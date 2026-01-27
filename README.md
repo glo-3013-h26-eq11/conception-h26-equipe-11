@@ -1,2 +1,38 @@
 # Conception-H26---quipe-11
 Repo centrale pour le cours de conception H26
+
+## Environnement dev
+Vous avez deux choix : 
+
+1. Installer [ros2-humble](https://docs.ros.org/en/humble/index.html) localement
+2. Faire le développement sur un container _Docker_ : [Comme ici](https://docs.ros.org/en/humble/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html)
+
+## Commandes
+
+### Build le projet
+```bash
+colcon build
+```
+
+### Run les tests
+```bash
+colcon test
+```
+
+### Créer un package/module
+
+Voir la [doc](https://docs.ros.org/en/humble/How-To-Guides/Developing-a-ROS-2-Package.html#python-packages) pour plus d'info.
+
+Ou ce [tutoriel](https://docs.ros.org/en/eloquent/Tutorials/Creating-Your-First-ROS2-Package.html).
+
+```bash
+ros2 pkg create --build-type ament_python --node-name my_node my_package
+```
+
+### Run un module
+
+**Linux**
+```bash
+source install/setup.bash
+ros2 run my_package my_node
+```
