@@ -27,13 +27,7 @@ jobs:
         run: |
           docker run --rm -e PYTHONPATH=/home/ws/src ros2-test-image bash -lc "
             cd /home/ws &&
+            colcon build &&
             source install/setup.bash &&
             colcon test --event-handlers console_direct+
-          "
-
-      - name: Show test results
-        run: |
-          docker run --rm -e PYTHONPATH=/home/ws/src ros2-test-image bash -lc "
-            cd /home/ws && 
-            colcon test-result --verbose
           "
