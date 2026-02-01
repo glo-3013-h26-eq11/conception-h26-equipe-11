@@ -1,0 +1,7 @@
+# For my container dev env
+.devcontainer
+
+# For the colcon build
+build/
+install/
+log/
