@@ -14,9 +14,14 @@ Vous avez deux choix :
 colcon build
 ```
 
-### Run les tests
+### Fix les erreurs de formattage
 ```bash
-colcon test
+black .
+```
+
+### Run les tests avec tous les logs
+```bash
+colcon test --event-handlers console_cohesion+
 ```
 
 ### Créer un package/module

@@ -1,3 +1,6 @@
+# For vscode
+.vscode/
+
 # For my container dev env
 .devcontainer
 
