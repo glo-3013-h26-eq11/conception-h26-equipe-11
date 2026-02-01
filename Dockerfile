@@ -1,0 +1,14 @@
+FROM osrf/ros:humble-base
+
+RUN apt-get update && apt-get install -y python3-pip python3-colcon-common-extensions \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /home/ws
+
+COPY . /home/ws
+
+ENV PATH="/root/.local/bin:${PATH}"
+
+RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
+
+RUN python3 -m pip install --user -r requirements.txt
