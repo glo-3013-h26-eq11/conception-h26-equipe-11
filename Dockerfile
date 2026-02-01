@@ -1,4 +1,4 @@
-FROM osrf/ros:humble-base
+FROM osrf/ros:humble
 
 RUN apt-get update && apt-get install -y python3-pip python3-colcon-common-extensions \
     && rm -rf /var/lib/apt/lists/*
