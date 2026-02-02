@@ -24,6 +24,7 @@ setup(
     entry_points={
         "console_scripts": [
             "rover_interface = navigation.rover_interface:main",
+            "route_planner = navigation.route_planner_node:main",
         ],
     },
 )
