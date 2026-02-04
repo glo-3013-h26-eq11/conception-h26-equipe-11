@@ -1,6 +1,10 @@
 # For vscode
 .vscode/
 
+# Python cache
+__pycache__/
+*.pyc
+
 # For the colcon build
 build/
 install/

@@ -1,6 +1,9 @@
 FROM ros:humble-ros-base
 
-RUN apt-get update && apt-get install -y python3-pip python3-colcon-common-extensions \
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-colcon-common-extensions \
+    ros-humble-depthai-ros \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /home/ws
