@@ -368,3 +368,6 @@ Actions
 build/
 install/
 log/
+
+# For the devcontainer.json : custom across OS
+devcontainer.json
