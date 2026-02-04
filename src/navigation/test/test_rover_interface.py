@@ -46,8 +46,8 @@ def test_valid_command_publishes_json(rover_node):
 def test_invalid_command_raises_error(rover_node):
     # Arrange
     bad_msg = String()
-    bad_msg.data = "GARBAGE COMMAND"
 
+    bad_msg.data = "GARBAGE COMMAND"
     # Act, Assert
     with pytest.raises(ValueError):
         rover_node.listener_command_callback(bad_msg)
