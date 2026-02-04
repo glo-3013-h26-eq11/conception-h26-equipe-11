@@ -5,3 +5,7 @@
 build/
 install/
 log/
+
+
+# For python
+__pycache__/
