@@ -34,8 +34,8 @@
         "-e", "DISPLAY=${env:DISPLAY}"
     ],
     "mounts": [
-       "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-       "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
+    //    "e=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+    //    "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"sourc
     ],
     "postCreateCommand": "pip install -r requirements.txt"
 }
