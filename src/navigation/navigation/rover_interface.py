@@ -15,7 +15,7 @@ ROVER_COMMAND = {
 class RoverInterfaceSubscriber(Node):
     def __init__(self):
         super().__init__("rover_interface_subscriber")
-        self.subscrition = self.create_subscription(
+        self.subscription = self.create_subscription(
             String, "rover_interface", self.listener_command_callback, 10
         )
         self.publisher = self.create_publisher(String, "rover_port", 10)

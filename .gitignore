@@ -369,5 +369,8 @@ build/
 install/
 log/
 
+# For python
+__pycache__/
+
 # For the devcontainer.json : custom across OS
 devcontainer.json
