@@ -1,3 +1,4 @@
 pyserial
 autoflake
 black
+fastapi[standard]
