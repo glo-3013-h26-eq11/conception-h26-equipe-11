@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y \
     python3-colcon-common-extensions \
     ros-humble-depthai-ros \
     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    ros-${ROS_DISTRO}-depthai-ros
 
 WORKDIR /home/ws
 
