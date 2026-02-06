@@ -2,3 +2,4 @@ pyserial
 autoflake
 black
 fastapi[standard]
+requests

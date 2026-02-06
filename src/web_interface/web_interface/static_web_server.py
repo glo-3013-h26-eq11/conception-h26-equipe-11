@@ -4,6 +4,7 @@ import uvicorn
 import os
 
 PORT = 5555
+BASE_URL = "localhost"
 
 WEB_INTERFACE_DIRECTORY = "/home/ws/src/web_interface/web_interface"
 
@@ -19,7 +20,7 @@ app.mount(
 
 
 def main():
-    uvicorn.run(f"web_interface.static_web_server:app", host="127.0.0.1", port=PORT)
+    uvicorn.run("web_interface.static_web_server:app", host=BASE_URL, port=PORT)
 
 
 if __name__ == "__main__":
