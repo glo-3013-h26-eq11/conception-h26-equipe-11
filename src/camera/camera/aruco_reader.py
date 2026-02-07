@@ -10,7 +10,7 @@ class ArucoReader(Node):
         super().__init__('aruco_reader')
         self.subscription = self.create_subscription(
             CompressedImage,
-            '/oak/rgb/image_rect/compressedDepth',
+            '/oak/rgb/image_rect/compressed',
             self.listener_callback,
             10)
     
