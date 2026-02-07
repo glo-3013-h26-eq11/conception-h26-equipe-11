@@ -24,6 +24,7 @@ setup(
     entry_points={
         "console_scripts": [
             "rover_interface = navigation.rover_interface:main",
+            "rover_port_usb = navigation.rover_port_usb:main"
         ],
     },
 )
