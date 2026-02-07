@@ -371,6 +371,7 @@ log/
 
 # For python
 __pycache__/
+.pytest_cache
 
 # For the devcontainer.json : custom across OS
 devcontainer.json
