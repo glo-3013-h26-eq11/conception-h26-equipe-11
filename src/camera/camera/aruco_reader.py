@@ -8,6 +8,43 @@ import cv2
 import json
 
 
+def _create_aruco_parameters():
+    """Create ArUco detector parameters across OpenCV versions."""
+    if hasattr(cv2.aruco, "DetectorParameters"):
+        return cv2.aruco.DetectorParameters()
+
+    if hasattr(cv2.aruco, "DetectorParameters_create"):
+        return cv2.aruco.DetectorParameters_create()
+
+    raise AttributeError(
+        "cv2.aruco has no DetectorParameters or DetectorParameters_create"
+    )
+
+
+class _LegacyArucoDetector:
+    """Fallback detector wrapper for older OpenCV APIs."""
+
+    def __init__(self, dictionary, parameters):
+        self._dictionary = dictionary
+        self._parameters = parameters
+
+    def detectMarkers(self, frame):
+        return cv2.aruco.detectMarkers(
+            frame, self._dictionary, parameters=self._parameters
+        )
+
+
+def _create_aruco_detector(dictionary, parameters):
+    """Create an ArUco detector across OpenCV versions."""
+    if hasattr(cv2.aruco, "ArucoDetector"):
+        return cv2.aruco.ArucoDetector(dictionary, parameters)
+
+    if hasattr(cv2.aruco, "detectMarkers"):
+        return _LegacyArucoDetector(dictionary, parameters)
+
+    raise AttributeError("cv2.aruco has no ArucoDetector or detectMarkers")
+
+
 class ArucoReader(Node):
     def __init__(self):
         super().__init__("aruco_reader")
@@ -41,12 +78,10 @@ class ArucoReader(Node):
             cv2.aruco.DICT_5X5_50
         )
 
-        self.aruco_params = cv2.aruco.DetectorParameters()
+        self.aruco_params = _create_aruco_parameters()
 
-        self.detector_4x4 = cv2.aruco.ArucoDetector(
-            self.vehicule_aruco_dict, self.aruco_params
-        )
-        self.detector_5x5 = cv2.aruco.ArucoDetector(
+        self.detector_4x4 = _create_aruco_detector(self.vehicule_aruco_dict, self.aruco_params)
+        self.detector_5x5 = _create_aruco_detector(
             self.intersection_aruco_dict, self.aruco_params
         )
 
