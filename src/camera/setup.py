@@ -27,7 +27,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            'aruco_reader = camera.aruco_reader:main',],
-        
+            "aruco_reader = camera.aruco_reader:main",
+        ],
     },
 )
