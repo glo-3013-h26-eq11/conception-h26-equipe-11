@@ -25,6 +25,7 @@ setup(
         "console_scripts": [
             "rover_interface = navigation.rover_interface:main",
             "route_planner = navigation.route_planner_node:main",
+            "rover_port_usb = navigation.rover_port_usb:main",
         ],
     },
 )
