@@ -1,0 +1,64 @@
+import pytest
+from navigation.goal_selector import GoalSelector
+from navigation.route_selector import RouteSelector
+
+TEST_GRAPH = {
+    "A1": {"g": "ZC1", "l": "A4", "d": "ZD1"},
+    "A2": {"g": "A4", "l": "ZD1", "d": "A2"},
+    "A3": {"g": "ZD1", "l": "A2", "d": "ZC1"},
+    "A4": {"g": "A2", "l": "ZC1", "d": "A4"},
+    "ZC1": {"l": "A1"},
+    "ZC2": {"l": "A2"},
+    "ZD1": {"l": "A3"},
+    "ZD2": {"l": "A4"},
+}
+
+
+@pytest.fixture
+def goal_selector():
+    route_selector = RouteSelector(graph=TEST_GRAPH)
+    return GoalSelector(route_selector)
+
+
+def test_select_goal_returns_none_when_no_goals(goal_selector):
+    result = goal_selector.select_goal("A1", [])
+
+    assert result is None
+
+
+def test_select_goal_returns_none_when_invalid_mode(goal_selector):
+    result = goal_selector.select_goal("A1", ["ZC1"], mode="INVALID")
+
+    assert result is None
+
+
+def test_select_goal_returns_closest_load_goal(goal_selector):
+    result = goal_selector.select_goal("A1", ["ZC1", "ZC2"], mode="GO_LOAD")
+
+    assert result is not None
+    assert result in ["ZC1", "ZC2"]
+
+
+def test_select_goal_returns_closest_drop_goal(goal_selector):
+    result = goal_selector.select_goal("A1", ["ZD1", "ZD2"], mode="GO_DROP")
+
+    assert result is not None
+    assert result in ["ZD1", "ZD2"]
+
+
+def test_select_goal_filters_load_goals(goal_selector):
+    result = goal_selector.select_goal("A1", ["ZC1", "ZD1"], mode="GO_LOAD")
+
+    assert result == "ZC1"
+
+
+def test_select_goal_filters_drop_goals(goal_selector):
+    result = goal_selector.select_goal("A1", ["ZC1", "ZD1"], mode="GO_DROP")
+
+    assert result == "ZD1"
+
+
+def test_select_goal_returns_none_when_no_accessible_goal(goal_selector):
+    result = goal_selector.select_goal("INVALID", ["ZC1"], mode="GO_LOAD")
+
+    assert result is None
