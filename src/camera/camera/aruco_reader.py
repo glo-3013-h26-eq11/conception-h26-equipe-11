@@ -2,6 +2,7 @@ from sensor_msgs.msg import CompressedImage
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+from rclpy.qos import qos_profile_sensor_data
 from cv_bridge import CvBridge
 import cv2
 import json
@@ -29,7 +30,9 @@ class ArucoReader(Node):
         self.publish_empty = (
             self.get_parameter("publish_empty").get_parameter_value().bool_value
         )
-        self.log_every_n = self.get_parameter("log_every_n").get_parameter_value().integer_value
+        self.log_every_n = (
+            self.get_parameter("log_every_n").get_parameter_value().integer_value
+        )
 
         self.vehicule_aruco_dict = cv2.aruco.getPredefinedDictionary(
             cv2.aruco.DICT_4X4_50
@@ -47,13 +50,15 @@ class ArucoReader(Node):
             self.intersection_aruco_dict, self.aruco_params
         )
 
-        self.detections_publisher = self.create_publisher(String, self.detections_topic, 10)
+        self.detections_publisher = self.create_publisher(
+            String, self.detections_topic, 10
+        )
 
         self.subscription = self.create_subscription(
             CompressedImage,
             self.image_topic,
             self.listener_callback,
-            10,
+            qos_profile_sensor_data,
         )
 
         self.get_logger().info("Aruco reader started")
