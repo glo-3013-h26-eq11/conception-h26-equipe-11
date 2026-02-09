@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Float32MultiArray
 import rclpy
 from rclpy.node import Node
@@ -20,14 +20,14 @@ class ArucoReader(Node):
         self.aruco_params = cv2.aruco.DetectorParameters_create()
         
         self.depth_sub = self.create_subscription(
-            Image,
+            CompressedImage,
             '/oak/stereo/image_raw/compressed',
             self.depth_callback,
             10
         )
         
         self.rgb_sub = self.create_subscription(
-            Image,
+            CompressedImage,
             '/oak/rgb/image_raw/compressed',
             self.rgb_callback,
             10
