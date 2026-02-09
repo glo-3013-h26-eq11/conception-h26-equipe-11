@@ -2,6 +2,8 @@ from sensor_msgs.msg import CompressedImage, Image
 from std_msgs.msg import Float32MultiArray, String
 import rclpy
 from rclpy.node import Node
+from std_msgs.msg import String
+from rclpy.qos import qos_profile_sensor_data
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
@@ -10,8 +12,8 @@ import json
 
 class ArucoReader(Node):
     def __init__(self):
-        super().__init__('aruco_reader')
-        
+        super().__init__("aruco_reader")
+
         self.bridge = CvBridge()
         self.latest_depth = None
         self.vehicule_aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
@@ -136,7 +138,7 @@ class ArucoReader(Node):
 def main(args=None):
     rclpy.init(args=args)
     aruco_reader = ArucoReader()
-    
+
     try:
         rclpy.spin(aruco_reader)
     except KeyboardInterrupt:
@@ -145,6 +147,6 @@ def main(args=None):
         aruco_reader.destroy_node()
         rclpy.shutdown()
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()
