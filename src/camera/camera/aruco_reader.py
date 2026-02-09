@@ -21,14 +21,14 @@ class ArucoReader(Node):
         
         self.depth_sub = self.create_subscription(
             Image,
-            '/oak/stereo/image_raw',
+            '/oak/stereo/image_raw/compressed',
             self.depth_callback,
             10
         )
         
         self.rgb_sub = self.create_subscription(
             Image,
-            '/oak/rgb/image_raw',
+            '/oak/rgb/image_raw/compressed',
             self.rgb_callback,
             10
         )
@@ -49,7 +49,7 @@ class ArucoReader(Node):
     
     def depth_callback(self, depth_msg):
         """Store aligned depth image"""
-        self.latest_depth = self.bridge.imgmsg_to_cv2(
+        self.latest_depth = self.bridge.compressed_imgmsg_to_cv2(
             depth_msg, 
             desired_encoding='passthrough'
         )
@@ -61,7 +61,7 @@ class ArucoReader(Node):
             return
         
         try:
-            rgb_frame = self.bridge.imgmsg_to_cv2(rgb_msg, desired_encoding='bgr8')
+            rgb_frame = self.bridge.compressed_imgmsg_to_cv2(rgb_msg, desired_encoding='bgr8')
             
             corners_4x4, ids_4x4, _= cv2.aruco.detectMarkers(
                 rgb_frame, 
