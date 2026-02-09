@@ -1,19 +1,17 @@
-from sensor_msgs.msg import CompressedImage, Image
-from std_msgs.msg import Float32MultiArray, String
+#!/usr/bin/env python3
+
+from sensor_msgs.msg import Image
+from std_msgs.msg import Float32MultiArray
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
-from rclpy.qos import qos_profile_sensor_data
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
-import message_filters
-import json
 
 class ArucoReader(Node):
     def __init__(self):
-        super().__init__("aruco_reader")
-
+        super().__init__('aruco_reader')
+        
         self.bridge = CvBridge()
         self.latest_depth = None
         
@@ -31,68 +29,71 @@ class ArucoReader(Node):
         self.rgb_sub = self.create_subscription(
             Image,
             '/oak/rgb/image_raw',
-            self.rgbd_callback,
+            self.rgb_callback,
             10
         )
         
-        self.aruco_5x5_publisher = self.create_publisher(
+        self.detection5x5_pub = self.create_publisher(
             Float32MultiArray,
-            '/aruco/_depth_5x5_ids',
+            '/aruco/detections_5x5',
             10
         )
         
-        self.aruco_4x4_publisher = self.create_publisher(
+        self.detection4x4_pub = self.create_publisher(
             Float32MultiArray,
-            '/aruco/depth_4x4_ids',
+            '/aruco/detections_4x4',
             10
         )
         
-        
-        self.get_logger().info("Aruco reader started")
+        self.get_logger().info("ArUco Reader started")
     
     def depth_callback(self, depth_msg):
+        """Store aligned depth image"""
         self.latest_depth = self.bridge.imgmsg_to_cv2(
             depth_msg, 
             desired_encoding='passthrough'
         )
-        
-    def status_check(self):
-        self.get_logger().info(f"Status: Received {self.callback_count} images so far")
     
-    def rgbd_callback(self, rgb_msg, depth_msg):
+    def rgb_callback(self, rgb_msg):
+        """Process RGB with aligned depth"""
         if self.latest_depth is None:
+            self.get_logger().warn("No depth image yet", throttle_duration_sec=5.0)
             return
         
         try:
+            rgb_frame = self.bridge.imgmsg_to_cv2(rgb_msg, desired_encoding='bgr8')
             
-            rgb_frame = self.bridge.imgmsg_to_cv2(
-                rgb_msg, 
-                desired_encoding='bgr8' 
+            corners_4x4, ids_4x4, _= cv2.aruco.detectMarkers(
+                rgb_frame, 
+                self.vehicule_aruco_dict, 
+                parameters=self.aruco_params
             )
             
-            corners_4x4, ids_4x4, rejected_4x4 = self.detector_4x4.detectMarkers(rgb_frame)
+            corners_5x5, ids_5x5, _ = cv2.aruco.detectMarkers(
+                rgb_frame, 
+                self.intersection_aruco_dict, 
+                parameters=self.aruco_params
+            )
             
-            corners_5x5, ids_5x5, rejected_5x5 = self.detector_5x5.detectMarkers(rgb_frame)
-            
-            if ids_4x4 is not None:
+            if ids_4x4 is not None and len(ids_4x4) > 0:
                 for i, marker_id in enumerate(ids_4x4):
                     depth = self.get_marker_depth(corners_4x4[i])
                     
                     msg = Float32MultiArray()
                     msg.data = [float(marker_id[0]), depth]
-                    self.detection_pub.publish(msg)
+                    self.detection4x4_pub.publish(msg)
                     
                     self.get_logger().info(
                         f"4x4 Marker {marker_id[0]}: {depth:.3f}m"
                     )
             
-            if ids_5x5 is not None:
+            if ids_5x5 is not None and len(ids_5x5) > 0:
                 for i, marker_id in enumerate(ids_5x5):
                     depth = self.get_marker_depth(corners_5x5[i])
                     
                     msg = Float32MultiArray()
                     msg.data = [float(marker_id[0]), depth]
-                    self.detection_pub.publish(msg)
+                    self.detection5x5_pub.publish(msg)
                     
                     self.get_logger().info(
                         f"5x5 Marker {marker_id[0]}: {depth:.3f}m"
@@ -100,9 +101,11 @@ class ArucoReader(Node):
         
         except Exception as e:
             self.get_logger().error(f"Error: {str(e)}")
+            import traceback
+            self.get_logger().error(traceback.format_exc())
     
     def get_marker_depth(self, corners):
-        
+        """Get depth at marker center"""
         corner_points = corners[0]
         center_x = int(np.mean(corner_points[:, 0]))
         center_y = int(np.mean(corner_points[:, 1]))
@@ -112,7 +115,7 @@ class ArucoReader(Node):
         center_y = np.clip(center_y, 0, height - 1)
         
         depth_mm = self.latest_depth[center_y, center_x]
-        depth_m = depth_mm / 1000.0
+        depth_m = float(depth_mm) / 1000.0
         
         if depth_m == 0 or np.isnan(depth_m):
             region_size = 5
@@ -125,17 +128,20 @@ class ArucoReader(Node):
             valid_depths = region[(region > 0) & (~np.isnan(region))]
             
             if len(valid_depths) > 0:
-                depth_m = np.mean(valid_depths) / 1000.0
+                depth_m = float(np.mean(valid_depths)) / 1000.0
             else:
-                self.get_logger().warn("No valid depth at marker location!")
+                self.get_logger().warn(
+                    f"No valid depth at marker location ({center_x}, {center_y})",
+                    throttle_duration_sec=2.0
+                )
                 depth_m = 0.0
         
         return depth_m
-    
+
 def main(args=None):
     rclpy.init(args=args)
     aruco_reader = ArucoReader()
-
+    
     try:
         rclpy.spin(aruco_reader)
     except KeyboardInterrupt:
@@ -144,6 +150,5 @@ def main(args=None):
         aruco_reader.destroy_node()
         rclpy.shutdown()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
