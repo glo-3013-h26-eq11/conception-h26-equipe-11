@@ -19,7 +19,7 @@ class ArucoReader(Node):
         self.vehicule_aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
         self.intersection_aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
         
-        self.aruco_params = cv2.aruco.DetectorParameters()
+        self.aruco_params = cv2.aruco.DetectorParameters_create()
         
         self.detector_4x4 = cv2.aruco.ArucoDetector(self.vehicule_aruco_dict, self.aruco_params)
         self.detector_5x5 = cv2.aruco.ArucoDetector(self.intersection_aruco_dict, self.aruco_params)
