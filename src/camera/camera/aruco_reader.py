@@ -16,13 +16,10 @@ class ArucoReader(Node):
 
         self.bridge = CvBridge()
         self.latest_depth = None
-        self.vehicule_aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-        self.intersection_aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
         
+        self.vehicule_aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+        self.intersection_aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_50)
         self.aruco_params = cv2.aruco.DetectorParameters_create()
-        
-        self.detector_4x4 = cv2.aruco.ArucoDetector(self.vehicule_aruco_dict, self.aruco_params)
-        self.detector_5x5 = cv2.aruco.ArucoDetector(self.intersection_aruco_dict, self.aruco_params)
         
         self.depth_sub = self.create_subscription(
             Image,
@@ -34,19 +31,19 @@ class ArucoReader(Node):
         self.rgb_sub = self.create_subscription(
             Image,
             '/oak/rgb/image_raw',
-            self.rgb_callback,
+            self.rgbd_callback,
             10
         )
         
         self.aruco_5x5_publisher = self.create_publisher(
             Float32MultiArray,
-            '/aruco/5x5_ids_depth',
+            '/aruco/_depth_5x5_ids',
             10
         )
         
         self.aruco_4x4_publisher = self.create_publisher(
             Float32MultiArray,
-            '/aruco/4x4_ids_depth',
+            '/aruco/depth_4x4_ids',
             10
         )
         
@@ -62,7 +59,7 @@ class ArucoReader(Node):
     def status_check(self):
         self.get_logger().info(f"Status: Received {self.callback_count} images so far")
     
-    def rbgd_callback(self, rgb_msg, depth_msg):
+    def rgbd_callback(self, rgb_msg, depth_msg):
         if self.latest_depth is None:
             return
         
