@@ -43,11 +43,7 @@ def test_given_valid_start_and_goal_when_compute_route_then_returns_list(selecto
 def test_given_valid_start_and_goal_when_compute_route_then_returns_correct_path(
     selector,
 ):
+    expected_route = ["l", "d"]
     route = selector.compute_route("ZC1", "ZD1")
 
-    assert route is not None
-    current = "ZC1"
-    for direction in route:
-        assert direction in selector.graph[current]
-        current = selector.graph[current][direction]
-    assert current == "ZD1"
+    assert route == expected_route
