@@ -6,7 +6,7 @@ class GoalSelector:
 
     def __init__(self, route_selector: RouteSelector):
         self.route_selector = route_selector
-        self._dist_cache: Dict[Tuple[str, str], Optional[int]] = {}
+        self._shortest_path_length_cache: Dict[Tuple[str, str], Optional[int]] = {}
 
     def select_goal(
         self,
@@ -16,8 +16,6 @@ class GoalSelector:
     ) -> Optional[str]:
         if not available_goals:
             return None
-
-        self._dist_cache.clear()
 
         if mode == "GO_LOAD":
             load_goals = [g for g in available_goals if g.startswith("ZC")]
@@ -49,12 +47,12 @@ class GoalSelector:
         return best_goal
 
     def _get_distance(self, start: str, goal: str) -> Optional[int]:
-        key = (start, goal)
-        if key in self._dist_cache:
-            return self._dist_cache[key]
+        node_pair = (start, goal)
+        if node_pair in self._shortest_path_length_cache:
+            return self._shortest_path_length_cache[node_pair]
 
         route = self.route_selector.compute_route(start, goal)
         dist = None if route is None else len(route)
 
-        self._dist_cache[key] = dist
+        self._shortest_path_length_cache[node_pair] = dist
         return dist
