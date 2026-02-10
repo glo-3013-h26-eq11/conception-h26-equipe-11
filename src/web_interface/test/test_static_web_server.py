@@ -19,10 +19,12 @@ def client():
 
 @pytest.fixture()
 def full_integration_ros_setup():
-    subprocess.run(["colcon", "build"], check=True)
+    subprocess.run(["npx", "vite", "build"], cwd="web_interface")
+    subprocess.run(["colcon", "build"], cwd="../..", check=True)
 
     process = subprocess.Popen(
         f"source install/setup.bash && ros2 run {PACKAGE_NAME} {EXECUTABLE_NAME}",
+        cwd="../..",
         shell=True,
         executable="/bin/bash",
         stdout=subprocess.PIPE,
