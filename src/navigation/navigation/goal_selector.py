@@ -1,31 +1,44 @@
-from typing import Dict, List, Optional, Tuple
+from __future__ import annotations
+
+from enum import Enum
+from typing import Callable, Dict, List, Optional, Tuple, Union
+
 from navigation.route_selector import RouteSelector
 
 
-class GoalSelector:
+class GoalMode(str, Enum):
+    GO_LOAD = "GO_LOAD"
+    GO_DROP = "GO_DROP"
 
+
+class GoalSelector:
     def __init__(self, route_selector: RouteSelector):
         self.route_selector = route_selector
         self._shortest_path_length_cache: Dict[Tuple[str, str], Optional[int]] = {}
+
+        self._goal_filters: Dict[GoalMode, Callable[[List[str]], List[str]]] = {
+            GoalMode.GO_LOAD: lambda goals: [g for g in goals if g.startswith("ZC")],
+            GoalMode.GO_DROP: lambda goals: [g for g in goals if g.startswith("ZD")],
+        }
 
     def select_goal(
         self,
         current_node: str,
         available_goals: List[str],
-        mode: str = "GO_LOAD",
+        mode: Union[GoalMode, str] = GoalMode.GO_LOAD,
     ) -> Optional[str]:
         if not available_goals:
             return None
 
-        if mode == "GO_LOAD":
-            load_goals = [g for g in available_goals if g.startswith("ZC")]
-            return self._select_closest_goal(current_node, load_goals)
+        if isinstance(mode, str):
+            try:
+                mode = GoalMode(mode)
+            except ValueError as e:
+                raise ValueError(f"Invalid goal selection mode: {mode}") from e
 
-        if mode == "GO_DROP":
-            drop_goals = [g for g in available_goals if g.startswith("ZD")]
-            return self._select_closest_goal(current_node, drop_goals)
-
-        return None
+        filter_fn = self._goal_filters[mode]
+        filtered = filter_fn(available_goals)
+        return self._select_closest_goal(current_node, filtered)
 
     def _select_closest_goal(
         self, current_node: str, goals: List[str]
@@ -33,7 +46,7 @@ class GoalSelector:
         if not goals:
             return None
 
-        best_goal = None
+        best_goal: Optional[str] = None
         min_distance = float("inf")
 
         for goal_node in sorted(goals):
