@@ -1,4 +1,6 @@
 pyserial
 autoflake
 black
+fastapi[standard]
+requests
 Jetson.GPIO
