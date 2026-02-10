@@ -35,15 +35,6 @@ def test_given_unknown_goal_when_compute_route_then_raises_value_error(selector)
     with pytest.raises(ValueError, match="Unknown goal node"):
         selector.compute_route("A1", "INVALID")
 
-
-def test_given_valid_start_and_goal_when_compute_route_then_returns_list(selector):
-    # Act
-    route = selector.compute_route("A1", "ZC1")
-
-    # Assert
-    assert isinstance(route, list)
-
-
 def test_given_valid_start_and_goal_when_compute_route_then_returns_correct_path(
     selector,
 ):
