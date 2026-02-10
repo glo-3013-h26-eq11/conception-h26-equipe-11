@@ -17,31 +17,41 @@ def selector():
 
 
 def test_given_start_equals_goal_when_compute_route_then_returns_empty_list(selector):
+    # Act
     route = selector.compute_route("A1", "A1")
 
+    # Assert
     assert route == []
 
 
 def test_given_unknown_start_when_compute_route_then_raises_value_error(selector):
+    # Act, Assert
     with pytest.raises(ValueError, match="Unknown start node"):
         selector.compute_route("INVALID", "A1")
 
 
 def test_given_unknown_goal_when_compute_route_then_raises_value_error(selector):
+    # Act, Assert
     with pytest.raises(ValueError, match="Unknown goal node"):
         selector.compute_route("A1", "INVALID")
 
 
 def test_given_valid_start_and_goal_when_compute_route_then_returns_list(selector):
+    # Act
     route = selector.compute_route("A1", "ZC1")
 
+    # Assert
     assert isinstance(route, list)
 
 
 def test_given_valid_start_and_goal_when_compute_route_then_returns_correct_path(
     selector,
 ):
+    # Arrange
     expected_route = ["l", "d"]
+
+    # Act
     route = selector.compute_route("ZC1", "ZD1")
 
+    # Assert
     assert route == expected_route
