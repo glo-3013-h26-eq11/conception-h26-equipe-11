@@ -18,8 +18,17 @@ RUN groupadd --gid $USER_GID $USERNAME \
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y python3-pip
 
-RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
+# Install curl and Node.js
+RUN apt-get update && apt-get install -y curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean
 
+# Check versions
+RUN node -v
+RUN npm -v
+
+RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
 
 ENV SHELL /bin/bash
 
