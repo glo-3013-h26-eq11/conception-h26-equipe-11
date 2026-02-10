@@ -18,7 +18,9 @@ class RouteSelector:
 
     def compute_route(self, start: str, goal: str) -> Optional[List[str]]:
         if start not in self.graph:
-            return None
+            raise ValueError(f"Unknown start node: {start}")
+        if goal not in self.graph:
+            raise ValueError(f"Unknown goal node: {goal}")
         if start == goal:
             return []
 

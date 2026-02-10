@@ -64,8 +64,12 @@ class GoalSelector:
         if node_pair in self._shortest_path_length_cache:
             return self._shortest_path_length_cache[node_pair]
 
-        route = self.route_selector.compute_route(start, goal)
-        dist = None if route is None else len(route)
+        try:
+            route = self.route_selector.compute_route(start, goal)
+        except ValueError:
+            dist = None
+        else:
+            dist = None if route is None else len(route)
 
         self._shortest_path_length_cache[node_pair] = dist
         return dist

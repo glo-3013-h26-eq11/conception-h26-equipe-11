@@ -22,16 +22,14 @@ def test_given_start_equals_goal_when_compute_route_then_returns_empty_list(sele
     assert route == []
 
 
-def test_given_unknown_start_when_compute_route_then_returns_none(selector):
-    route = selector.compute_route("INVALID", "A1")
+def test_given_unknown_start_when_compute_route_then_raises_value_error(selector):
+    with pytest.raises(ValueError, match="Unknown start node"):
+        selector.compute_route("INVALID", "A1")
 
-    assert route is None
 
-
-def test_given_unknown_goal_when_compute_route_then_returns_none(selector):
-    route = selector.compute_route("A1", "INVALID")
-
-    assert route is None
+def test_given_unknown_goal_when_compute_route_then_raises_value_error(selector):
+    with pytest.raises(ValueError, match="Unknown goal node"):
+        selector.compute_route("A1", "INVALID")
 
 
 def test_given_valid_start_and_goal_when_compute_route_then_returns_list(selector):
