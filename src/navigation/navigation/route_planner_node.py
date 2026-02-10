@@ -30,10 +30,7 @@ class RoutePlannerNode(Node):
     def _try_compute_route(self):
         if self.current_node is None or self.goal_node is None:
             return
-        try:
-            route = self.route_selector.compute_route(self.current_node, self.goal_node)
-        except ValueError:
-            return
+        route = self.route_selector.compute_route(self.current_node, self.goal_node)
         if route is None:
             return
         msg = String()

@@ -81,24 +81,15 @@ def test_given_both_nodes_set_when_goal_received_then_publishes_route(node):
     assert isinstance(route, list)
 
 
-def test_given_invalid_route_when_goal_received_then_does_not_publish(node):
+def test_given_invalid_start_node_when_goal_received_then_raises_value_error(node):
     # Arrange
-    received = []
-
-    def cb(msg: String):
-        received.append(msg.data)
-
-    node.create_subscription(String, "route_plan", cb, 10)
-
     current_msg = String()
     current_msg.data = "INVALID"
     goal_msg = String()
     goal_msg.data = "ZC1"
 
-    # Act
     node.current_node_callback(current_msg)
-    node.goal_node_callback(goal_msg)
-    rclpy.spin_once(node, timeout_sec=0.2)
 
-    # Assert
-    assert received == []
+    # Act, Assert
+    with pytest.raises(ValueError, match="Unknown start node"):
+        node.goal_node_callback(goal_msg)

@@ -31,10 +31,7 @@ class GoalSelector:
             return None
 
         if isinstance(mode, str):
-            try:
-                mode = GoalMode(mode)
-            except ValueError as e:
-                raise ValueError(f"Invalid goal selection mode: {mode}") from e
+            mode = GoalMode(mode)
 
         filter_fn = self._goal_filters[mode]
         filtered = filter_fn(available_goals)
@@ -64,12 +61,8 @@ class GoalSelector:
         if node_pair in self._shortest_path_length_cache:
             return self._shortest_path_length_cache[node_pair]
 
-        try:
-            route = self.route_selector.compute_route(start, goal)
-        except ValueError:
-            dist = None
-        else:
-            dist = None if route is None else len(route)
+        route = self.route_selector.compute_route(start, goal)
+        dist = None if route is None else len(route)
 
         self._shortest_path_length_cache[node_pair] = dist
         return dist

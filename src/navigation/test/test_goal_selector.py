@@ -30,7 +30,7 @@ def test_given_no_goals_when_select_goal_then_returns_none(goal_selector):
 
 def test_given_invalid_mode_when_select_goal_then_raises_value_error(goal_selector):
     # Act, Assert
-    with pytest.raises(ValueError, match="Invalid goal selection mode"):
+    with pytest.raises(ValueError, match="INVALID"):
         goal_selector.select_goal("A1", ["ZC1"], mode="INVALID")
 
 
@@ -76,9 +76,7 @@ def test_given_mixed_goals_when_select_goal_with_go_drop_then_returns_only_drop_
     assert result == "ZD1"
 
 
-def test_given_invalid_start_when_select_goal_then_returns_none(goal_selector):
-    # Act
-    result = goal_selector.select_goal("INVALID", ["ZC1"], mode=GoalMode.GO_LOAD)
-
-    # Assert
-    assert result is None
+def test_given_invalid_start_when_select_goal_then_raises_value_error(goal_selector):
+    # Act, Assert
+    with pytest.raises(ValueError, match="Unknown start node"):
+        goal_selector.select_goal("INVALID", ["ZC1"], mode=GoalMode.GO_LOAD)
