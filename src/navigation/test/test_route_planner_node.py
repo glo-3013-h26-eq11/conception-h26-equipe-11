@@ -30,7 +30,7 @@ def _capture_topic_once(node, topic_name: str, timeout_sec: float = 0.2):
     return received
 
 
-def test_does_not_publish_when_current_node_missing(node):
+def test_given_goal_only_when_goal_received_then_does_not_publish(node):
     goal_msg = String()
     goal_msg.data = "ZC1"
 
@@ -40,7 +40,7 @@ def test_does_not_publish_when_current_node_missing(node):
     assert received == []
 
 
-def test_does_not_publish_when_goal_node_missing(node):
+def test_given_current_only_when_current_received_then_does_not_publish(node):
     current_msg = String()
     current_msg.data = "A1"
 
@@ -50,7 +50,7 @@ def test_does_not_publish_when_goal_node_missing(node):
     assert received == []
 
 
-def test_publishes_route_when_both_nodes_present(node):
+def test_given_both_nodes_set_when_goal_received_then_publishes_route(node):
     received = []
 
     def cb(msg: String):
@@ -72,7 +72,7 @@ def test_publishes_route_when_both_nodes_present(node):
     assert isinstance(route, list)
 
 
-def test_does_not_publish_when_route_not_found(node):
+def test_given_invalid_route_when_goal_received_then_does_not_publish(node):
     received = []
 
     def cb(msg: String):

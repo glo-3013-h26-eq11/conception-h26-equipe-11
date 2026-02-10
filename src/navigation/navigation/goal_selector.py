@@ -29,7 +29,9 @@ class GoalSelector:
 
         return None
 
-    def _select_closest_goal(self, current_node: str, goals: List[str]) -> Optional[str]:
+    def _select_closest_goal(
+        self, current_node: str, goals: List[str]
+    ) -> Optional[str]:
         if not goals:
             return None
 

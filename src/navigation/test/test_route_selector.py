@@ -10,31 +10,39 @@ TEST_GRAPH = {
     "ZD1": {"l": "A3"},
 }
 
+
 @pytest.fixture
 def selector():
     return RouteSelector(graph=TEST_GRAPH)
 
-def test_compute_route_returns_empty_list_when_start_equals_goal(selector):
+
+def test_given_start_equals_goal_when_compute_route_then_returns_empty_list(selector):
     route = selector.compute_route("A1", "A1")
 
     assert route == []
 
-def test_compute_route_returns_none_when_start_is_unknown(selector):
+
+def test_given_unknown_start_when_compute_route_then_returns_none(selector):
     route = selector.compute_route("INVALID", "A1")
 
     assert route is None
 
-def test_compute_route_returns_none_when_goal_is_unknown(selector):
+
+def test_given_unknown_goal_when_compute_route_then_returns_none(selector):
     route = selector.compute_route("A1", "INVALID")
 
     assert route is None
 
-def test_compute_route_returns_list_when_route_exists(selector):
+
+def test_given_valid_start_and_goal_when_compute_route_then_returns_list(selector):
     route = selector.compute_route("A1", "ZC1")
 
     assert isinstance(route, list)
 
-def test_compute_route_returns_correct_path(selector):
+
+def test_given_valid_start_and_goal_when_compute_route_then_returns_correct_path(
+    selector,
+):
     route = selector.compute_route("ZC1", "ZD1")
 
     assert route is not None

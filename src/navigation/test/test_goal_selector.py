@@ -20,45 +20,53 @@ def goal_selector():
     return GoalSelector(route_selector)
 
 
-def test_select_goal_returns_none_when_no_goals(goal_selector):
+def test_given_no_goals_when_select_goal_then_returns_none(goal_selector):
     result = goal_selector.select_goal("A1", [])
 
     assert result is None
 
 
-def test_select_goal_returns_none_when_invalid_mode(goal_selector):
+def test_given_invalid_mode_when_select_goal_then_returns_none(goal_selector):
     result = goal_selector.select_goal("A1", ["ZC1"], mode="INVALID")
 
     assert result is None
 
 
-def test_select_goal_returns_closest_load_goal(goal_selector):
+def test_given_load_goals_when_select_goal_with_go_load_then_returns_closest_load_goal(
+    goal_selector,
+):
     result = goal_selector.select_goal("A1", ["ZC1", "ZC2"], mode="GO_LOAD")
 
     assert result is not None
     assert result in ["ZC1", "ZC2"]
 
 
-def test_select_goal_returns_closest_drop_goal(goal_selector):
+def test_given_drop_goals_when_select_goal_with_go_drop_then_returns_closest_drop_goal(
+    goal_selector,
+):
     result = goal_selector.select_goal("A1", ["ZD1", "ZD2"], mode="GO_DROP")
 
     assert result is not None
     assert result in ["ZD1", "ZD2"]
 
 
-def test_select_goal_filters_load_goals(goal_selector):
+def test_given_mixed_goals_when_select_goal_with_go_load_then_returns_only_load_goal(
+    goal_selector,
+):
     result = goal_selector.select_goal("A1", ["ZC1", "ZD1"], mode="GO_LOAD")
 
     assert result == "ZC1"
 
 
-def test_select_goal_filters_drop_goals(goal_selector):
+def test_given_mixed_goals_when_select_goal_with_go_drop_then_returns_only_drop_goal(
+    goal_selector,
+):
     result = goal_selector.select_goal("A1", ["ZC1", "ZD1"], mode="GO_DROP")
 
     assert result == "ZD1"
 
 
-def test_select_goal_returns_none_when_no_accessible_goal(goal_selector):
+def test_given_invalid_start_when_select_goal_then_returns_none(goal_selector):
     result = goal_selector.select_goal("INVALID", ["ZC1"], mode="GO_LOAD")
 
     assert result is None
