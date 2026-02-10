@@ -24,6 +24,9 @@ RUN apt-get update && apt-get install -y curl \
     && apt-get install -y nodejs \
     && apt-get clean
 
+# Install rosbridge-suite for easy websocket connections
+RUN apt-get install -y ros-humble-rosbridge-suite
+
 # Check versions
 RUN node -v
 RUN npm -v
