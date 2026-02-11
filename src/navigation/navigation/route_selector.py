@@ -1,42 +1,68 @@
 from collections import deque
-from typing import Dict, List, Optional
-
-GRAPH_TEMP = {
-    "A1": {"g": "ZC1", "l": "A4", "d": "ZD1"},
-    "A2": {"g": "A4", "l": "ZD1", "d": "A2"},
-    "A3": {"g": "ZD1", "l": "A2", "d": "ZC1"},
-    "A4": {"g": "A2", "l": "ZC1", "d": "A4"},
-    "ZC1": {"l": "A1"},
-    "ZD1": {"l": "A3"},
-}
+from typing import Dict, List, Optional, Tuple
 
 
 class RouteSelector:
+    def __init__(self, graph: Dict[str, Dict[str, str]]):
+        self.graph = graph
 
-    def __init__(self, graph: Optional[Dict[str, Dict[str, str]]] = None):
-        self.graph = graph if graph is not None else GRAPH_TEMP
-
-    def compute_route(self, start: str, goal: str) -> Optional[List[str]]:
+    def _validate_start_goal(self, start: str, goal: str) -> None:
         if start not in self.graph:
             raise ValueError(f"Unknown start node: {start}")
         if goal not in self.graph:
             raise ValueError(f"Unknown goal node: {goal}")
-        if start == goal:
-            return []
 
-        queue = deque([(start, [])])
+    def compute_path(
+        self, start: str, goal: str
+    ) -> Optional[Tuple[List[str], List[str]]]:
+        self._validate_start_goal(start, goal)
+
+        if start == goal:
+            return [start], []
+
+        queue = deque([start])
         visited = {start}
 
+        parent: Dict[str, str] = {}
+        parent_dir: Dict[str, str] = {}
+
         while queue:
-            node, path = queue.popleft()
+            node = queue.popleft()
 
-            if node == goal:
-                return path
+            for direction, next_node in self.graph.get(node, {}).items():
+                if next_node in visited:
+                    continue
 
-            neighbors = self.graph.get(node, {})
-            for direction, next_node in neighbors.items():
-                if next_node not in visited:
-                    visited.add(next_node)
-                    queue.append((next_node, path + [direction]))
+                visited.add(next_node)
+                parent[next_node] = node
+                parent_dir[next_node] = direction
+
+                if next_node == goal:
+                    return self._reconstruct_path(start, goal, parent, parent_dir)
+
+                queue.append(next_node)
 
         return None
+
+    def _reconstruct_path(
+        self,
+        start: str,
+        goal: str,
+        parent: Dict[str, str],
+        parent_dir: Dict[str, str],
+    ) -> Tuple[List[str], List[str]]:
+        nodes: List[str] = []
+        directions: List[str] = []
+
+        cur = goal
+        while cur != start:
+            nodes.append(cur)
+            directions.append(parent_dir[cur])
+            cur = parent[cur]
+
+        nodes.append(start)
+
+        nodes.reverse()
+        directions.reverse()
+
+        return nodes, directions
