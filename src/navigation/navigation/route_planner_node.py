@@ -18,7 +18,9 @@ class RoutePlannerNode(Node):
             String, "goal_node", self.goal_node_callback, 10
         )
 
-        self.publisher_directions = self.create_publisher(String, "route_plan/directions", 10)
+        self.publisher_directions = self.create_publisher(
+            String, "route_plan/directions", 10
+        )
         self.publisher_nodes = self.create_publisher(String, "route_plan/nodes", 10)
 
         self.current_node: str | None = None

@@ -69,6 +69,7 @@ def test_given_current_only_when_current_received_then_does_not_publish_nodes(no
     # Assert
     assert received == []
 
+
 def test_given_goal_only_when_goal_received_then_does_not_publish_directions(node):
     # Arrange
     goal_msg = String()
@@ -82,7 +83,9 @@ def test_given_goal_only_when_goal_received_then_does_not_publish_directions(nod
     assert received == []
 
 
-def test_given_current_only_when_current_received_then_does_not_publish_directions(node):
+def test_given_current_only_when_current_received_then_does_not_publish_directions(
+    node,
+):
     # Arrange
     current_msg = String()
     current_msg.data = "A1"
@@ -118,7 +121,6 @@ def test_given_both_nodes_set_when_goal_received_then_publishes_nodes_list(node)
     assert received and json.loads(received[0]) != []
 
 
-
 def test_given_both_nodes_set_when_goal_received_then_publishes_directions_list(node):
     # Arrange
     received = []
@@ -140,7 +142,6 @@ def test_given_both_nodes_set_when_goal_received_then_publishes_directions_list(
 
     # Assert
     assert received and json.loads(received[0]) != []
-
 
 
 def test_given_invalid_start_node_when_goal_received_then_raises_value_error(node):
