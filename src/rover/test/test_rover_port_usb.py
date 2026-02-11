@@ -1,7 +1,7 @@
 import pytest
 import rclpy
 from std_msgs.msg import String
-from navigation.rover_port_usb import RoverPortSubscriber
+from rover.rover_port_usb import RoverPortSubscriber
 import os
 import pty
 import serial

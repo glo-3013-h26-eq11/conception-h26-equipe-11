@@ -2,7 +2,7 @@ import pytest
 import rclpy
 from std_msgs.msg import String
 import json
-from navigation.rover_interface import RoverInterfaceSubscriber, ROVER_COMMAND
+from rover.rover_interface import RoverInterfaceSubscriber, ROVER_COMMAND
 
 
 @pytest.fixture(scope="module", autouse=True)
