@@ -19,7 +19,7 @@ def generate_launch_description() -> LaunchDescription:
                 output="screen",
                 parameters=[
                     {
-                        "width": LaunchConfiguration("width"),
+                        "width": LaunchConfiguration("width"), 
                         "height": LaunchConfiguration("height"),
                         "fps": LaunchConfiguration("fps"),
                         "publish_compressed": LaunchConfiguration("publish_compressed"),
