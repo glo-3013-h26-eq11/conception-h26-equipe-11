@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from enum import Enum
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
@@ -64,7 +62,6 @@ class GoalSelector:
         result = self.route_selector.compute_path(start, goal)
         dist = (
             None if result is None else len(result[1])
-        )  # result = (nodes, directions)
-
+        )
         self._shortest_path_length_cache[node_pair] = dist
         return dist
