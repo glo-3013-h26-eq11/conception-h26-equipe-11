@@ -115,7 +115,7 @@ class ArucoReader(Node):
             self.mtx,
             self.dist
         )
-        return float(tvecs[0][0][2])
+        return float(tvecs[0][0][2] * 2)
 
 
 def main(args=None):
