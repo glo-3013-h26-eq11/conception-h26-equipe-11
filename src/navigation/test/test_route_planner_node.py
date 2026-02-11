@@ -2,7 +2,9 @@ import json
 import pytest
 import rclpy
 from std_msgs.msg import String
+
 from navigation.route_planner_node import RoutePlannerNode
+from navigation.route_selector import RouteSelector
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -14,8 +16,20 @@ def rclpy_context():
 
 @pytest.fixture
 def node():
-    route_planner_node = RoutePlannerNode()
+    # Arrange
+    temp_graph = {
+        "A1": {"g": "ZC1", "l": "A4", "d": "ZD1"},
+        "A2": {"g": "A4", "l": "ZD1", "d": "A2"},
+        "A3": {"g": "ZD1", "l": "A2", "d": "ZC1"},
+        "A4": {"g": "A2", "l": "ZC1", "d": "A4"},
+        "ZC1": {"l": "A1"},
+        "ZD1": {"l": "A3"},
+    }
+    route_selector = RouteSelector(graph=temp_graph)
+    route_planner_node = RoutePlannerNode(route_selector=route_selector)
+
     yield route_planner_node
+
     route_planner_node.destroy_node()
 
 
@@ -30,40 +44,65 @@ def _capture_topic_once(node, topic_name: str, timeout_sec: float = 0.2):
     return received
 
 
-def test_given_goal_only_when_goal_received_then_does_not_publish(node):
+def test_given_goal_only_when_goal_received_then_does_not_publish_nodes(node):
     # Arrange
     goal_msg = String()
     goal_msg.data = "ZC1"
 
     # Act
     node.goal_node_callback(goal_msg)
-    received = _capture_topic_once(node, "route_plan")
+    received = _capture_topic_once(node, "route_plan/nodes")
 
     # Assert
     assert received == []
 
 
-def test_given_current_only_when_current_received_then_does_not_publish(node):
+def test_given_current_only_when_current_received_then_does_not_publish_nodes(node):
     # Arrange
     current_msg = String()
     current_msg.data = "A1"
 
     # Act
     node.current_node_callback(current_msg)
-    received = _capture_topic_once(node, "route_plan")
+    received = _capture_topic_once(node, "route_plan/nodes")
+
+    # Assert
+    assert received == []
+
+def test_given_goal_only_when_goal_received_then_does_not_publish_directions(node):
+    # Arrange
+    goal_msg = String()
+    goal_msg.data = "ZC1"
+
+    # Act
+    node.goal_node_callback(goal_msg)
+    received = _capture_topic_once(node, "route_plan/directions")
 
     # Assert
     assert received == []
 
 
-def test_given_both_nodes_set_when_goal_received_then_publishes_route(node):
+def test_given_current_only_when_current_received_then_does_not_publish_directions(node):
+    # Arrange
+    current_msg = String()
+    current_msg.data = "A1"
+
+    # Act
+    node.current_node_callback(current_msg)
+    received = _capture_topic_once(node, "route_plan/directions")
+
+    # Assert
+    assert received == []
+
+
+def test_given_both_nodes_set_when_goal_received_then_publishes_nodes_list(node):
     # Arrange
     received = []
 
     def cb(msg: String):
         received.append(msg.data)
 
-    node.create_subscription(String, "route_plan", cb, 10)
+    node.create_subscription(String, "route_plan/nodes", cb, 10)
 
     current_msg = String()
     current_msg.data = "A1"
@@ -76,9 +115,32 @@ def test_given_both_nodes_set_when_goal_received_then_publishes_route(node):
     rclpy.spin_once(node, timeout_sec=0.2)
 
     # Assert
-    assert len(received) == 1
-    route = json.loads(received[0])
-    assert isinstance(route, list)
+    assert received and json.loads(received[0]) != []
+
+
+
+def test_given_both_nodes_set_when_goal_received_then_publishes_directions_list(node):
+    # Arrange
+    received = []
+
+    def cb(msg: String):
+        received.append(msg.data)
+
+    node.create_subscription(String, "route_plan/directions", cb, 10)
+
+    current_msg = String()
+    current_msg.data = "A1"
+    goal_msg = String()
+    goal_msg.data = "ZC1"
+
+    # Act
+    node.current_node_callback(current_msg)
+    node.goal_node_callback(goal_msg)
+    rclpy.spin_once(node, timeout_sec=0.2)
+
+    # Assert
+    assert received and json.loads(received[0]) != []
+
 
 
 def test_given_invalid_start_node_when_goal_received_then_raises_value_error(node):

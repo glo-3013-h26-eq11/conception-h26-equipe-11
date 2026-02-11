@@ -37,10 +37,11 @@ class RoutePlannerNode(Node):
             return
 
         result = self.route_selector.compute_path(self.current_node, self.goal_node)
-        if result is None:
-            return
 
-        nodes_path, directions_path = result
+        if result is None:
+            nodes_path, directions_path = [], []
+        else:
+            nodes_path, directions_path = result
 
         msg_dirs = String()
         msg_dirs.data = json.dumps(directions_path)
