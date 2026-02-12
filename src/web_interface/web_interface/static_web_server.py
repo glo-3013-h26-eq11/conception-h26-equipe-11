@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 import os
 
-PORT = 5555
+PORT = 80
 BASE_URL = "localhost"
 
 WEB_INTERFACE_DIRECTORY = "/home/ws/src/web_interface/web_interface"
