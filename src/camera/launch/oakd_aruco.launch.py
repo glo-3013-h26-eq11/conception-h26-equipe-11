@@ -56,7 +56,9 @@ def generate_launch_description() -> LaunchDescription:
                     ),
                     IncludeLaunchDescription(
                         PythonLaunchDescriptionSource(depthai_camera_launch_path),
-                        condition=UnlessCondition(LaunchConfiguration("use_rgbd_pcl")),
+                        condition=UnlessCondition(
+                            LaunchConfiguration("use_rgbd_pcl")
+                        ),
                     ),
                 ],
                 condition=IfCondition(LaunchConfiguration("start_depthai")),
