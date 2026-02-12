@@ -1,9 +1,7 @@
-name: ROS2 CI
+name: ROS2 CI - Deploy
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
 
 jobs:
