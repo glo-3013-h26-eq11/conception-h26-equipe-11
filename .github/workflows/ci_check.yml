@@ -23,7 +23,7 @@ jobs:
           "
       - name: TEST->Run tests
         run: |
-          docker run --rm -e PYTHONPATH=/home/ws/src ros2-test-image bash -lc -v /var/run/docker.sock:/var/run/docker.sock "
+          docker run --rm -e PYTHONPATH=/home/ws/src -v /var/run/docker.sock:/var/run/docker.sock ros2-test-image bash -lc "
             cd /home/ws &&
             colcon build &&
             source install/setup.bash &&
