@@ -7,6 +7,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-depthai-ros
+    python3 -m pip install --user depthai
+    source /opt/ros/humble/setup.bash
+    colcon build
+    source install/setup.bash
 
 WORKDIR /home/ws
 
