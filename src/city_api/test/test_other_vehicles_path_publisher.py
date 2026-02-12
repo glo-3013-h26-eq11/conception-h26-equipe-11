@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 import rclpy
-from city_api.city_api.other_vehicles_path_publisher import OtherVehiclesPathPublisher
+from city_api.other_vehicles_path_publisher import OtherVehiclesPathPublisher
 from std_msgs.msg import String
 import json
 

@@ -33,7 +33,6 @@
         "--pid=host",
         "--ipc=host",
         "-e", "DISPLAY=${env:DISPLAY}",
-        "--group-add", "docker",
     ],
     "mounts": [
     //    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
