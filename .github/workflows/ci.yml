@@ -22,7 +22,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
+        with:
+          submodules: recursive
       - name: BUILD->Build Docker image
         run: docker build -t ros2-test-image .
 
@@ -38,7 +39,8 @@ jobs:
             cd /home/ws &&
             colcon build &&
             source install/setup.bash &&
-            colcon test --event-handlers console_direct+
+            colcon test --event-handlers console_direct+ &&
+            colcon test-results --verbose
           "
 
       - name: DEPLOY->Log in to GitHub Container Registry
