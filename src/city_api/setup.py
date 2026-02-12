@@ -23,7 +23,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "fetch_other_vehicles_path = city_api.fetch_other_vehicles_path:main",
+            "other_vehicles_path_publisher = city_api.other_vehicles_path_publisher:main",
         ],
     },
 )
