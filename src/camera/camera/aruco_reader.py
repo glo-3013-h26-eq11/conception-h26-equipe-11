@@ -23,7 +23,7 @@ class ArucoReader(Node):
 
             instrinsics = calib.getCameraIntrinsics(
                 dai.CameraBoardSocket.RGB,
-                640, 480
+                1280, 720
             )
 
             dist = calib.getDistortionCoefficients(
@@ -115,7 +115,7 @@ class ArucoReader(Node):
             self.mtx,
             self.dist
         )
-        return float(tvecs[0][0][2] * 2)
+        return float(tvecs[0][0][2])
 
 
 def main(args=None):
