@@ -28,6 +28,9 @@ RUN apt-get update && apt-get install -y curl \
 RUN node -v
 RUN npm -v
 
+# Install docker
+RUN apt-get install -y docker.io
+
 RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
 
 ENV SHELL /bin/bash

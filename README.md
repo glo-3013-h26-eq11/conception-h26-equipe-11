@@ -41,3 +41,8 @@ ros2 pkg create --build-type ament_python --node-name my_node my_package
 source install/setup.bash
 ros2 run my_package my_node
 ```
+
+### Update un submodule du repo
+```bash
+git submodule update --init --recursive
+```

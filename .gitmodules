@@ -1,0 +1,3 @@
+[submodule "remote/design3-api"]
+	path = remote/design3-api
+	url = https://github.com/norlab-ulaval/design3-api.git
