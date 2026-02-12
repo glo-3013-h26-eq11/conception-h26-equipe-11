@@ -17,7 +17,9 @@ def fake_gpio(monkeypatch):
     monkeypatch.setitem(sys.modules, "Jetson.GPIO", fake_gpio)
 
     if "sensor.proximity_sensor" in sys.modules:
-        del sys.modules["sensor.proximity_sensor"] # méthode batarde pour forcer de reload les modules pour le monkeypatch
+        del sys.modules[
+            "sensor.proximity_sensor"
+        ]  # méthode batarde pour forcer de reload les modules pour le monkeypatch
 
     return fake_gpio
 

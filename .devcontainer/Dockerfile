@@ -20,8 +20,17 @@ RUN apt-get install -y python3-pip
 RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-depthai-ros
 
-RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
+# Install curl and Node.js
+RUN apt-get update && apt-get install -y curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean
 
+# Check versions
+RUN node -v
+RUN npm -v
+
+RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
 
 ENV SHELL /bin/bash
 
