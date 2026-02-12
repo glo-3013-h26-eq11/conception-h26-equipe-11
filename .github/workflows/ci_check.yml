@@ -28,5 +28,5 @@ jobs:
             colcon build &&
             source install/setup.bash &&
             colcon test --event-handlers console_direct+ &&
-            colcon test-results --verbose
+            colcon test-result --verbose
           "

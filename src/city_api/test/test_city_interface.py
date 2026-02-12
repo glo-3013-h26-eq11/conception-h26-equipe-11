@@ -26,7 +26,18 @@ def start_design3_api():
     )
 
     container = subprocess.run(
-        ["sudo", "docker", "run", "-d", "-p", "5000:5000", "--rm", "design3-api"],
+        [
+            "sudo",
+            "docker",
+            "run",
+            "-d",
+            "-p",
+            "5000:5000",
+            "--network",
+            "host",
+            "--rm",
+            "design3-api",
+        ],
         check=True,
         capture_output=True,
         text=True,
