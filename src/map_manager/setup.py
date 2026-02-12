@@ -24,7 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'my_node = map_manager.my_node:main'
+            'map_processor_node = map_manager.map_processor_node:main'
         ],
     },
 )
