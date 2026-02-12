@@ -21,7 +21,7 @@ class ProximitySensor(Node):
 
         GPIO.setup(GPIO_PIN, GPIO.IN)
 
-        GPIO.add_event_detect(GPIO_PIN, GPIO.BOTH, callback=self.gpio_change)
+        GPIO.add_event_detect(GPIO_PIN, GPIO.BOTH, callback=self.gpio_change, bouncetime=200)
 
     def gpio_change(self, pin):
         if GPIO.input(pin):
@@ -33,13 +33,11 @@ class ProximitySensor(Node):
     def gpio_from_0_to_1(self, pin):
         boolean_msg = Bool()
         boolean_msg.data = MerchandiseFlag.NOT_DETECTED.value
-        print("test change")
         self.publisher.publish(boolean_msg)
 
     def gpio_from_1_to_0(self, pin):
         boolean_msg = Bool()
         boolean_msg.data = MerchandiseFlag.IS_DETECTED.value
-        print("test_change_other")
         self.publisher.publish(boolean_msg)
 
 
