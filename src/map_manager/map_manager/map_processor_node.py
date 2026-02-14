@@ -49,7 +49,7 @@ class MapProcessorNode(Node):
             parts = line.split(",")
             if len(parts) == 3:
                 origin_id = parts[0].strip()
-                direction = parts[1].strip()
+                direction: str = parts[1].strip()
                 dest_id = parts[2].strip()
 
                 if origin_id in nodes_dict and dest_id in nodes_dict:

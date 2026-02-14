@@ -2,7 +2,7 @@ import json
 
 
 class MapNode:
-    def __init__(self, id: str, tag: int = -1):
+    def __init__(self, id: str, tag: int):
         self.id: str = id
         self.tag: int = tag
         self.right: str = None
