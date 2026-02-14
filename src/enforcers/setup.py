@@ -22,6 +22,6 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": ["base_enforcer = enforcers.base_enforcer:main"],
+        "console_scripts": ["enforcer_manager = enforcers.enforcer_manager_node:main"],
     },
 )
