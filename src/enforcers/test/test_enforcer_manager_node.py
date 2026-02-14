@@ -20,17 +20,6 @@ def node():
     enforcer_manager_node.destroy_node()
 
 
-def _capture_topic_once(node, topic_name: str, msg_type, timeout_sec: float = 0.2):
-    received_msgs = []
-
-    def call_back(msg):
-        received_msgs.append(msg)
-
-    node.create_subscription(msg_type, topic_name, call_back, 10)
-    rclpy.spin_once(node, timeout_sec=timeout_sec)
-    return received_msgs
-
-
 def test_given_load_not_detected_when_load_callback_with_true_then_updates_to_load_detected(
     node,
 ):
