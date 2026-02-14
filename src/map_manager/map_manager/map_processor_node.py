@@ -28,7 +28,6 @@ class MapProcessorNode(Node):
         self.get_logger().info("Map Processor Node has been started.")
 
     def _parse_nodes(self, nodes_csv_lines: list[str]) -> dict[str, MapNode]:
-        """Parses the nodes section of the CSV."""
         nodes_dict = {}
         for line in nodes_csv_lines[1:]:
             if not line.strip():
@@ -43,7 +42,7 @@ class MapProcessorNode(Node):
     def _parse_transitions(
         self, transitions_csv_lines: list[str], nodes_dict: dict[str, MapNode]
     ) -> None:
-        
+
         for line in transitions_csv_lines[1:]:
             if not line.strip():
                 continue
@@ -64,8 +63,8 @@ class MapProcessorNode(Node):
                     elif direction == "l":
                         origin_node.add_straight_line(dest_node)
 
-    def parse_combined_csv(self, combined_data: str) -> Map:
-        sections = combined_data.strip().split("---")
+    def parse_csv_file(self, raw_data: str) -> Map:
+        sections = raw_data.strip().split("---")
         if len(sections) < 2:
             raise ValueError("Input must contain two sections separated by '---'")
 
@@ -75,15 +74,14 @@ class MapProcessorNode(Node):
         nodes_dict = self._parse_nodes(nodes_csv_lines)
         self._parse_transitions(transitions_csv_lines, nodes_dict)
 
-        return Map(list(nodes_dict.values()))
+        nodes_list = list(nodes_dict.values())
+        return Map(nodes_list)
 
     def map_callback(self, msg):
         try:
             self.get_logger().info("Received raw CSV map data.")
 
-
-            processed_map = self.parse_combined_csv(msg.data)
-
+            processed_map = self.parse_csv_file(msg.data)
             out_msg = String()
             out_msg.data = processed_map.to_json()
 
