@@ -1,5 +1,5 @@
-from base_enforcer import Enforcer
-from merchandise_enforcer import MerchandiseEnforcer
+from enforcers.base_enforcer import Enforcer
+from enforcers.merchandise_enforcer import MerchandiseEnforcer
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
@@ -10,7 +10,7 @@ import rclpy
 
 class EnforcerManagerNode(Node):
     def __init__(self):
-        super().__init__('Enforcer Manager')
+        super().__init__('enforcer_manager_node')
         
         self.sub_load_detection = self.create_subscription(
             Bool, 'is_there_merchandise', self.load_callback, 10
