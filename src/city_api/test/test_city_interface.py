@@ -73,17 +73,17 @@ def local_interface():
     return interface
 
 
-def test_given_when_get_from_local_city_api_then_doesnt_throw(local_interface):
+def test_when_get_from_local_city_api_then_doesnt_throw(local_interface):
     local_interface.get()
 
 
-def test_given_when_get_cranes_from_local_city_api_then_returns_crane(local_interface):
+def test_when_get_cranes_from_local_city_api_then_returns_crane(local_interface):
     result = local_interface.get_cranes()
 
     assert "cranes" in result
 
 
-def test_given_when_get_vehicles_from_local_city_api_then_returns_vehicles(
+def test_when_get_vehicles_from_local_city_api_then_returns_vehicles(
     local_interface,
 ):
     result = local_interface.get_vehicles()
@@ -91,7 +91,7 @@ def test_given_when_get_vehicles_from_local_city_api_then_returns_vehicles(
     assert "vehicles" in result
 
 
-def test_given_when_post_and_get_vehicle_with_id_from_local_city_api_then_returns_vehicles(
+def test_when_post_and_get_vehicle_with_id_from_local_city_api_then_returns_vehicles(
     local_interface,
 ):
     id = 1
@@ -104,7 +104,7 @@ def test_given_when_post_and_get_vehicle_with_id_from_local_city_api_then_return
     assert result["id"] == id
 
 
-def test_given_when_post_vehicle_with_invalid_id_then_throws_http_error(
+def test_when_post_vehicle_with_invalid_id_then_throws_http_error(
     local_interface,
 ):
     id = 345654
@@ -114,7 +114,7 @@ def test_given_when_post_vehicle_with_invalid_id_then_throws_http_error(
         local_interface.post_vehicle_with_id(id, path)
 
 
-def test_given_when_post_and_get_crane_with_id_from_local_city_api_then_returns_cranes(
+def test_when_post_and_get_crane_with_id_from_local_city_api_then_returns_cranes(
     local_interface,
 ):
     id = 1

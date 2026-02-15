@@ -30,7 +30,7 @@ def rover_usb_node():
     node.destroy_node()
 
 
-def test_given_json_then_publishes_to_port(rover_usb_node):
+def test_when_receives_json_then_publishes_to_port(rover_usb_node):
     # Arrange
     rover_node, master = rover_usb_node
 
