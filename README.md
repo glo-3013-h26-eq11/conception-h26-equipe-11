@@ -52,5 +52,4 @@ git submodule update --init --recursive
 colcon build
 source install/setup.bash
 ros2 launch web_interface web_interface_launch.py
->>>>>>> main
 ```
