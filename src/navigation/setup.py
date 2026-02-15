@@ -22,6 +22,8 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": [],
+        "console_scripts": [
+            "route_planner = navigation.route_planner_node:main",
+        ],
     },
 )
