@@ -41,3 +41,10 @@ ros2 pkg create --build-type ament_python --node-name my_node my_package
 source install/setup.bash
 ros2 run my_package my_node
 ```
+
+### Run le launch file du web_interface
+```bash
+colcon build
+source install/setup.bash
+ros2 launch web_interface web_interface_launch.py
+```
