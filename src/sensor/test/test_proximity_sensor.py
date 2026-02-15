@@ -43,7 +43,8 @@ def test_when_transition_up_then_publishes_no_merchandise(fake_gpio):
     node.create_subscription(Bool, "is_there_merchandise", capture_callback, 10)
 
     # Act
-    fake_gpio.fire_transition_event(GPIO_PIN, fake_gpio.RISING)
+    fake_gpio.set_input(1)
+    fake_gpio.fire_transition_event(GPIO_PIN, fake_gpio.BOTH)
 
     rclpy.spin_once(node, timeout_sec=0.1)
 
@@ -73,7 +74,8 @@ def test_when_transition_down_then_publishes_there_is_merchandise(fake_gpio):
     node.create_subscription(Bool, "is_there_merchandise", capture_callback, 10)
 
     # Act
-    fake_gpio.fire_transition_event(GPIO_PIN, fake_gpio.FALLING)
+    fake_gpio.set_input(0)
+    fake_gpio.fire_transition_event(GPIO_PIN, fake_gpio.BOTH)
 
     rclpy.spin_once(node, timeout_sec=0.1)
 
@@ -88,8 +90,7 @@ class FakeGPIO:
 
     BOARD = "BOARD"
     IN = "IN"
-    RISING = "RISING"
-    FALLING = "FALLING"
+    BOTH = "BOTH"
 
     def __init__(self):
         self.callbacks = {}
@@ -97,10 +98,16 @@ class FakeGPIO:
     def setmode(self, mode):
         pass
 
+    def set_input(self, input):
+        self.input_value = input
+
     def setup(self, pin, direction):
         pass
 
-    def add_event_detect(self, pin, transition_event, callback):
+    def input(self, pin):
+        return self.input_value
+
+    def add_event_detect(self, pin, transition_event, callback, bouncetime):
         self.callbacks[(pin, transition_event)] = callback
 
     def cleanup(self):

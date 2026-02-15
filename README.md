@@ -42,9 +42,15 @@ source install/setup.bash
 ros2 run my_package my_node
 ```
 
+### Update un submodule du repo
+```bash
+git submodule update --init --recursive
+```
+
 ### Run le launch file du web_interface
 ```bash
 colcon build
 source install/setup.bash
 ros2 launch web_interface web_interface_launch.py
+>>>>>>> main
 ```
