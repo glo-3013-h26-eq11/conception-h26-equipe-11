@@ -12,6 +12,10 @@ RUN apt-get update && apt-get install -y curl \
 # Install docker
 RUN apt-get install -y docker.io
 
+# Install rosbridge-suite for easy websocket connections
+RUN apt-get install -y ros-humble-rosbridge-suite
+
+
 WORKDIR /home/ws
 
 COPY . /home/ws
