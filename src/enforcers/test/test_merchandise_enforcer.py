@@ -8,7 +8,7 @@ def enforcer():
     return MerchandiseEnforcer()
 
 
-def test_given_merchandise_loaded_and_detination_zc_when_enforce_then_blocks(enforcer):
+def test_given_loaded_merchandise_and_destination_zc_when_enforce_then_blocks(enforcer):
     # Arrange
     enforcer.load_detected = True
     enforcer.destination = "ZC1"

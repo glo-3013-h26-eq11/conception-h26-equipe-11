@@ -13,7 +13,5 @@ class MerchandiseEnforcer(Enforcer):
             and self.destination
             and self.destination.startswith("ZC")
         ):
-            cmd.linear.x = 0.0
-            cmd.angular.z = 0.0
-            return cmd
+            return self.stop_robot(cmd)
         return cmd

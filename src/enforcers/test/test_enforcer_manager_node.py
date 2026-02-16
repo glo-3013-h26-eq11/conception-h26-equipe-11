@@ -24,7 +24,7 @@ def test_given_load_not_detected_when_load_callback_with_true_then_updates_to_lo
     node,
 ):
     # Arrange
-    node.enforcers[0].load_detected = False
+    node.merchandise_enforcer.load_detected = False
 
     # Act
     load_msg = Bool()
@@ -32,7 +32,7 @@ def test_given_load_not_detected_when_load_callback_with_true_then_updates_to_lo
     node.load_callback(load_msg)
 
     # Assert
-    assert node.enforcers[0].load_detected == True
+    assert node.merchandise_enforcer.load_detected == True
 
 
 def test_given_load_detected_when_load_callback_with_false_then_updates_to_load_not_detected(
@@ -47,7 +47,7 @@ def test_given_load_detected_when_load_callback_with_false_then_updates_to_load_
     node.load_callback(load_msg)
 
     # Assert
-    assert node.enforcers[0].load_detected == False
+    assert node.merchandise_enforcer.load_detected == False
 
 
 def test_given_destination_zc_when_load_callback_with_true_then_publishes_invalid_destination(
@@ -61,7 +61,7 @@ def test_given_destination_zc_when_load_callback_with_true_then_publishes_invali
 
     node.create_subscription(Bool, "/merchandise_destination_invalid", call_back, 10)
 
-    node.enforcers[0].destination = "ZC1"
+    node.merchandise_enforcer.destination = "ZC1"
     load_msg = Bool()
     load_msg.data = True
 
@@ -85,7 +85,7 @@ def test_given_destination_zd_when_load_callback_with_true_then_publishes_nothin
 
     node.create_subscription(Bool, "/merchandise_destination_invalid", call_back, 10)
 
-    node.enforcers[0].destination = "ZD2"
+    node.merchandise_enforcer.destination = "ZD2"
     load_msg = Bool()
     load_msg.data = True
 
@@ -108,7 +108,7 @@ def test_given_any_destination_when_load_callback_with_false_then_publishes_noth
 
     node.create_subscription(Bool, "/merchandise_destination_invalid", call_back, 10)
 
-    node.enforcers[0].destination = "ZC1"
+    node.merchandise_enforcer.destination = "ZC1"
     load_msg = Bool()
     load_msg.data = False
 
@@ -131,8 +131,8 @@ def test_given_load_detected_and_destination_zc_when_cmd_callback_then_blockes_a
 
     node.create_subscription(Twist, "/cmd_vel_safe", call_back, 10)
 
-    node.enforcers[0].destination = "ZC1"
-    node.enforcers[0].load_detected = True
+    node.merchandise_enforcer.destination = "ZC1"
+    node.merchandise_enforcer.load_detected = True
 
     cmd = Twist()
     cmd.linear.x = 0.5
@@ -161,8 +161,8 @@ def test_given_load_detected_and_destination_zd_when_cmd_callback_the_allows_and
 
     node.create_subscription(Twist, "/cmd_vel_safe", call_back, 10)
 
-    node.enforcers[0].destination = "ZD2"
-    node.enforcers[0].load_detected = True
+    node.merchandise_enforcer.destination = "ZD2"
+    node.merchandise_enforcer.load_detected = True
 
     cmd = Twist()
     cmd.linear.x = 0.5
@@ -191,8 +191,8 @@ def test_given_load_not_detected_and_any_destination_when_cmd_callback_then_allo
 
     node.create_subscription(Twist, "/cmd_vel_safe", call_back, 10)
 
-    node.enforcers[0].destination = "ZD2"
-    node.enforcers[0].load_detected = False
+    node.merchandise_enforcer.destination = "ZD2"
+    node.merchandise_enforcer.load_detected = False
 
     cmd = Twist()
     cmd.linear.x = 0.5
@@ -210,15 +210,15 @@ def test_given_load_not_detected_and_any_destination_when_cmd_callback_then_allo
     assert cmd_vel_safe.angular.z == 0.2
 
 
-def test_given_destination_when_nodes_callback_then_updates_destination(node):
+def test_given_destination_when_route_nodes_callback_then_updates_destination(node):
     # Arrange
-    node.enforcers[0].destination = "ZC1"
+    node.merchandise_enforcer.destination = "ZC1"
 
     # Act
     test_nodes = ["ZC1", "A1", "A4", "ZD1"]
     msg = String()
     msg.data = json.dumps(test_nodes)
-    node.nodes_callback(msg)
+    node.route_nodes_callback(msg)
 
     # Assert
-    assert node.enforcers[0].destination == "ZD1"
+    assert node.merchandise_enforcer.destination == "ZD1"
