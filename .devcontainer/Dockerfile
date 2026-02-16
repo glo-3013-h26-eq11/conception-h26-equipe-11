@@ -17,6 +17,8 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y python3-pip
+RUN apt-get update && apt-get install -y \
+    ros-${ROS_DISTRO}-depthai-ros
 
 # Install curl and Node.js
 RUN apt-get update && apt-get install -y curl \

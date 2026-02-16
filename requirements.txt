@@ -4,3 +4,4 @@ black
 fastapi[standard]
 requests
 Jetson.GPIO
+depthai
