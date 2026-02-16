@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y curl \
 
 # Install rosbridge-suite for easy websocket connections
 RUN apt-get install -y ros-humble-rosbridge-suite
+RUN git submodule update --init --recursive
 
 # Check versions
 RUN node -v
