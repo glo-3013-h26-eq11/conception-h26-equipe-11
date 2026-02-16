@@ -1,7 +1,3 @@
-[submodule "src/ldlidar_sdk"]
-	path = src/ldlidar_sdk
-	url = https://github.com/norlab-ulaval/ldlidar_sdk.git
-	branch = design3
 [submodule "src/ldlidar_ros2"]
 	path = src/ldlidar_ros2
 	url = https://github.com/norlab-ulaval/ldlidar_ros2.git
