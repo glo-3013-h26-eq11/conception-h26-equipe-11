@@ -17,15 +17,15 @@ def basic_map(sample_nodes):
 
 
 def test_given_duplicate_nodes_when_initiated_then_value_error_is_raised():
-    node_a1 = MapNode("A")
-    node_a2 = MapNode("A")
+    node_a1 = MapNode("A", 1)
+    node_a2 = MapNode("A", 1)
 
     with pytest.raises(ValueError, match="Duplicate node ID detected"):
         Map([node_a1, node_a2])
 
 
 def test_given_a_invalid_node_id_when_get_map_node_then_value_error_is_raised():
-    node_a = MapNode("A")
+    node_a = MapNode("A", 1)
     my_map = Map([node_a])
 
     with pytest.raises(ValueError, match="not found in map"):

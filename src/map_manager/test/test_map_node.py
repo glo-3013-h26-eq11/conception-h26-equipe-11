@@ -13,10 +13,10 @@ def test_given_node_data_when_initiated_then_attributes_are_correct():
 
 
 def test_given_nodes_when_turns_added_then_attributes_are_updated():
-    node_start = MapNode("Start")
-    node_left = MapNode("L")
-    node_right = MapNode("R")
-    node_straight = MapNode("S")
+    node_start = MapNode("Start", 1)
+    node_left = MapNode("L", 2)
+    node_right = MapNode("R", 3)
+    node_straight = MapNode("S", 4)
 
     node_start.add_left_turn(node_left)
     node_start.add_right_turn(node_right)

@@ -53,7 +53,11 @@ def test_given_csv_with_empty_lines_when_parse_nodes_then_ignores_empty_lines(
 def test_given_valid_transitions_csv_lines_when_parse_transitions_then_nodes_are_linked(
     map_processor_node,
 ):
-    nodes_dict = {"A1": MapNode("A1"), "A4": MapNode("A4"), "ZC1": MapNode("ZC1")}
+    nodes_dict = {
+        "A1": MapNode("A1", 1),
+        "A4": MapNode("A4", 2),
+        "ZC1": MapNode("ZC1", 3),
+    }
     csv_lines = ["Origine,Direction,Destination", "A1,g,ZC1", "A1,l,A4"]
 
     map_processor_node._parse_transitions(csv_lines, nodes_dict)
@@ -66,7 +70,7 @@ def test_given_valid_transitions_csv_lines_when_parse_transitions_then_nodes_are
 def test_given_transition_with_unknown_node_when_parse_transitions_then_link_is_not_added(
     map_processor_node,
 ):
-    nodes_dict = {"A1": MapNode("A1")}
+    nodes_dict = {"A1": MapNode("A1", 1)}
     csv_lines = ["Origine,Direction,Destination", "A1,g,UNKNOWN"]
 
     map_processor_node._parse_transitions(csv_lines, nodes_dict)

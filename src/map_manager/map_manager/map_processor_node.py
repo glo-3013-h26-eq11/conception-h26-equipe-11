@@ -20,10 +20,12 @@ class MapProcessorNode(Node):
         # A1,1
         # ZC1,6
         self.subscription = self.create_subscription(
-            String, "raw_map_topic", self.map_callback, 10
+            String, "map_manager/raw_map_topic", self.map_callback, 10
         )
 
-        self.publisher = self.create_publisher(String, "parsed_map_topic", 10)
+        self.publisher = self.create_publisher(
+            String, "map_manager/parsed_map_topic", 10
+        )
 
         self.get_logger().info("Map Processor Node has been started.")
 
