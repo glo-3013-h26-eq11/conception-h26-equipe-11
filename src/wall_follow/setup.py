@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            "wall_follow_node = wall_follow.wall_follow:main",
         ],
     },
 )
