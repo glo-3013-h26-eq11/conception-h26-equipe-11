@@ -17,12 +17,12 @@ COPY . /home/ws
 
 
 ENV PATH="/root/.local/bin:${PATH}"
+RUN git submodule update --init --recursive
 RUN python3 -m pip install --user -r requirements.txt
 
 RUN /bin/bash -c " \
     source /opt/ros/humble/setup.bash && \
-    colcon build && \
-    source install/setup.bash \
+    colcon build \
 "
 RUN cd src/web_interface/web_interface && \
     npm install && \
