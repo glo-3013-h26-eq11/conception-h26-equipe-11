@@ -12,6 +12,13 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && apt-get clean
 
+# Install docker
+RUN apt-get install -y docker.io
+
+# Install rosbridge-suite for easy websocket connections
+RUN apt-get install -y ros-humble-rosbridge-suite
+
+
 WORKDIR /home/ws
 COPY . /home/ws
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [submodule "src/ldlidar_sdk"]
 	path = src/ldlidar_sdk
 	url = https://github.com/norlab-ulaval/ldlidar_sdk.git
@@ -6,3 +7,8 @@
 	path = src/ldlidar_ros2
 	url = https://github.com/norlab-ulaval/ldlidar_ros2.git
 	branch = design-3
+=======
+[submodule "remote/design3-api"]
+	path = remote/design3-api
+	url = https://github.com/norlab-ulaval/design3-api.git
+>>>>>>> origin/main

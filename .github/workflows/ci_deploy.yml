@@ -1,9 +1,7 @@
-name: ROS2 CI
+name: ROS2 CI - Deploy
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
 
 jobs:
@@ -22,7 +20,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
+        with:
+          submodules: recursive
       - name: BUILD->Build Docker image
         run: docker build -t ros2-test-image .
 
@@ -34,11 +33,12 @@ jobs:
           "
       - name: TEST->Run tests
         run: |
-          docker run --rm -e PYTHONPATH=/home/ws/src ros2-test-image bash -lc "
+          docker run --rm -e PYTHONPATH=/home/ws/src --network host -v /var/run/docker.sock:/var/run/docker.sock ros2-test-image bash -lc "
             cd /home/ws &&
             colcon build &&
             source install/setup.bash &&
-            colcon test --event-handlers console_direct+
+            colcon test --event-handlers console_direct+ &&
+            colcon test-result --verbose
           "
 
       - name: DEPLOY->Log in to GitHub Container Registry
