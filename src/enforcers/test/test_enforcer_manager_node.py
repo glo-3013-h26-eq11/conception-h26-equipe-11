@@ -32,14 +32,14 @@ def test_given_load_not_detected_when_load_callback_with_true_then_updates_to_lo
     node.load_callback(load_msg)
 
     # Assert
-    assert node.merchandise_enforcer.load_detected == True
+    assert node.merchandise_enforcer.load_detected is True
 
 
 def test_given_load_detected_when_load_callback_with_false_then_updates_to_load_not_detected(
     node,
 ):
     # Arrange
-    node.enforcers[0].load_detected = True
+    node.merchandise_enforcer.load_detected = True
 
     # Act
     load_msg = Bool()
@@ -47,7 +47,7 @@ def test_given_load_detected_when_load_callback_with_false_then_updates_to_load_
     node.load_callback(load_msg)
 
     # Assert
-    assert node.merchandise_enforcer.load_detected == False
+    assert node.merchandise_enforcer.load_detected is not True
 
 
 def test_given_destination_zc_when_load_callback_with_true_then_publishes_invalid_destination(
@@ -73,7 +73,7 @@ def test_given_destination_zc_when_load_callback_with_true_then_publishes_invali
     assert len(received_msgs) == 1
 
     invalid_dest_msg = received_msgs[0].data
-    assert invalid_dest_msg == True
+    assert invalid_dest_msg is True
 
 
 def test_given_destination_zd_when_load_callback_with_true_then_publishes_nothing(node):
@@ -120,7 +120,7 @@ def test_given_any_destination_when_load_callback_with_false_then_publishes_noth
     assert received_msgs == []
 
 
-def test_given_load_detected_and_destination_zc_when_cmd_callback_then_blockes_and_publishes_cmd_vel_safe(
+def test_given_load_detected_and_destination_zc_when_cmd_callback_then_blockes_and_publishes_safe(
     node,
 ):
     # Arrange
@@ -150,7 +150,7 @@ def test_given_load_detected_and_destination_zc_when_cmd_callback_then_blockes_a
     assert cmd_vel_safe.angular.z == 0.0
 
 
-def test_given_load_detected_and_destination_zd_when_cmd_callback_the_allows_and_publishes_cmd_vel_safe(
+def test_given_load_detected_and_destination_zd_when_cmd_callback_the_allows_and_publishes_safe(
     node,
 ):
     # Arrange
@@ -180,7 +180,7 @@ def test_given_load_detected_and_destination_zd_when_cmd_callback_the_allows_and
     assert cmd_vel_safe.angular.z == 0.2
 
 
-def test_given_load_not_detected_and_any_destination_when_cmd_callback_then_allows_and_publishes_cmd_vel_safe(
+def test_given_load_not_detected_and_destination_when_cmd_callback_then_allows_and_publishes_safe(
     node,
 ):
     # Arrange
