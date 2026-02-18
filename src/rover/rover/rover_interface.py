@@ -35,12 +35,11 @@ def main(args=None):
     rclpy.init(args=args)
 
     rover_interface_subscriber = RoverInterfaceSubscriber()
-
-    rclpy.spin(rover_interface_subscriber)
-
-    rover_interface_subscriber.destroy_node()
-
-    rclpy.shutdown()
+    try:
+        rclpy.spin(rover_interface_subscriber)
+    finally:
+        rover_interface_subscriber.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

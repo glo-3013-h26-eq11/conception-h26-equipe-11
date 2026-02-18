@@ -32,11 +32,12 @@ def main(args=None):
 
     rover_port_subscriber = RoverPortSubscriber()
 
-    rclpy.spin(rover_port_subscriber)
-
-    rover_port_subscriber.destroy_node()
-
-    rclpy.shutdown()
+    try:
+        rclpy.spin(rover_port_subscriber)
+    finally:
+        rover_port_subscriber.destroy_node()
+        
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
