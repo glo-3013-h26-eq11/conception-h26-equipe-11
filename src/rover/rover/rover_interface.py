@@ -3,30 +3,21 @@ from rclpy.node import Node
 from std_msgs.msg import String
 import json
 
-ROVER_COMMAND = {
-    "FORWARD_SLOWLY": {"T": 1, "L": 0.1, "R": 0.1},
-    "FORWARD": {"T": 1, "L": 0.3, "R": 0.3},
-    "EMERGENCY_STOP": {"T": 0},
-    "FORWARD_LEFT": {"T": 1, "L": 0.1, "R": 0.3},
-    "FORWARD_RIGHT": {"T": 1, "L": 0.3, "R": 0.1},
-}
-
 
 class RoverInterfaceSubscriber(Node):
     def __init__(self):
         super().__init__("rover_interface_subscriber")
         self.subscription = self.create_subscription(
-            String, "rover_interface", self.listener_command_callback, 10
+            String, "/cmd_vel", self.listener_command_callback, 10
         )
         self.publisher = self.create_publisher(String, "rover_port", 10)
 
     def listener_command_callback(self, msg):
-        string_msg = msg.data
+        linear_x = msg.linear.x
 
-        if string_msg not in ROVER_COMMAND:
-            raise ValueError("Invalid Rover Command")
+        angular_z = msg.angular.z
 
-        command = ROVER_COMMAND[string_msg]
+        command = self.create_movement_dictionnary(linear_x, angular_z)
 
         json_msg = json.dumps(command)
 
@@ -34,6 +25,9 @@ class RoverInterfaceSubscriber(Node):
         out_msg.data = json_msg
 
         self.publisher.publish(out_msg)
+
+    def create_movement_dictionnary(self, x, z):
+        return {"T": 13, "X": x, "Z": z}
 
 
 def main(args=None):
