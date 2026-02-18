@@ -1,6 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode,python,windows,pycharm
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,visualstudiocode,python,windows,pycharm
 
+/Commandes
 ### macOS ###
 # General
 .DS_Store
