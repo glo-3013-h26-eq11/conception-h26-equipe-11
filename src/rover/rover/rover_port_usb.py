@@ -39,7 +39,7 @@ def main(args=None):
     try:
         rclpy.spin(rover_port_subscriber)
     finally:
-        
+        rover_port_subscriber.stop()
         
         rover_port_subscriber.destroy_node()
         
