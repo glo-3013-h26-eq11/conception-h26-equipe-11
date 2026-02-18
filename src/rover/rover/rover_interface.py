@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+from geometry_msgs.msg import Twist
 import json
 
 
@@ -8,7 +9,7 @@ class RoverInterfaceSubscriber(Node):
     def __init__(self):
         super().__init__("rover_interface_subscriber")
         self.subscription = self.create_subscription(
-            String, "/cmd_vel", self.listener_command_callback, 10
+            Twist, "/cmd_vel", self.listener_command_callback, 10
         )
         self.publisher = self.create_publisher(String, "rover_port", 10)
 
