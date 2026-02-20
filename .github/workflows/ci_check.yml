@@ -28,17 +28,18 @@ jobs:
             colcon build &&
             source install/setup.bash &&
             colcon test --event-handlers console_direct+ &&
-            colcon test-result --verbose
-          "
-      - name: Run tests in Docker
-        run: |
-          docker run -v /tmp:/tmp $IMAGE_TAG \
-            python -m pytest \
-              --cov-report=term-missing:skip-covered \
-              --junitxml=/tmp/pytest.xml \
-              --cov=src tests/ | tee /tmp/pytest-coverage.txt
+            colcon test-result --verbose && 
 
-      - name: Coverage comment
+            # Combine coverage files from all packages
+            coverage combine \$(find src -name '.coverage') &&
+
+            # Generate terminal coverage report (for PR comment)
+            coverage report -m | tee /tmp/pytest-coverage.txt &&
+
+            # Generate XML coverage (for badge / Codecov)
+            coverage xml -o /tmp/coverage.xml
+          "
+      - name: CODE_COVERAGE->coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
           pytest-coverage-path: /tmp/pytest-coverage.txt
