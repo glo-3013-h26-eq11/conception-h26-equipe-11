@@ -30,3 +30,16 @@ jobs:
             colcon test --event-handlers console_direct+ &&
             colcon test-result --verbose
           "
+      - name: Run tests in Docker
+        run: |
+          docker run -v /tmp:/tmp $IMAGE_TAG \
+            python -m pytest \
+              --cov-report=term-missing:skip-covered \
+              --junitxml=/tmp/pytest.xml \
+              --cov=src tests/ | tee /tmp/pytest-coverage.txt
+
+      - name: Coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: /tmp/pytest-coverage.txt
+          junitxml-path: /tmp/pytest.xml
