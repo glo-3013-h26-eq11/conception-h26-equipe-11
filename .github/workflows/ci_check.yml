@@ -53,10 +53,10 @@ jobs:
             coverage report -m | tee /tmp/pytest-coverage.txt &&
 
             # Generate XML coverage (for badge / Codecov)
-            coverage xml -o /tmp/coverage.xml
+            coverage xml -o /tmp/coverage.xml --include "src/*"
           "
       - name: CODE_COVERAGE->coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
           pytest-coverage-path: /tmp/pytest-coverage.txt
-          junitxml-path: /tmp/pytest.xml
+          junitxml-path: /tmp/coverage.xml
