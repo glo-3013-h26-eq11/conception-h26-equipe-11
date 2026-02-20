@@ -35,28 +35,4 @@ jobs:
             colcon test --event-handlers console_direct+ &&
 
             colcon test-result --verbose && 
-
-            colcon test \
-            --event-handlers console_direct+ \
-            --pytest-args \
-              --cov \
-              --cov-report=term-missing \
-              --cov-report=xml:/tmp/coverage.xml \
-              --junitxml=/tmp/pytest.xml \
-            | tee /tmp/pytest-coverage.txt &&
-
-
-            # Combine coverage files from all packages
-            coverage combine \$(find src -name '.coverage') &&
-
-            # Generate terminal coverage report (for PR comment)
-            coverage report -m | tee /tmp/pytest-coverage.txt &&
-
-            # Generate XML coverage (for badge / Codecov)
-            coverage xml -o /tmp/coverage.xml --include 'src/*'
           "
-      - name: CODE_COVERAGE->coverage comment
-        uses: MishaKav/pytest-coverage-comment@main
-        with:
-          pytest-coverage-path: /tmp/pytest.xml
-          junitxml-path: /tmp/pytest.xml
