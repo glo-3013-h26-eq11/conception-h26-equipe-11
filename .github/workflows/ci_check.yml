@@ -27,7 +27,18 @@ jobs:
             cd /home/ws &&
             colcon build &&
             source install/setup.bash &&
+            
             colcon test --event-handlers console_direct+ &&
+
+            colcon test \
+            --event-handlers console_direct+ \
+            --pytest-args \
+              --cov \
+              --cov-report=term-missing \
+              --cov-report=xml:/tmp/coverage.xml \
+              --junitxml=/tmp/pytest.xml \
+            | tee /tmp/pytest-coverage.txt &&
+
             colcon test-result --verbose && 
 
             # Combine coverage files from all packages
