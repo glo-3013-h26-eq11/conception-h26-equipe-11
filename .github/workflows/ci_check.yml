@@ -58,5 +58,5 @@ jobs:
       - name: CODE_COVERAGE->coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
-          pytest-coverage-path: /tmp/pytest-coverage.txt
-          junitxml-path: /tmp/coverage.xml
+          pytest-coverage-path: /tmp/pytest.xml
+          junitxml-path: /tmp/pytest.xml
