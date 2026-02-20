@@ -30,6 +30,8 @@ jobs:
             
             colcon test --event-handlers console_direct+ &&
 
+            colcon test-result --verbose && 
+
             colcon test \
             --event-handlers console_direct+ \
             --pytest-args \
@@ -39,7 +41,6 @@ jobs:
               --junitxml=/tmp/pytest.xml \
             | tee /tmp/pytest-coverage.txt &&
 
-            colcon test-result --verbose && 
 
             # Combine coverage files from all packages
             coverage combine \$(find src -name '.coverage') &&
