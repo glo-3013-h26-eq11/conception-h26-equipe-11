@@ -17,7 +17,7 @@ def generate_launch_description():
     return launch.LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                os.path.join(ldlidar_launch_dir, 'ld06.launch.py')
+                os.path.join(ldlidar_launch_dir, 'stl19p.launch.py')
             )
         ),
         

@@ -19,7 +19,6 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y python3-pip
 RUN apt-get update && apt-get install -y \
     ros-${ROS_DISTRO}-depthai-ros
-RUN python3 -m pip install --user depthai
 
 # Install curl and Node.js
 RUN apt-get update && apt-get install -y curl \
@@ -29,7 +28,7 @@ RUN apt-get update && apt-get install -y curl \
 
 # Install rosbridge-suite for easy websocket connections
 RUN apt-get install -y ros-humble-rosbridge-suite
-RUN git submodule update --init --recursive
+
 
 # Check versions
 RUN node -v

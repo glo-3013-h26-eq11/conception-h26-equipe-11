@@ -3,3 +3,4 @@
 	url = https://github.com/norlab-ulaval/design3-api.git
 [submodule "remote/ldlidar_ros2"]
 	path = remote/ldlidar_ros2
+	url = git@github.com:norlab-ulaval/ldlidar_ros2.git

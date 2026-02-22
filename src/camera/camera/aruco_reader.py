@@ -45,14 +45,6 @@ class ArucoReader(Node):
             CompressedImage, "/oak/rgb/image_raw/compressed", self.rgb_callback, 10
         )
 
-        self.detection4x4_pub = self.create_publisher(
-            Float32MultiArray, "/aruco/detections_4x4", 10
-        )
-
-        self.detection5x5_pub = self.create_publisher(
-            Float32MultiArray, "/aruco/detections_5x5", 10
-        )
-
         self.detections_pub = self.create_publisher(String, "aruco_detections", 10)
 
         self.get_logger().info("ArUco Reader started")
@@ -83,10 +75,6 @@ class ArucoReader(Node):
                         corners_4x4[i], marker_size=0.02
                     )
 
-                    msg = Float32MultiArray()
-                    msg.data = [float(marker_id), depth]
-                    self.detection4x4_pub.publish(msg)
-
                     detections_4x4.append({"id": int(marker_id), "depth": float(depth)})
 
                     self.get_logger().info(f"4x4 Marker {marker_id}: {depth:.3f} m")
@@ -96,11 +84,7 @@ class ArucoReader(Node):
                     depth = self.calculate_marker_depth(
                         corners_5x5[i], marker_size=0.075
                     )
-
-                    msg = Float32MultiArray()
-                    msg.data = [float(marker_id), depth]
-                    self.detection5x5_pub.publish(msg)
-
+                    
                     detections_5x5.append({"id": int(marker_id), "depth": float(depth)})
 
                     self.get_logger().info(f"5x5 Marker {marker_id}: {depth:.3f} m")
