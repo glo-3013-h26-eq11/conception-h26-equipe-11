@@ -38,7 +38,7 @@ class RoverInterfaceSubscriber(Node):
         out_msg.data = json.dumps(command)
         self.publisher.publish(out_msg)
 
-    def ackermann_to_diff(speed, steering_angle):
+    def ackermann_to_diff(self, speed, steering_angle):
         if abs(steering_angle) < 1e-3:
             left = speed
             right = speed
