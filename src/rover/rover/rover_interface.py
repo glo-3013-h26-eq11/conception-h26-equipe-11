@@ -45,8 +45,8 @@ class RoverInterfaceSubscriber(Node):
             right = speed
         else:
             radius = WHEELBASE / math.tan(steering_angle)
-            left = speed * (radius - TRACK_WIDTH / 2.0) / radius
-            right = speed * (radius + TRACK_WIDTH / 2.0) / radius
+            right = speed * (radius - TRACK_WIDTH / 2.0) / radius
+            left = speed * (radius + TRACK_WIDTH / 2.0) / radius
 
         max_mag = max(abs(left), abs(right))
         if max_mag > MAX_CMD:
