@@ -29,7 +29,7 @@ class RoverInterfaceSubscriber(Node):
         left, right = self.ackermann_to_diff(speed, steering)
 
         command = {
-            "T": 13,
+            "T": 1,
             "L": left,
             "R": right,
         }
