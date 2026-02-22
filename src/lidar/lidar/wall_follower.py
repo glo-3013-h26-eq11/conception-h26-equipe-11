@@ -15,6 +15,7 @@ KD = 0.0
 KI = 0.0
 MAX_STEERING = 0.8       # radians
 SPEED = 0.3              # m/s
+LIDAR_OFFSET = math.pi / 2
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -41,14 +42,14 @@ class WallFollowNode(Node):
         angle_min = scan.angle_min
         angle_increment = scan.angle_increment
 
-        front = angle_to_distance(0.0, lidar_range_array, angle_min, angle_increment)
+        front = angle_to_distance(LIDAR_OFFSET, lidar_range_array, angle_min, angle_increment)
         if is_valid_lidar_scan(front) and front < MIN_FRONT_DISTANCE:
             self.get_logger().warn(f"Obstacle detected at {front:.2f}m, stopping")
             self.send_control_command(0.0, 0.0)
             return
 
         theta = np.radians(THETA_DEG)
-        theta_b = -np.pi / 2.0 + 10  # 90 degrees to the right
+        theta_b = -np.pi / 2.0 + LIDAR_OFFSET  # 90 degrees to the right
         theta_a = theta_b + theta # 30 degrees to the right
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
