@@ -1,4 +1,4 @@
-from city_api.city_interface import CityInterface
+from central_manager.city_interface import CityInterface
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String

@@ -1,8 +1,9 @@
 import pytest
 import rclpy
 from std_msgs.msg import String
+from geometry_msgs.msg import Twist
+from rover.rover_interface import RoverInterfaceSubscriber
 import json
-from rover.rover_interface import RoverInterfaceSubscriber, ROVER_COMMAND
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -28,8 +29,9 @@ def test_when_receives_valid_command_then_publishes_json(rover_node):
 
     rover_node.create_subscription(String, "rover_port", capture_callback, 10)
 
-    input_msg = String()
-    input_msg.data = "FORWARD"
+    input_msg = Twist()
+    input_msg.linear.x = 2.0
+    input_msg.angular.z = 2.0
 
     # Act
     rover_node.listener_command_callback(input_msg)
@@ -37,17 +39,7 @@ def test_when_receives_valid_command_then_publishes_json(rover_node):
     rclpy.spin_once(rover_node, timeout_sec=0.1)
 
     # Assert
-    expected_result = ROVER_COMMAND[input_msg.data]
+    expected = rover_node.create_movement_dictionnary(2.0, 2.0)
 
     assert len(received_msgs) == 1
-    assert received_msgs[0] == json.dumps(expected_result)
-
-
-def test_when_receives_invalid_command_then_raises_error(rover_node):
-    # Arrange
-    bad_msg = String()
-
-    bad_msg.data = "GARBAGE COMMAND"
-    # Act, Assert
-    with pytest.raises(ValueError):
-        rover_node.listener_command_callback(bad_msg)
+    assert received_msgs[0] == json.dumps(expected)

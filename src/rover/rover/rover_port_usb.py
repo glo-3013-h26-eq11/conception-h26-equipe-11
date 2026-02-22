@@ -26,17 +26,24 @@ class RoverPortSubscriber(Node):
 
         self.serial_port.write(string_msg.encode() + b"\n")
 
+    def stop(self):
+        stop_command = '{"T":1,"L":0.0,"R":0.0}'
+        self.serial_port.write(stop_command.encode() + b"\n")
+
 
 def main(args=None):
     rclpy.init(args=args)
 
     rover_port_subscriber = RoverPortSubscriber()
 
-    rclpy.spin(rover_port_subscriber)
+    try:
+        rclpy.spin(rover_port_subscriber)
+    finally:
+        rover_port_subscriber.stop()
 
-    rover_port_subscriber.destroy_node()
+        rover_port_subscriber.destroy_node()
 
-    rclpy.shutdown()
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

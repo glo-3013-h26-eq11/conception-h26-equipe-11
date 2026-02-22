@@ -1,10 +1,10 @@
-from city_api.city_interface import CityInterface
+from central_manager.city_interface import CityInterface
 import pytest
 import subprocess
 import time
 import requests
 
-URL = "http://localhost:5000/"
+URL = "http://localhost:5050/"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -32,7 +32,7 @@ def start_design3_api():
             "run",
             "-d",
             "-p",
-            "5000:5000",
+            "5050:5000",
             "--rm",
             "design3-api",
         ],

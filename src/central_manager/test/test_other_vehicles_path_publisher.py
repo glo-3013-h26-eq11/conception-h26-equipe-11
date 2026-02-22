@@ -1,16 +1,18 @@
 import pytest
 from unittest.mock import MagicMock
 import rclpy
-from city_api.other_vehicles_path_publisher import OtherVehiclesPathPublisher
+from central_manager.other_vehicles_path_publisher import OtherVehiclesPathPublisher
 from std_msgs.msg import String
 import json
 
 
 @pytest.fixture(scope="module", autouse=True)
 def rclpy_context():
-    rclpy.init()
+    if not rclpy.ok():
+        rclpy.init()
     yield
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 @pytest.fixture()

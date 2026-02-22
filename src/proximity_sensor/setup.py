@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = "city_api"
+package_name = "proximity_sensor"
 
 setup(
     name=package_name,
@@ -13,9 +13,9 @@ setup(
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="devuser",
-    maintainer_email="lemes3@ulaval.ca",
+    maintainer_email="olcao1@ulaval.ca",
     description="TODO: Package description",
-    license="Apache-2.0",
+    license="TODO: License declaration",
     extras_require={
         "test": [
             "pytest",
@@ -23,7 +23,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "other_vehicles_path_publisher = city_api.other_vehicles_path_publisher:main",
+            "proximity_sensor = proximity_sensor.proximity_sensor:main",
         ],
     },
 )

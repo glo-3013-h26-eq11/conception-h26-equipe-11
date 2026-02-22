@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = "sensor"
+package_name = "central_manager"
 
 setup(
     name=package_name,
@@ -13,8 +13,8 @@ setup(
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="devuser",
-    maintainer_email="lemes3@ulaval.ca",
-    description="TODO: Package description",
+    maintainer_email="olcao1@ulaval.ca",
+    description="Central orchestration of system modules",
     license="Apache-2.0",
     extras_require={
         "test": [
@@ -22,6 +22,10 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": ["proximity_sensor = sensor.proximity_sensor:main"],
+        "console_scripts": [
+            "map_processor_node = central_manager.map_processor_node:main",
+            "other_vehicles_path_publisher = central_manager.other_vehicles_path_publisher:main",
+            "enforcer_manager = central_manager.enforcer_manager_node:main",
+        ],
     },
 )
