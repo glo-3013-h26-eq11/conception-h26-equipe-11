@@ -54,3 +54,17 @@ class RoverInterfaceSubscriber(Node):
         right /= max_mag
 
         return left, right
+    
+    def main(args=None):
+        rclpy.init(args=args)
+
+        node = RoverInterfaceSubscriber()
+        try:
+            rclpy.spin(node)
+        finally:
+            node.destroy_node()
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
