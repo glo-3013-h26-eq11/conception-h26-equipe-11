@@ -7,13 +7,14 @@ from sensor_msgs.msg import LaserScan
 
 THETA_DEG = 60
 LOOKAHEAD = 0.6          # m
-DESIRED_DISTANCE_FROM_WALL = 0.10  # m
+DESIRED_DISTANCE_FROM_WALL = 0.075  # m
 INTEGRAL_WINDOW_SIZE = 10
+MIN_FRONT_DISTANCE = 0.4     # m
 KP = 1.2
 KD = 0.0
 KI = 0.0
 MAX_STEERING = 0.8       # radians
-SPEED = 0.3              # m/s - was 1.0, way too fast for indoors
+SPEED = 0.3              # m/s
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -40,8 +41,14 @@ class WallFollowNode(Node):
         angle_min = scan.angle_min
         angle_increment = scan.angle_increment
 
+        front = angle_to_distance(0.0, lidar_range_array, angle_min, angle_increment)
+        if is_valid_lidar_scan(front) and front < MIN_FRONT_DISTANCE:
+            self.get_logger().warn(f"Obstacle detected at {front:.2f}m, stopping")
+            self.send_control_command(0.0, 0.0)
+            return
+
         theta = np.radians(THETA_DEG)
-        theta_b = -np.pi / 2.0   # 90 degrees to the right
+        theta_b = -np.pi / 2.0 + 10  # 90 degrees to the right
         theta_a = theta_b + theta # 30 degrees to the right
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
