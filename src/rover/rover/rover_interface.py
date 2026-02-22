@@ -1,24 +1,27 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-from geometry_msgs.msg import Twist
+from ackermann_msgs.msg import AckermannDriveStamped
 import json
 
 
 class RoverInterfaceSubscriber(Node):
     def __init__(self):
         super().__init__("rover_interface_subscriber")
+
         self.subscription = self.create_subscription(
-            Twist, "/cmd_vel", self.listener_command_callback, 10
+            AckermannDriveStamped,
+            "drive",
+            self.listener_command_callback,
+            10,
         )
         self.publisher = self.create_publisher(String, "rover_port", 10)
 
-    def listener_command_callback(self, msg):
-        linear_x = msg.linear.x
+    def listener_command_callback(self, msg: AckermannDriveStamped):
+        speed = msg.drive.speed
+        steering = msg.drive.steering_angle
 
-        angular_z = msg.angular.z
-
-        command = self.create_movement_dictionnary(linear_x, angular_z)
+        command = self.create_movement_dictionary(speed, steering)
 
         json_msg = json.dumps(command)
 
@@ -27,18 +30,22 @@ class RoverInterfaceSubscriber(Node):
 
         self.publisher.publish(out_msg)
 
-    def create_movement_dictionnary(self, x, z):
-        return {"T": 13, "X": x, "Z": z}
+    def create_movement_dictionary(self, speed, steering):
+        return {
+            "T": 13,
+            "SPEED": speed,
+            "STEERING": steering,
+        }
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    rover_interface_subscriber = RoverInterfaceSubscriber()
+    node = RoverInterfaceSubscriber()
     try:
-        rclpy.spin(rover_interface_subscriber)
+        rclpy.spin(node)
     finally:
-        rover_interface_subscriber.destroy_node()
+        node.destroy_node()
         rclpy.shutdown()
 
 
