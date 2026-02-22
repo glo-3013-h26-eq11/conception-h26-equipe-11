@@ -5,4 +5,3 @@ fastapi[standard]
 requests
 Jetson.GPIO
 depthai
-ros-humble-ackermann-msgs
