@@ -60,7 +60,7 @@ class WallFollowNode(Node):
             self.send_control_command(SPEED, self.last_steering)
             return
 
-        alpha = math.atan2((a * math.cos(theta) - b), (a * math.sin(theta)))  # atan2 not atan
+        alpha = math.atan2((a * math.cos(theta) - b), (a * math.sin(theta))) 
         D_t = b * math.cos(alpha)
         D_tp1 = D_t + LOOKAHEAD * math.sin(alpha)
 
@@ -77,7 +77,7 @@ class WallFollowNode(Node):
             error_diff = de / dt
             error_integral = np.sum(self.last_errors_window) * dt
 
-        steering = -(error * KP + error_integral * KI + error_diff * KD)
+        steering = error * KP + error_integral * KI + error_diff * KD
 
         # Clamp steering to valid range
         steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
@@ -85,6 +85,10 @@ class WallFollowNode(Node):
         # Update state
         self.last_steering = steering
         self.last_time = now
+        self.get_logger().info(
+            f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, "
+            f"D_t: {D_t:.3f}m, D_tp1: {D_tp1:.3f}m, error: {error:.3f}m, steering: {math.degrees(steering):.1f}deg"
+        )
 
         if len(self.last_errors_window) >= INTEGRAL_WINDOW_SIZE:
             self.last_errors_window = np.roll(self.last_errors_window, -1)
