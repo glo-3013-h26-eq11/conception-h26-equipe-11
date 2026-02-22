@@ -77,7 +77,7 @@ class WallFollowNode(Node):
             error_diff = de / dt
             error_integral = np.sum(self.last_errors_window) * dt
 
-        steering = error * KP + error_integral * KI + error_diff * KD
+        steering = -(error * KP + error_integral * KI + error_diff * KD)
 
         # Clamp steering to valid range
         steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
