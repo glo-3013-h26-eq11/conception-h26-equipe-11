@@ -27,7 +27,7 @@ class RoverInterfaceSubscriber(Node):
         speed = msg.drive.speed
         steering = msg.drive.steering_angle
 
-        left, right = self.ackermann_to_twist(speed, steering)
+        left, right = self.ackermann_to_diff_drive(speed, steering)
 
         command = {
             "T": 1,
