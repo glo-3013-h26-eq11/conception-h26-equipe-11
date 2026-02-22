@@ -7,7 +7,7 @@ from sensor_msgs.msg import LaserScan
 
 THETA_DEG = 60
 LOOKAHEAD = 0.6          # m
-DESIRED_DISTANCE_FROM_WALL = 0.5  # m
+DESIRED_DISTANCE_FROM_WALL = 0.10  # m
 INTEGRAL_WINDOW_SIZE = 10
 KP = 1.2
 KD = 0.0
