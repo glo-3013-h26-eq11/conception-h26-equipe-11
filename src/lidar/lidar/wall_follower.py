@@ -7,7 +7,7 @@ from sensor_msgs.msg import LaserScan
 
 THETA_DEG = 60
 LOOKAHEAD = 0.6          # m
-DESIRED_DISTANCE_FROM_WALL = 0.075  # m
+DESIRED_DISTANCE_FROM_WALL = 0.10 # m
 INTEGRAL_WINDOW_SIZE = 10
 MIN_FRONT_DISTANCE = 0.4     # m
 KP = 1.2
@@ -42,7 +42,7 @@ class WallFollowNode(Node):
         angle_min = scan.angle_min
         angle_increment = scan.angle_increment
 
-        front = angle_to_distance(LIDAR_OFFSET, lidar_range_array, angle_min, angle_increment)
+        front = angle_to_distance(0.0 + LIDAR_OFFSET, lidar_range_array, angle_min, angle_increment)
         if is_valid_lidar_scan(front) and front < MIN_FRONT_DISTANCE:
             self.get_logger().warn(f"Obstacle detected at {front:.2f}m, stopping")
             self.send_control_command(0.0, 0.0)
