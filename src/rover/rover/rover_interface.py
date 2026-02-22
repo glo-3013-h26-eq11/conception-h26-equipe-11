@@ -55,16 +55,16 @@ class RoverInterfaceSubscriber(Node):
 
         return left, right
     
-    def main(args=None):
-        rclpy.init(args=args)
+def main(args=None):
+    rclpy.init(args=args)
 
-        node = RoverInterfaceSubscriber()
-        try:
-            rclpy.spin(node)
-        finally:
-            node.destroy_node()
-            rclpy.shutdown()
+    node = RoverInterfaceSubscriber()
+    try:
+        rclpy.spin(node)
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
