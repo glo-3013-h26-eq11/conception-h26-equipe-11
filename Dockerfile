@@ -29,8 +29,7 @@ RUN python3 -m pip install --user -r requirements.txt
 RUN sudo apt update && sudo apt install -y ros-humble-ackermann-msgs
 
 RUN /bin/bash -c " \
-    source /opt/ros/humble/setup.bash && \
-    colcon build \
+    source /opt/ros/humble/setup.bash
 "
 RUN cd src/web_interface/web_interface && \
     npm install && \
