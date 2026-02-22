@@ -5,7 +5,8 @@ from ackermann_msgs.msg import AckermannDriveStamped
 import json
 import math
 
-WHEELBASE = 0.32
+WHEELBASE = 0.15
+TRACK_WIDTH = 0.15
 MAX_CMD= 1.0
 
 
@@ -26,7 +27,7 @@ class RoverInterfaceSubscriber(Node):
         speed = msg.drive.speed
         steering = msg.drive.steering_angle
 
-        left, right = self.ackermann_to_diff(speed, steering)
+        left, right = self.ackermann_to_twist(speed, steering)
 
         command = {
             "T": 1,
@@ -38,20 +39,19 @@ class RoverInterfaceSubscriber(Node):
         out_msg.data = json.dumps(command)
         self.publisher.publish(out_msg)
 
-    def ackermann_to_diff(self, speed, steering_angle):
-        if abs(steering_angle) < 1e-3:
+    def ackermann_to_diff_drive(self, speed, steering_angle):
+        if abs(steering_angle) < 0.05:
             left = speed
             right = speed
         else:
-            curvature = math.tan(steering_angle) / WHEELBASE
-            yaw_rate = speed * curvature
+            radius = WHEELBASE / math.tan(steering_angle)
+            left = speed * (radius - TRACK_WIDTH / 2.0) / radius
+            right = speed * (radius + TRACK_WIDTH / 2.0) / radius
 
-            left = speed - yaw_rate
-            right = speed + yaw_rate
-
-        max_mag = max(abs(left), abs(right), MAX_CMD)
-        left /= max_mag
-        right /= max_mag
+        max_mag = max(abs(left), abs(right))
+        if max_mag > MAX_CMD:
+            left = left / max_mag * MAX_CMD
+            right = right / max_mag * MAX_CMD
 
         return left, right
     
