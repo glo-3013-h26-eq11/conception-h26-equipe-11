@@ -10,8 +10,8 @@ LOOKAHEAD = 0.2         # m
 DESIRED_DISTANCE_FROM_WALL = 0.1  # m
 INTEGRAL_WINDOW_SIZE = 10
 MIN_FRONT_DISTANCE = 0.4  # m
-KP = 1.2
-KD = 0.0
+KP = 1.0
+KD = 0.5
 KI = 0.0
 MAX_STEERING = 0.8        # radians
 SPEED = 0.3               # m/s
@@ -106,6 +106,8 @@ class WallFollowNode(Node):
             self.last_errors_window[-1] = error
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
+            
+        self.get_logger().info(f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg")
 
         self.send_control_command(SPEED, steering)
 
