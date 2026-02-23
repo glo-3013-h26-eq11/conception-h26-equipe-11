@@ -7,7 +7,7 @@ from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
 LOOKAHEAD = 0.8         # m
-DESIRED_DISTANCE_FROM_WALL = 0  # m
+DESIRED_DISTANCE_FROM_WALL = 0.10  # m
 INTEGRAL_WINDOW_SIZE = 10
 MIN_FRONT_DISTANCE = 0.4  # m
 KP = 1.0
@@ -82,7 +82,7 @@ class WallFollowNode(Node):
             self.send_control_command(SPEED, self.last_steering)
             return
 
-        alpha = math.atan2((a * math.cos(theta) - b), (a * math.sin(theta)))
+        alpha = math.atan((a * math.cos(theta) - b) / (a * math.sin(theta)))
         D_t = b * math.cos(alpha)
         D_tp1 = D_t + LOOKAHEAD * math.sin(alpha)
 
