@@ -11,7 +11,7 @@ DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 10
 MIN_FRONT_DISTANCE = 0.4  # m
 KP = 0.6
-KD = 0.8
+KD = 0.4
 KI = 0.0
 MAX_STEERING = 0.9        # radians
 SPEED = 0.4               # m/s
@@ -116,7 +116,7 @@ class WallFollowNode(Node):
 
         if is_valid_lidar_scan(front_right_dist) and front_right_dist < CORNER_THRESHOLD:
             bias_strength = (CORNER_THRESHOLD - front_right_dist) / CORNER_THRESHOLD
-            corner_steering = -MAX_STEERING * bias_strength
+            corner_steering = MAX_STEERING * bias_strength
             if corner_steering < steering:
                 steering = corner_steering
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
@@ -124,7 +124,7 @@ class WallFollowNode(Node):
 
         elif is_valid_lidar_scan(front_left_dist) and front_left_dist < CORNER_THRESHOLD:
             bias_strength = (CORNER_THRESHOLD - front_left_dist) / CORNER_THRESHOLD
-            corner_steering = MAX_STEERING * bias_strength
+            corner_steering = -MAX_STEERING * bias_strength
             if corner_steering > steering:
                 steering = corner_steering
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
