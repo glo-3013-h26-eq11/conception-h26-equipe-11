@@ -10,7 +10,7 @@ LOOKAHEAD = 0.8         # m
 DESIRED_DISTANCE_FROM_WALL = 0.10  # m
 INTEGRAL_WINDOW_SIZE = 10
 MIN_FRONT_DISTANCE = 0.4  # m
-KP = 1.5
+KP = 1.0
 KD = 0.5
 KI = 0.0
 MAX_STEERING = 0.9        # radians
@@ -89,6 +89,8 @@ class WallFollowNode(Node):
         error = DESIRED_DISTANCE_FROM_WALL - D_tp1
 
         now = self.get_clock().now().nanoseconds
+        
+        self.get_logger().info(f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m")
 
         if self.last_time is None or len(self.last_errors_window) == 0:
             error_diff = 0.0
