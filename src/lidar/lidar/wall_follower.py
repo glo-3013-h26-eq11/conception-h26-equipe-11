@@ -11,14 +11,14 @@ DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 10
 MIN_FRONT_DISTANCE = 0.4  # m
 KP = 0.6
-KD = 0.4
+KD = 0.2
 KI = 0.0
 MAX_STEERING = 0.9        # radians
 SPEED = 0.4               # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1          # m
 FRONT_ARC_DEG = 30
-CORNER_THRESHOLD = 0.5   # m — how close the front-right ray must be to trigger bias
+CORNER_THRESHOLD = 0.65   # m — how close the front-right ray must be to trigger bias
 CORNER_STEER_BIAS = 0.6  # rad — max leftward bias applied at corner
 
 
@@ -64,6 +64,8 @@ class WallFollowNode(Node):
 
         if obstacle_detected:
             avoid_steering = MAX_STEERING if right_sum > left_sum else -MAX_STEERING
+            self.last_time = None
+            self.last_errors_window = np.array([])
             self.get_logger().warn(f"Obstacle detected, steering {'left' if right_sum > left_sum else 'right'}")
             self.send_control_command(SPEED * 0.5, avoid_steering)
             return
