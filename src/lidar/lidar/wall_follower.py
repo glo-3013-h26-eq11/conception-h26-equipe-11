@@ -71,7 +71,7 @@ class WallFollowNode(Node):
             return
 
         theta = np.radians(THETA_DEG)
-        theta_b = 0.0
+        theta_b = -math.pi / 2
         theta_a = theta_b + theta
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
@@ -113,6 +113,9 @@ class WallFollowNode(Node):
             self.last_errors_window[-1] = error
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
+            
+        front_angle = LIDAR_OFFSET
+        front_dist = angle_to_distance(front_angle, lidar_range_array, angle_min, angle_increment)
 
         front_right_angle = LIDAR_OFFSET + np.radians(-45)
         front_right_dist = angle_to_distance(front_right_angle, lidar_range_array, angle_min, angle_increment)
@@ -120,14 +123,16 @@ class WallFollowNode(Node):
         front_left_angle = LIDAR_OFFSET + np.radians(45)
         front_left_dist = angle_to_distance(front_left_angle, lidar_range_array, angle_min, angle_increment)
 
-        if is_valid_lidar_scan(front_right_dist) and front_right_dist < CORNER_THRESHOLD:
+        if is_valid_lidar_scan(front_right_dist) and front_right_dist < CORNER_THRESHOLD \
+        and is_valid_lidar_scan(front_dist) and front_dist < 1.0:
             bias_strength = (CORNER_THRESHOLD - front_right_dist) / CORNER_THRESHOLD
             corner_steering = MAX_STEERING * bias_strength
             steering = max(steering, corner_steering)
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
             self.get_logger().info(f"Right corner at {front_right_dist:.2f}m, steering: {math.degrees(steering):.1f}deg")
 
-        elif is_valid_lidar_scan(front_left_dist) and front_left_dist < CORNER_THRESHOLD:
+        elif is_valid_lidar_scan(front_left_dist) and front_left_dist < CORNER_THRESHOLD \
+        and is_valid_lidar_scan(front_dist) and front_dist < 1.0:
             bias_strength = (CORNER_THRESHOLD - front_left_dist) / CORNER_THRESHOLD
             corner_steering = -MAX_STEERING * bias_strength
             steering = min(steering, corner_steering)
