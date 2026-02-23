@@ -19,7 +19,7 @@ LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1          # m
 FRONT_ARC_DEG = 30
 CORNER_THRESHOLD = 0.5   # m — how close the front-right ray must be to trigger bias
-CORNER_STEER_BIAS = 0.3  # rad — max leftward bias applied at corner
+CORNER_STEER_BIAS = 0.6  # rad — max leftward bias applied at corner
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -114,7 +114,9 @@ class WallFollowNode(Node):
 
         if is_valid_lidar_scan(front_right_dist) and front_right_dist < CORNER_THRESHOLD:
             bias_strength = (CORNER_THRESHOLD - front_right_dist) / CORNER_THRESHOLD
-            steering += CORNER_STEER_BIAS * bias_strength
+            corner_steering = -MAX_STEERING * bias_strength
+            if corner_steering < steering:
+                steering = corner_steering
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
             self.get_logger().info(f"Corner at {front_right_dist:.2f}m, bias: {math.degrees(CORNER_STEER_BIAS * bias_strength):.1f}deg left")
 
