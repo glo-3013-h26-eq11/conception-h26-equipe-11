@@ -11,15 +11,15 @@ DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 10
 MIN_FRONT_DISTANCE = 0.4  # m
 KP = 0.6
-KD = 0.2
+KD = 0.5
 KI = 0.0
 MAX_STEERING = 0.9        # radians
 SPEED = 0.4               # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1          # m
 FRONT_ARC_DEG = 30
-CORNER_THRESHOLD = 0.65   # m — how close the front-right ray must be to trigger bias
-CORNER_STEER_BIAS = 0.6  # rad — max leftward bias applied at corner
+CORNER_THRESHOLD = 0.65   # m 
+CORNER_STEER_BIAS = 0.6  # rad
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -113,12 +113,13 @@ class WallFollowNode(Node):
 
         front_right_angle = LIDAR_OFFSET + np.radians(-45)
         front_right_dist = angle_to_distance(front_right_angle, lidar_range_array, angle_min, angle_increment)
+        
         front_left_angle = LIDAR_OFFSET + np.radians(45)
         front_left_dist = angle_to_distance(front_left_angle, lidar_range_array, angle_min, angle_increment)
 
         if is_valid_lidar_scan(front_right_dist) and front_right_dist < CORNER_THRESHOLD:
-            bias_strength = (CORNER_THRESHOLD - front_right_dist) / CORNER_THRESHOLD
-            corner_steering = MAX_STEERING * bias_strength
+            # bias_strength = (CORNER_THRESHOLD - front_right_dist) / CORNER_THRESHOLD
+            corner_steering = MAX_STEERING #* bias_strength
             if corner_steering < steering:
                 steering = corner_steering
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
