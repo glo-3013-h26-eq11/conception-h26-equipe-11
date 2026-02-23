@@ -18,7 +18,7 @@ SPEED = 0.4               # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1          # m
 FRONT_ARC_DEG = 30
-CORNER_THRESHOLD = 0.65   # m 
+CORNER_THRESHOLD = 0.3   # m 
 CORNER_STEER_BIAS = 0.6  # rad
 
 
