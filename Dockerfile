@@ -26,7 +26,6 @@ COPY . /home/ws
 ENV PATH="/root/.local/bin:${PATH}"
 RUN git submodule update --init --recursive
 RUN python3 -m pip install --user -r requirements.txt
-RUN sudo apt update && sudo apt install -y ros-humble-ackermann-msgs
 
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash"
 

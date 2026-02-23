@@ -24,10 +24,10 @@ class EnforcerManagerNode(Node):
             String, "route_plan/nodes", self.route_nodes_callback, 10
         )
 
-        self.pub_cmd_vel_safe = self.create_publisher(Twist, "/cmd_vel_safe", 10)
+        self.pub_cmd_vel_safe = self.create_publisher(Twist, "cmd_vel_safe", 10)
 
         self.pub_invalid_destination = self.create_publisher(
-            Bool, "/merchandise_destination_invalid", 10
+            Bool, "merchandise_destination_invalid", 10
         )
 
         self.enforcers: List[Enforcer] = [MerchandiseEnforcer()]
