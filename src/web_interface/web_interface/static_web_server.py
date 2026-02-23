@@ -21,7 +21,9 @@ async def lifespan(app: FastAPI):
     if not rclpy.ok():
         rclpy.init(args=None)
     ros_node = rclpy.create_node("web_interface_bridge")
-    raw_map_publisher = ros_node.create_publisher(String, "/map_manager/raw_map_topic", 10)
+    raw_map_publisher = ros_node.create_publisher(
+        String, "/map_manager/raw_map_topic", 10
+    )
 
     yield  # app running
 

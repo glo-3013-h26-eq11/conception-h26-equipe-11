@@ -1,7 +1,7 @@
 import pytest
 import rclpy
 from std_msgs.msg import String
-from rover.rover_port_usb import RoverPortSubscriber
+from rover.rover_port_usb_node import RoverUsbPortNode
 import os
 import pty
 import serial
@@ -23,7 +23,7 @@ def rover_usb_node():
     slave_name = os.ttyname(slave)
     serial_port = serial.Serial(slave_name, 115200)
 
-    node = RoverPortSubscriber(serial_port=serial_port)
+    node = RoverUsbPortNode(serial_port=serial_port)
 
     yield node, master
 

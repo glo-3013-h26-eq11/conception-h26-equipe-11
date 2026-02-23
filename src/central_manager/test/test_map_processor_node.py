@@ -2,7 +2,7 @@ import pytest
 import rclpy
 from unittest.mock import MagicMock, patch
 from central_manager.map_processor_node import MapProcessorNode
-from central_manager.model import Map, MapNode
+from central_manager.map import Map, MapNode
 from std_msgs.msg import String
 
 

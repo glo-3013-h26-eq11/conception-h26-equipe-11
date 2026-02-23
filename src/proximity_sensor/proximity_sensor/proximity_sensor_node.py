@@ -2,17 +2,12 @@ import rclpy
 from std_msgs.msg import Bool
 from rclpy.node import Node
 import Jetson.GPIO as GPIO
-from enum import Enum
+from proximity_sensor.merchandise_flag import MerchandiseFlag
 
 GPIO_PIN = 7
 
 
-class MerchandiseFlag(Enum):
-    IS_DETECTED = True
-    NOT_DETECTED = False
-
-
-class ProximitySensor(Node):
+class ProximitySensorNode(Node):
     def __init__(self):
         super().__init__("proximity_sensor")
         self.publisher = self.create_publisher(Bool, "is_there_merchandise", 10)
@@ -45,7 +40,7 @@ class ProximitySensor(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    proximity_sensor = ProximitySensor()
+    proximity_sensor = ProximitySensorNode()
 
     rclpy.spin(proximity_sensor)
 

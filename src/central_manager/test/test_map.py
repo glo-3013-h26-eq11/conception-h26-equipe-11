@@ -1,6 +1,6 @@
 import pytest
 import json
-from central_manager.model import Map, MapNode
+from central_manager.map import Map, MapNode
 
 
 @pytest.fixture

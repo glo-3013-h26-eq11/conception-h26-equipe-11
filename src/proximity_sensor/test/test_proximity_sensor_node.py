@@ -16,9 +16,9 @@ def fake_gpio(monkeypatch):
     fake_gpio = FakeGPIO()
     monkeypatch.setitem(sys.modules, "Jetson.GPIO", fake_gpio)
 
-    if "proximity_sensor.proximity_sensor" in sys.modules:
+    if "proximity_sensor.proximity_sensor_node" in sys.modules:
         del sys.modules[
-            "proximity_sensor.proximity_sensor"
+            "proximity_sensor.proximity_sensor_node"
         ]  # méthode batarde pour forcer de reload les modules pour le monkeypatch
 
     return fake_gpio
@@ -26,13 +26,13 @@ def fake_gpio(monkeypatch):
 
 def test_when_transition_up_then_publishes_no_merchandise(fake_gpio):
     # Arrange
-    from proximity_sensor.proximity_sensor import (
-        ProximitySensor,
+    from proximity_sensor.proximity_sensor_node import (
+        ProximitySensorNode,
     )  # import nécessaire ici pour override le Jetson.GPIO
-    from proximity_sensor.proximity_sensor import MerchandiseFlag
-    from proximity_sensor.proximity_sensor import GPIO_PIN
+    from proximity_sensor.merchandise_flag import MerchandiseFlag
+    from proximity_sensor.proximity_sensor_node import GPIO_PIN
 
-    node = ProximitySensor()
+    node = ProximitySensorNode()
 
     received_msgs = []
 
@@ -57,13 +57,13 @@ def test_when_transition_up_then_publishes_no_merchandise(fake_gpio):
 
 def test_when_transition_down_then_publishes_there_is_merchandise(fake_gpio):
     # Arrange
-    from proximity_sensor.proximity_sensor import (
-        ProximitySensor,
+    from proximity_sensor.proximity_sensor_node import (
+        ProximitySensorNode,
     )  # import nécessaire ici pour override le Jetson.GPIO
-    from proximity_sensor.proximity_sensor import MerchandiseFlag
-    from proximity_sensor.proximity_sensor import GPIO_PIN
+    from proximity_sensor.proximity_sensor_node import MerchandiseFlag
+    from proximity_sensor.proximity_sensor_node import GPIO_PIN
 
-    node = ProximitySensor()
+    node = ProximitySensorNode()
 
     received_msgs = []
 
