@@ -6,7 +6,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
-LOOKAHEAD = 0.6          # m
+LOOKAHEAD = 0.2         # m
 DESIRED_DISTANCE_FROM_WALL = 0.1  # m
 INTEGRAL_WINDOW_SIZE = 10
 MIN_FRONT_DISTANCE = 0.4  # m
@@ -17,6 +17,7 @@ MAX_STEERING = 0.8        # radians
 SPEED = 0.3               # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1          # m
+FRONT_ARC_DEG = 30
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -43,14 +44,30 @@ class WallFollowNode(Node):
         angle_min = scan.angle_min
         angle_increment = scan.angle_increment
 
-        front = angle_to_distance(LIDAR_OFFSET, lidar_range_array, angle_min, angle_increment)
-        if is_valid_lidar_scan(front) and front < MIN_FRONT_DISTANCE:
-            self.get_logger().warn(f"Obstacle at {front:.2f}m, stopping")
-            self.send_control_command(0.0, 0.0)
+        front_angles = np.arange(-FRONT_ARC_DEG, FRONT_ARC_DEG + 1, 1)
+
+        left_sum = 0
+        right_sum = 0
+        obstacle_detected = False
+
+        for deg in front_angles:
+            angle_rad = LIDAR_OFFSET + np.radians(deg)
+            dist = angle_to_distance(angle_rad, lidar_range_array, angle_min, angle_increment)
+            if is_valid_lidar_scan(dist) and dist < MIN_FRONT_DISTANCE:
+                obstacle_detected = True
+                if deg < 0:
+                    right_sum += (MIN_FRONT_DISTANCE - dist)
+                else:
+                    left_sum += (MIN_FRONT_DISTANCE - dist)
+
+        if obstacle_detected:
+            avoid_steering = MAX_STEERING if right_sum > left_sum else -MAX_STEERING
+            self.get_logger().warn(f"Obstacle detected, steering {'left' if right_sum > left_sum else 'right'}")
+            self.send_control_command(SPEED * 0.5, avoid_steering)
             return
 
         theta = np.radians(THETA_DEG)
-        theta_b = -np.pi / 2.0 + LIDAR_OFFSET
+        theta_b = 0.0
         theta_a = theta_b + theta
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
@@ -89,11 +106,6 @@ class WallFollowNode(Node):
             self.last_errors_window[-1] = error
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
-
-        self.get_logger().info(
-            f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, "
-            f"D_t: {D_t:.3f}m, D_tp1: {D_tp1:.3f}m, error: {error:.3f}m, steering: {math.degrees(steering):.1f}deg"
-        )
 
         self.send_control_command(SPEED, steering)
 

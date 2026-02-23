@@ -15,7 +15,7 @@ class RoverInterfaceSubscriber(Node):
 
         self.subscription = self.create_subscription(
             Twist,
-            "/cmd_vel_safe",
+            "/cmd_vel",
             self.listener_command_callback,
             10,
         )
