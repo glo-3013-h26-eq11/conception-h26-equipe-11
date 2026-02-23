@@ -53,3 +53,25 @@ colcon build
 source install/setup.bash
 ros2 launch web_interface web_interface_launch.py
 ```
+
+### Code coverage
+```bash
+mkdir .coverage_folder
+
+colcon test \
+            --event-handlers console_direct+ \
+            --pytest-args \
+              --cov \
+              --cov-report=term-missing \
+              --cov-report=xml:.coverage_folder/coverage.xml \
+              --junitxml=.coverage_folder/pytest.xml \
+            | tee .coverage_folder/pytest-coverage.txt
+
+coverage combine $(find src -name '.coverage')
+
+coverage report -m | tee .coverage_folder/pytest-coverage.txt 
+
+coverage xml -o .coverage_folder/coverage.xml --include 'src/*'
+
+coverage html -d .coverage_folder/coverage-html --include="src/*"
+```
