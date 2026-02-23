@@ -10,9 +10,9 @@ LOOKAHEAD = 0.8         # m
 DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 10
 MIN_FRONT_DISTANCE = 0.4  # m
-KP = 0.8
+KP = 0.6
 KD = 0.8
-KI = 0.05
+KI = 0.0
 MAX_STEERING = 0.9        # radians
 SPEED = 0.4               # m/s
 LIDAR_OFFSET = math.pi / 2
@@ -111,6 +111,8 @@ class WallFollowNode(Node):
 
         front_right_angle = LIDAR_OFFSET + np.radians(-45)
         front_right_dist = angle_to_distance(front_right_angle, lidar_range_array, angle_min, angle_increment)
+        front_left_angle = LIDAR_OFFSET + np.radians(45)
+        front_left_dist = angle_to_distance(front_left_angle, lidar_range_array, angle_min, angle_increment)
 
         if is_valid_lidar_scan(front_right_dist) and front_right_dist < CORNER_THRESHOLD:
             bias_strength = (CORNER_THRESHOLD - front_right_dist) / CORNER_THRESHOLD
@@ -118,8 +120,15 @@ class WallFollowNode(Node):
             if corner_steering < steering:
                 steering = corner_steering
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-            self.get_logger().info(f"Corner at {front_right_dist:.2f}m, bias: {math.degrees(CORNER_STEER_BIAS * bias_strength):.1f}deg left")
+            self.get_logger().info(f"Right corner at {front_right_dist:.2f}m, steering: {math.degrees(steering):.1f}deg")
 
+        elif is_valid_lidar_scan(front_left_dist) and front_left_dist < CORNER_THRESHOLD:
+            bias_strength = (CORNER_THRESHOLD - front_left_dist) / CORNER_THRESHOLD
+            corner_steering = MAX_STEERING * bias_strength
+            if corner_steering > steering:
+                steering = corner_steering
+            steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+            self.get_logger().info(f"Left corner at {front_left_dist:.2f}m, steering: {math.degrees(steering):.1f}deg")
         self.get_logger().info(f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg")
 
         self.send_control_command(SPEED, steering)
