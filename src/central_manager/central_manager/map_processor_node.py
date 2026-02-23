@@ -12,7 +12,7 @@ class MapProcessorNode(Node):
         # separated by a '---' delimiter.
         #
         # Format example for 'raw_map_topic':
-        # Origine,Direction,Destination
+        # Origine,Direction,DestinationStart
         # A1,g,ZC1
         # A1,l,A4
         # ---
