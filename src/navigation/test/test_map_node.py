@@ -1,5 +1,5 @@
 import pytest
-from central_manager.model import MapNode
+from navigation.map import MapNode
 
 
 def test_given_node_data_when_initiated_then_attributes_are_correct():

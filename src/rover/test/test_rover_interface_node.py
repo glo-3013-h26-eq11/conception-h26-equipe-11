@@ -2,7 +2,7 @@ import pytest
 import rclpy
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
-from rover.rover_interface import RoverInterfaceSubscriber
+from rover.rover_interface_node import RoverInterfaceNode
 import json
 
 
@@ -15,7 +15,7 @@ def rclpy_context():
 
 @pytest.fixture
 def rover_node():
-    node = RoverInterfaceSubscriber()
+    node = RoverInterfaceNode()
     yield node
     node.destroy_node()
 
@@ -27,7 +27,7 @@ def test_when_receives_valid_command_then_publishes_json(rover_node):
     def capture_callback(msg):
         received_msgs.append(msg.data)
 
-    rover_node.create_subscription(String, "rover_port", capture_callback, 10)
+    rover_node.create_subscription(String, "/rover/port", capture_callback, 10)
 
     input_msg = Twist()
     input_msg.linear.x = 2.0
