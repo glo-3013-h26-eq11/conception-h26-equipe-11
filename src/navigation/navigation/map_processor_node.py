@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-from central_manager.map import Map, MapNode
+from navigation.map import Map, MapNode
 
 
 class MapProcessorNode(Node):

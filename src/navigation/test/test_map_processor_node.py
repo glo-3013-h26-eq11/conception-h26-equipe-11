@@ -1,12 +1,12 @@
 import pytest
 import rclpy
 from unittest.mock import MagicMock, patch
-from central_manager.map_processor_node import MapProcessorNode
-from central_manager.map import Map, MapNode
+from navigation.map_processor_node import MapProcessorNode
+from navigation.map import Map, MapNode
 from std_msgs.msg import String
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def ros_context():
     if not rclpy.ok():
         rclpy.init()
