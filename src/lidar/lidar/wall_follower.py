@@ -8,13 +8,13 @@ from geometry_msgs.msg import Twist
 THETA_DEG = 60
 LOOKAHEAD = 0.8         # m
 DESIRED_DISTANCE_FROM_WALL = 0.10  # m
-INTEGRAL_WINDOW_SIZE = 10
-MIN_FRONT_DISTANCE = 0.4  # m
+INTEGRAL_WINDOW_SIZE = 20
+MIN_FRONT_DISTANCE = 0.6  # m
 KP = 0.8
 KD = 0.5
 KI = 0.0
 MAX_STEERING = 0.9        # radians
-SPEED = 0.5               # m/s
+SPEED = 0.25               # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1          # m
 FRONT_ARC_DEG = 10
