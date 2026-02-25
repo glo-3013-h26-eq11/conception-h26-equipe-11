@@ -14,7 +14,7 @@ KP = 0.8
 KD = 0.5
 KI = 0.0
 MAX_STEERING = 0.9        # radians
-SPEED = 0.4               # m/s
+SPEED = 0.5               # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1          # m
 FRONT_ARC_DEG = 10
@@ -48,27 +48,27 @@ class WallFollowNode(Node):
         
         front_angles = np.arange(-FRONT_ARC_DEG, FRONT_ARC_DEG + 1, 1)
 
-        left_sum = 0
-        right_sum = 0
-        obstacle_detected = False
+        # left_sum = 0
+        # right_sum = 0
+        # obstacle_detected = False
 
-        for deg in front_angles:
-            angle_rad = LIDAR_OFFSET + np.radians(deg)
-            dist = angle_to_distance(angle_rad, lidar_range_array, angle_min, angle_increment)
-            if is_valid_lidar_scan(dist) and dist < MIN_FRONT_DISTANCE:
-                obstacle_detected = True
-                if deg < 0:
-                    right_sum += (MIN_FRONT_DISTANCE - dist)
-                else:
-                    left_sum += (MIN_FRONT_DISTANCE - dist)
+        # for deg in front_angles:
+        #     angle_rad = LIDAR_OFFSET + np.radians(deg)
+        #     dist = angle_to_distance(angle_rad, lidar_range_array, angle_min, angle_increment)
+        #     if is_valid_lidar_scan(dist) and dist < MIN_FRONT_DISTANCE:
+        #         obstacle_detected = True
+        #         if deg < 0:
+        #             right_sum += (MIN_FRONT_DISTANCE - dist)
+        #         else:
+        #             left_sum += (MIN_FRONT_DISTANCE - dist)
 
-        if obstacle_detected:
-            avoid_steering = MAX_STEERING if right_sum > left_sum else -MAX_STEERING
-            self.last_time = None
-            self.last_errors_window = np.array([])
-            self.get_logger().warn(f"Obstacle detected, steering {'left' if right_sum > left_sum else 'right'}")
-            self.send_control_command(SPEED * 0.5, avoid_steering)
-            return
+        # if obstacle_detected:
+        #     avoid_steering = MAX_STEERING if right_sum > left_sum else -MAX_STEERING
+        #     self.last_time = None
+        #     self.last_errors_window = np.array([])
+        #     self.get_logger().warn(f"Obstacle detected, steering {'left' if right_sum > left_sum else 'right'}")
+        #     self.send_control_command(SPEED * 0.5, avoid_steering)
+        #     return
 
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
@@ -114,21 +114,26 @@ class WallFollowNode(Node):
             self.last_errors_window[-1] = error
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
-
-        if is_valid_lidar_scan(a) and a < CORNER_THRESHOLD and dist <= MIN_FRONT_DISTANCE:
-            bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
-            corner_steering = MAX_STEERING * bias_strength
-            steering = max(steering, corner_steering)
-            steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-            self.get_logger().info(f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg")
-
-        elif is_valid_lidar_scan(opposite_a) and opposite_a < CORNER_THRESHOLD and dist <= MIN_FRONT_DISTANCE:
-            bias_strength = (CORNER_THRESHOLD - opposite_a) / CORNER_THRESHOLD
-            corner_steering = -MAX_STEERING * bias_strength
-            steering = min(steering, corner_steering)
-            steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-            self.get_logger().info(f"Left corner at {opposite_a:.2f}m, steering: {math.degrees(steering):.1f}deg")
             
+        for deg in front_angles:
+            
+            angle_rad = LIDAR_OFFSET + np.radians(deg)
+            dist = angle_to_distance(angle_rad, lidar_range_array, angle_min, angle_increment)
+
+            if is_valid_lidar_scan(a) and a < CORNER_THRESHOLD and dist <= MIN_FRONT_DISTANCE:
+                bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
+                corner_steering = MAX_STEERING * bias_strength
+                steering = max(steering, corner_steering)
+                steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+                self.get_logger().info(f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg")
+
+            elif is_valid_lidar_scan(opposite_a) and opposite_a < CORNER_THRESHOLD and dist <= MIN_FRONT_DISTANCE:
+                bias_strength = (CORNER_THRESHOLD - opposite_a) / CORNER_THRESHOLD
+                corner_steering = -MAX_STEERING * bias_strength
+                steering = min(steering, corner_steering)
+                steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+                self.get_logger().info(f"Left corner at {opposite_a:.2f}m, steering: {math.degrees(steering):.1f}deg")
+                
         
         self.get_logger().info(f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg")
 
