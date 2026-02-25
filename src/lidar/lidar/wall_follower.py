@@ -17,7 +17,7 @@ MAX_STEERING = 0.9        # radians
 SPEED = 0.4               # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1          # m
-FRONT_ARC_DEG = 30
+FRONT_ARC_DEG = 10
 CORNER_THRESHOLD = 0.4   # m 
 CORNER_STEER_BIAS = 0.6  # rad
 
@@ -128,6 +128,8 @@ class WallFollowNode(Node):
             steering = min(steering, corner_steering)
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
             self.get_logger().info(f"Left corner at {opposite_a:.2f}m, steering: {math.degrees(steering):.1f}deg")
+            
+        
         self.get_logger().info(f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg")
 
         self.send_control_command(SPEED, steering)
