@@ -18,7 +18,7 @@ SPEED = 0.3               # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1          # m
 FRONT_ARC_DEG = 10
-CORNER_THRESHOLD = 0.2   # m 
+CORNER_THRESHOLD = 0.4   # m 
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
