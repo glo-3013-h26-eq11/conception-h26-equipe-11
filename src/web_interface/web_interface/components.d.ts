@@ -12,7 +12,9 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Configuration: typeof import('./src/components/configuration.vue')['default']
+    Console: typeof import('./src/components/console.vue')['default']
     Destination_start: typeof import('./src/components/destination_start.vue')['default']
-    DestinationStart: typeof import('./src/components/destination_start.vue')['default']
+    Load_unsafe_distance: typeof import('./src/components/load_unsafe_distance.vue')['default']
+    Rover_information: typeof import('./src/components/rover_information.vue')['default']
   }
 }

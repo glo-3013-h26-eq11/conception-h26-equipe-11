@@ -30,14 +30,15 @@ async function uploadFile() {
 </script>
 
 <template>
-  <v-container fluid>
-    <v-card title="Configuration" border="thin">
+  <div>
+    <v-container>
+    <v-card title="Configuration" border="thin" >
       <v-row>
-        <v-col>
-          <v-file-input v-model="topographie" accept=".csv,text/csv" clearable prepend-icon="mdi-train-car"
+        <v-col cols="12" md="6">
+          <v-file-input  v-model="topographie" accept=".csv,text/csv" clearable prepend-icon="mdi-train-car"
                         label="Topographie" variant="outlined"/>
         </v-col>
-        <v-col>
+        <v-col cols="12" md="6">
           <v-file-input v-model="aruco" accept=".csv,text/csv" clearable prepend-icon="mdi-qrcode" label="ArUco"
                         variant="outlined"/>
         </v-col>
@@ -47,6 +48,7 @@ async function uploadFile() {
       </v-card-actions>
     </v-card>
   </v-container>
+  </div>
 </template>
 
 <style scoped>
