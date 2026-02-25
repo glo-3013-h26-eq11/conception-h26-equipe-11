@@ -9,7 +9,7 @@ THETA_DEG = 60
 LOOKAHEAD = 0.8         # m
 DESIRED_DISTANCE_FROM_WALL = 0.10  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.4 # m
+MIN_FRONT_DISTANCE = 0.3 # m
 KP = 0.8
 KD = 0.5
 KI = 0.0
@@ -121,14 +121,14 @@ class WallFollowNode(Node):
 
             if is_valid_lidar_scan(a) and a < CORNER_THRESHOLD and dist <= MIN_FRONT_DISTANCE:
                 bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
-                corner_steering = MAX_STEERING
+                corner_steering = MAX_STEERING * bias_strength
                 steering = max(steering, corner_steering)
                 steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
                 self.get_logger().info(f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg")
 
             elif is_valid_lidar_scan(opposite_a) and opposite_a < CORNER_THRESHOLD and dist <= MIN_FRONT_DISTANCE:
                 bias_strength = (CORNER_THRESHOLD - opposite_a) / CORNER_THRESHOLD
-                corner_steering = -MAX_STEERING 
+                corner_steering = -MAX_STEERING * bias_strength
                 steering = min(steering, corner_steering)
                 steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
                 self.get_logger().info(f"Left corner at {opposite_a:.2f}m, steering: {math.degrees(steering):.1f}deg")
