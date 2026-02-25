@@ -21,6 +21,7 @@ setup(
     maintainer_email='devuser@todo.todo',
     description='LIDAR package with wall follower',
     license='MIT',
+    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'wall_follower = lidar.wall_follower:main',
