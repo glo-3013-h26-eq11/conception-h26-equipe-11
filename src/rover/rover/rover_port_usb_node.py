@@ -6,12 +6,12 @@ import serial
 JETSON_ROVER_PORT = "/dev/ttyACM0"
 
 
-class RoverPortSubscriber(Node):
+class RoverUsbPortNode(Node):
     def __init__(self, serial_port=None):
-        super().__init__("rover_port_usb_subscriber")
+        super().__init__("rover_port_usb_node")
 
         self.subscription = self.create_subscription(
-            String, "rover_port", self.listener_json_callback, 10
+            String, "/rover/port", self.listener_json_callback, 10
         )
 
         if serial_port is None:
@@ -34,7 +34,7 @@ class RoverPortSubscriber(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    rover_port_subscriber = RoverPortSubscriber()
+    rover_port_subscriber = RoverUsbPortNode()
 
     try:
         rclpy.spin(rover_port_subscriber)

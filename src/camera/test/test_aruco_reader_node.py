@@ -94,8 +94,8 @@ def _install_fake_modules(monkeypatch, *, ids_4x4, ids_5x5, depth_value=0.42):
     monkeypatch.setitem(sys.modules, "cv2", cv2_mod)
     monkeypatch.setitem(sys.modules, "depthai", depthai_mod)
 
-    sys.modules.pop("camera.aruco_reader", None)
-    return importlib.import_module("camera.aruco_reader")
+    sys.modules.pop("camera.aruco_reader_node", None)
+    return importlib.import_module("camera.aruco_reader_node")
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -121,7 +121,7 @@ def test_publishes_ids_when_detected(monkeypatch):
         depth_value=0.5,
     )
 
-    node = ar.ArucoReader()
+    node = ar.ArucoReaderNode()
 
     received = []
 
@@ -155,7 +155,7 @@ def test_publishes_ids_when_detected(monkeypatch):
 def test_does_not_publish_when_no_detections(monkeypatch):
     ar = _install_fake_modules(monkeypatch, ids_4x4=None, ids_5x5=None)
 
-    node = ar.ArucoReader()
+    node = ar.ArucoReaderNode()
 
     received = []
 

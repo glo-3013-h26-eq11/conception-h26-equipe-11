@@ -23,9 +23,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "map_processor_node = central_manager.map_processor_node:main",
-            "other_vehicles_path_publisher = central_manager.other_vehicles_path_publisher:main",
-            "enforcer_manager = central_manager.enforcer_manager_node:main",
+            "enforcer_manager_node = central_manager.enforcer_manager_node:main",
         ],
     },
 )

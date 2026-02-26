@@ -23,8 +23,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "rover_interface = rover.rover_interface:main",
-            "rover_port_usb = rover.rover_port_usb:main",
+            "rover_interface_node = rover.rover_interface_node:main",
+            "rover_port_usb_node = rover.rover_port_usb_node:main",
         ],
     },
 )
