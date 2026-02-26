@@ -60,7 +60,7 @@ def test_given_valid_transitions_csv_lines_when_parse_transitions_then_nodes_are
         "A4": MapNode("A4", 2),
         "ZC1": MapNode("ZC1", 3),
     }
-    csv_lines = ["Origine,Direction,DestinationStart", "A1,g,ZC1", "A1,l,A4"]
+    csv_lines = ["Origine,Direction,Destination", "A1,g,ZC1", "A1,l,A4"]
 
     map_processor_node._parse_transitions(csv_lines, nodes_dict)
 
@@ -73,7 +73,7 @@ def test_given_transition_with_unknown_node_when_parse_transitions_then_link_is_
     map_processor_node,
 ):
     nodes_dict = {"A1": MapNode("A1", 1)}
-    csv_lines = ["Origine,Direction,DestinationStart", "A1,g,UNKNOWN"]
+    csv_lines = ["Origine,Direction,Destination", "A1,g,UNKNOWN"]
 
     map_processor_node._parse_transitions(csv_lines, nodes_dict)
 
@@ -84,7 +84,7 @@ def test_given_full_raw_csv_data_when_parse_csv_file_then_returns_complete_map_o
     map_processor_node,
 ):
     raw_data = (
-        "Origine,Direction,DestinationStart\n"
+        "Origine,Direction,Destination\n"
         "A1,g,ZC1\n"
         "A1,l,A4\n"
         "---\n"
@@ -118,7 +118,7 @@ def test_given_a_raw_map_msg_when_map_callback_then_publishes_processed_json_map
 ):
     msg = String()
     msg.data = (
-        "Origine,Direction,DestinationStart\n"
+        "Origine,Direction,Destination\n"
         "A1,l,A4\n"
         "---\n"
         "position_dans_ville,aruco_id\n"
