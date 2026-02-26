@@ -14,6 +14,9 @@ WEB_INTERFACE_DIRECTORY = "/home/ws/src/web_interface/web_interface"
 
 FILENAME = os.path.basename(__file__)
 
+VALEUR_DESTINATION = 0
+VALEUR_DIRECTION = 0
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -72,6 +75,41 @@ async def csv_concat(payload: CsvPayload):
         "files": payload.file_names,
         "length": len(merged),
     }
+
+
+@app.get("/api/start")
+async def start_rover():
+    return {"message": "Rover is running"}
+
+
+@app.get("/api/stop")
+async def stop_rover():
+    return {"message": "Rover is stopped"}
+
+
+@app.get("/api/destination")
+async def destination():
+    global VALEUR_DESTINATION
+    VALEUR_DESTINATION = (VALEUR_DESTINATION + 1) % 4
+    return {"destination": f"ZC{VALEUR_DESTINATION}"}
+
+
+@app.get("/api/direction")
+async def direction():
+    global VALEUR_DIRECTION
+    VALEUR_DIRECTION = (VALEUR_DIRECTION + 1) % 4
+    direction = ["none", "left", "forward", "right"]
+    return {"direction": f"{direction[VALEUR_DIRECTION]}"}
+
+
+@app.get("/api/loadunsafe")
+async def load_unsafe():
+    return {"loaded": VALEUR_DIRECTION % 2 == 0, "unsafe": VALEUR_DIRECTION % 3 == 0}
+
+
+@app.get("/api/console")
+async def console():
+    return {"messages": ["test", "test2"]}
 
 
 app.mount(
