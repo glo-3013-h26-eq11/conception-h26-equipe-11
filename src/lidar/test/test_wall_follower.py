@@ -2,8 +2,6 @@ import math
 import pytest
 import rclpy
 from sensor_msgs.msg import LaserScan
-from geometry_msgs.msg import Twist
-
 from lidar.wall_follower import (
     WallFollowNode,
     angle_to_distance,
@@ -11,8 +9,6 @@ from lidar.wall_follower import (
     SPEED,
     WHEELBASE,
     LIDAR_OFFSET,
-    MAX_STEERING,
-    THETA_DEG,
 )
 
 
@@ -163,14 +159,18 @@ def test_when_negative_steering_then_publishes_negative_velocity(wall_follow_nod
     assert published_msgs[0].angular.z < 0
 
 
-def test_when_invalid_wall_measurements_then_repeats_last_command(wall_follow_node, monkeypatch):
+def test_when_invalid_wall_measurements_then_repeats_last_command(
+    wall_follow_node, monkeypatch
+):
     # Arrange
     commands = []
 
     def fake_send_control_command(speed, steering):
         commands.append((speed, steering))
 
-    monkeypatch.setattr(wall_follow_node, "send_control_command", fake_send_control_command)
+    monkeypatch.setattr(
+        wall_follow_node, "send_control_command", fake_send_control_command
+    )
 
     wall_follow_node.last_steering = 0.3
 
@@ -185,14 +185,18 @@ def test_when_invalid_wall_measurements_then_repeats_last_command(wall_follow_no
     assert commands[0][1] == pytest.approx(0.3)
 
 
-def test_when_front_obstacle_detected_then_sends_avoidance_command(wall_follow_node, monkeypatch):
+def test_when_front_obstacle_detected_then_sends_avoidance_command(
+    wall_follow_node, monkeypatch
+):
     # Arrange
     commands = []
 
     def fake_send_control_command(speed, steering):
         commands.append((speed, steering))
 
-    monkeypatch.setattr(wall_follow_node, "send_control_command", fake_send_control_command)
+    monkeypatch.setattr(
+        wall_follow_node, "send_control_command", fake_send_control_command
+    )
 
     scan = create_scan()
 
@@ -219,7 +223,9 @@ def test_when_valid_scan_then_publishes_pid_command(wall_follow_node, monkeypatc
     def fake_send_control_command(speed, steering):
         commands.append((speed, steering))
 
-    monkeypatch.setattr(wall_follow_node, "send_control_command", fake_send_control_command)
+    monkeypatch.setattr(
+        wall_follow_node, "send_control_command", fake_send_control_command
+    )
 
     scan = create_scan(default_distance=1.0)
 
@@ -231,12 +237,16 @@ def test_when_valid_scan_then_publishes_pid_command(wall_follow_node, monkeypatc
     assert commands[0][0] == pytest.approx(SPEED)
 
 
-def test_when_first_valid_callback_then_initializes_internal_state(wall_follow_node, monkeypatch):
+def test_when_first_valid_callback_then_initializes_internal_state(
+    wall_follow_node, monkeypatch
+):
     # Arrange
     def fake_send_control_command(speed, steering):
         pass
 
-    monkeypatch.setattr(wall_follow_node, "send_control_command", fake_send_control_command)
+    monkeypatch.setattr(
+        wall_follow_node, "send_control_command", fake_send_control_command
+    )
 
     scan = create_scan(default_distance=1.0)
 
@@ -251,12 +261,16 @@ def test_when_first_valid_callback_then_initializes_internal_state(wall_follow_n
     assert len(wall_follow_node.last_errors_window) == 1
 
 
-def test_when_multiple_valid_callbacks_then_error_window_grows(wall_follow_node, monkeypatch):
+def test_when_multiple_valid_callbacks_then_error_window_grows(
+    wall_follow_node, monkeypatch
+):
     # Arrange
     def fake_send_control_command(speed, steering):
         pass
 
-    monkeypatch.setattr(wall_follow_node, "send_control_command", fake_send_control_command)
+    monkeypatch.setattr(
+        wall_follow_node, "send_control_command", fake_send_control_command
+    )
 
     scan = create_scan(default_distance=1.0)
 

@@ -5,7 +5,7 @@ import rclpy
 from rclpy.node import Node
 
 from sensor_msgs.msg import CompressedImage
-from std_msgs.msg import Float32MultiArray, String
+from std_msgs.msg import String
 from cv_bridge import CvBridge
 
 import cv2
@@ -84,7 +84,7 @@ class ArucoReaderNode(Node):
                     depth = self.calculate_marker_depth(
                         corners_5x5[i], marker_size=0.075
                     )
-                    
+
                     detections_5x5.append({"id": int(marker_id), "depth": float(depth)})
 
                     self.get_logger().info(f"5x5 Marker {marker_id}: {depth:.3f} m")
