@@ -1,4 +1,6 @@
 from setuptools import find_packages, setup
+import os
+from glob import glob
 
 package_name = "lidar"
 
@@ -9,21 +11,18 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
+        (os.path.join("share", package_name, "launch"), glob("launch/*.launch.py")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="devuser",
-    maintainer_email="olcao1@ulaval.ca",
-    description="TODO: Package description",
-    license="TODO: License declaration",
-    extras_require={
-        "test": [
-            "pytest",
-        ],
-    },
+    maintainer_email="devuser@todo.todo",
+    description="LIDAR package with wall follower",
+    license="MIT",
+    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "lidar_node = lidar.lidar_node:main",
+            "wall_follower = lidar.wall_follower:main",
         ],
     },
 )

@@ -32,12 +32,12 @@
         "--net=host",
         "--pid=host",
         "--ipc=host",
-        "-e", "DISPLAY=${env:DISPLAY}",
+        "-e", "DISPLAY=${env:DISPLAY}"
     ],
     "mounts": [
     //    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
     //    "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
           "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
     ],
-    "postCreateCommand": "pip install -r requirements.txt && cd /home/ws/src/web_interface/web_interface && npm install && npx vite build"
+    "postCreateCommand": "pip install -r requirements.txt && cd /home/ws/src/web_interface/web_interface && npm install && npx vite build && git submodule update --init --recursive"
 }

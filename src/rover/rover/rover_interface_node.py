@@ -4,6 +4,10 @@ from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 import json
 
+WHEELBASE = 0.15
+TRACK_WIDTH = 0.15
+MAX_CMD = 1.0
+
 
 class RoverInterfaceNode(Node):
     def __init__(self):
@@ -34,11 +38,12 @@ class RoverInterfaceNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    rover_interface_subscriber = RoverInterfaceNode()
+    node = RoverInterfaceNode()
+
     try:
-        rclpy.spin(rover_interface_subscriber)
+        rclpy.spin(node)
     finally:
-        rover_interface_subscriber.destroy_node()
+        node.destroy_node()
         rclpy.shutdown()
 
 
