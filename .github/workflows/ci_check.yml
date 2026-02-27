@@ -21,7 +21,6 @@ jobs:
       - name: BUILD->Build workspace
         run: |
           docker run --rm -e PYTHONPATH=/home/ws/src ros2-test-image bash -lc "
-            touch /home/ws/src/remote/ldlidar_ros2/COLCON_IGNORE &&
             cd /home/ws &&
             colcon build --symlink-install
           "
