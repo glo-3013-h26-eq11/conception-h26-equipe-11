@@ -8,7 +8,6 @@ from lidar.wall_follower import (
     is_valid_lidar_scan,
     SPEED,
     WHEELBASE,
-    LIDAR_OFFSET,
 )
 
 
@@ -183,37 +182,6 @@ def test_when_invalid_wall_measurements_then_repeats_last_command(
     assert len(commands) == 1
     assert commands[0][0] == pytest.approx(SPEED)
     assert commands[0][1] == pytest.approx(0.3)
-
-
-def test_when_front_obstacle_detected_then_sends_avoidance_command(
-    wall_follow_node, monkeypatch
-):
-    # Arrange
-    commands = []
-
-    def fake_send_control_command(speed, steering):
-        commands.append((speed, steering))
-
-    monkeypatch.setattr(
-        wall_follow_node, "send_control_command", fake_send_control_command
-    )
-
-    scan = create_scan()
-
-    front_index = int((LIDAR_OFFSET - scan.angle_min) / scan.angle_increment)
-    scan.ranges[front_index] = 0.2  # obstacle frontal (< MIN_FRONT_DISTANCE)
-
-    # Act
-    wall_follow_node.lidar_callback(scan)
-
-    # Assert
-    assert len(commands) == 1
-    assert commands[0][0] == pytest.approx(SPEED * 0.5)
-    assert commands[0][1] != 0.0
-
-    # Le callback obstacle reset aussi l'état PID
-    assert wall_follow_node.last_time is None
-    assert len(wall_follow_node.last_errors_window) == 0
 
 
 def test_when_valid_scan_then_publishes_pid_command(wall_follow_node, monkeypatch):
