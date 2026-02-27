@@ -23,7 +23,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "proximity_sensor = proximity_sensor.proximity_sensor:main",
+            "proximity_sensor_node = proximity_sensor.proximity_sensor_node:main",
         ],
     },
 )

@@ -1,4 +1,4 @@
-from central_manager.city_interface import CityInterface
+from navigation.city_interface import CityInterface
 
 
 def test_when_get_cranes_from_remote_city_api_then_doesnt_throw():

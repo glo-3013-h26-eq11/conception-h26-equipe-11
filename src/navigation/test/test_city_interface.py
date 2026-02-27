@@ -1,4 +1,4 @@
-from central_manager.city_interface import CityInterface
+from navigation.city_interface import CityInterface
 import pytest
 import subprocess
 import time

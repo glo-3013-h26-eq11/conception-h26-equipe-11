@@ -63,8 +63,8 @@ def generate_launch_description() -> LaunchDescription:
             ),
             Node(
                 package="camera",
-                executable="aruco_reader",
-                name="aruco_reader",
+                executable="aruco_reader_node",
+                name="aruco_reader_node",
                 output="screen",
                 parameters=[
                     {

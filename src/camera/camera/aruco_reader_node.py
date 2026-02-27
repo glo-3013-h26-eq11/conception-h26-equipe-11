@@ -13,7 +13,7 @@ import numpy as np
 import depthai as dai
 
 
-class ArucoReader(Node):
+class ArucoReaderNode(Node):
     def __init__(self):
         super().__init__("aruco_reader")
 
@@ -120,7 +120,7 @@ class ArucoReader(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ArucoReader()
+    node = ArucoReaderNode()
 
     try:
         rclpy.spin(node)
