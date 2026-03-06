@@ -45,7 +45,10 @@ class ArucoReaderNode(Node):
         self.intersection_aruco_dict = cv2.aruco.getPredefinedDictionary(
             cv2.aruco.DICT_5X5_50
         )
-        self.aruco_params = cv2.aruco.DetectorParameters_create()
+        if hasattr(cv2.aruco, "DetectorParameters_create"):
+            self.aruco_params = cv2.aruco.DetectorParameters_create()
+        else:
+            self.aruco_params = cv2.aruco.DetectorParameters()
 
         self.rgb_sub = self.create_subscription(
             CompressedImage, image_topic, self.rgb_callback, 10
