@@ -4,6 +4,15 @@ from glob import glob
 
 package_name = "web_interface"
 
+dist_files = [
+    (
+        os.path.join("share", package_name, "dist", os.path.relpath(os.path.dirname(f), "web_interface/web_interface/dist")),
+        [f],
+    )
+    for f in glob("web_interface/web_interface/dist/**/*", recursive=True)
+    if os.path.isfile(f)
+]
+
 setup(
     name=package_name,
     version="0.0.0",
@@ -15,7 +24,7 @@ setup(
             os.path.join("share", package_name, "launch"),
             glob(os.path.join("launch", "*launch.py*")),
         ),
-    ],
+    ] + dist_files,
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="devuser",

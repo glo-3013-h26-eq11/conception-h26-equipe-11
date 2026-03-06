@@ -7,11 +7,12 @@ from typing import List
 import rclpy
 import uvicorn
 import os
+from ament_index_python.packages import get_package_share_directory
 
 PORT = 5555
 BASE_URL = "0.0.0.0"
 
-WEB_INTERFACE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+WEB_INTERFACE_DIRECTORY = get_package_share_directory("web_interface")
 
 FILENAME = os.path.basename(__file__)
 
