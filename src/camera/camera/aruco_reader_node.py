@@ -95,7 +95,7 @@ class ArucoReaderNode(Node):
 
             if ids_4x4 is not None:
                 for i, marker_id in enumerate(ids_4x4.flatten()):
-                    depth = self.calculate_marker_depth(
+                    depth, angle, _ = self.calculate_marker_depth(
                         corners_4x4[i], marker_size=0.02
                     )
 
@@ -105,13 +105,13 @@ class ArucoReaderNode(Node):
 
             if ids_5x5 is not None:
                 for i, marker_id in enumerate(ids_5x5.flatten()):
-                    depth = self.calculate_marker_depth(
+                    depth, angle, z_fwd = self.calculate_marker_depth(
                         corners_5x5[i], marker_size=0.075
                     )
 
-                    detections_5x5.append({"id": int(marker_id), "depth": float(depth)})
+                    detections_5x5.append({"id": int(marker_id), "depth": float(depth), "angle_x_deg": float(angle), "z_forward": float(z_fwd)})
 
-                    self.get_logger().info(f"5x5 Marker {marker_id}: {depth:.3f} m")
+                    self.get_logger().info(f"5x5 Marker {marker_id}: {depth:.3f} m  angle={angle:.1f}deg  Z={z_fwd:.3f}m")
 
             if not detections_4x4 and not detections_5x5:
                 return
@@ -157,7 +157,14 @@ class ArucoReaderNode(Node):
         # mounted at a fixed height of ~24 cm, so the Y component is a
         # constant vertical offset that would bias the euclidean norm.
         # Using sqrt(X² + Z²) gives the true floor distance to the marker.
-        return float(np.linalg.norm([tvec[0], tvec[2]]))
+        dist_xz = float(np.linalg.norm([tvec[0], tvec[2]]))
+        # Horizontal angle: 0° = straight ahead, ±90° = fully to the side.
+        # Used to ignore markers seen during a turn (large lateral offset).
+        angle_x_deg = float(np.degrees(np.arctan2(abs(tvec[0]), abs(tvec[2]))))
+        # Z: forward distance to marker. If Z is very small the rover is
+        # already passing under the marker — must not trigger stop.
+        z_forward = float(tvec[2])
+        return dist_xz, angle_x_deg, z_forward
 
 
 def main(args=None):
