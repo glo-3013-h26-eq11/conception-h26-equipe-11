@@ -3,6 +3,7 @@ from fastapi.concurrency import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
 from std_msgs.msg import String
 from pydantic import BaseModel
+from typing import List
 import rclpy
 import uvicorn
 import os
@@ -43,7 +44,7 @@ raw_map_publisher = None
 
 
 class CsvPayload(BaseModel):
-    file_names: list[str]
+    file_names: List[str]
     csv_content: str
 
 
