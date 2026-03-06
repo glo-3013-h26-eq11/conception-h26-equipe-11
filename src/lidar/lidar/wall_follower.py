@@ -34,8 +34,14 @@ def is_valid_lidar_scan(scan: float) -> bool:
 class WallFollowNode(Node):
     def __init__(self):
         super().__init__("wall_follow_node")
-        self.create_subscription(LaserScan, "/scan", self.lidar_callback, 10)
-        self.drive_pub = self.create_publisher(Twist, "cmd_vel", 10)
+        self.declare_parameter("scan_topic", "/scan")
+        self.declare_parameter("output_topic", "/cmd_vel")
+
+        scan_topic = self.get_parameter("scan_topic").value
+        output_topic = self.get_parameter("output_topic").value
+
+        self.create_subscription(LaserScan, scan_topic, self.lidar_callback, 10)
+        self.drive_pub = self.create_publisher(Twist, output_topic, 10)
         self.last_time = None
         self.last_steering = 0.0
         self.last_errors_window = np.array([])

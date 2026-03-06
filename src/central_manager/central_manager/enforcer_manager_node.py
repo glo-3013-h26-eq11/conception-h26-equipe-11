@@ -1,8 +1,10 @@
 from central_manager.base_enforcer import Enforcer
 from central_manager.merchandise_enforcer import MerchandiseEnforcer
+from central_manager.stopSignEnforcer import StopSignEnforcer
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
+from std_msgs.msg import Float32MultiArray
 from typing import List
 import json
 import rclpy
@@ -16,6 +18,13 @@ class EnforcerManagerNode(Node):
             Bool, "is_there_merchandise", self.load_callback, 10
         )
 
+        self.sub_aruco_5x5 = self.create_subscription(
+            Float32MultiArray,
+            "/aruco/detections_5x5",
+            self.aruco_5x5_callback,
+            10,
+        )
+
         self.sub_cmd_vel = self.create_subscription(
             Twist, "/cmd_vel", self.cmd_callback, 10
         )
@@ -24,17 +33,21 @@ class EnforcerManagerNode(Node):
             String, "route_plan/nodes", self.route_nodes_callback, 10
         )
 
-        self.pub_cmd_vel_safe = self.create_publisher(Twist, "cmd_vel_safe", 10)
+        self.pub_cmd_vel_safe = self.create_publisher(Twist, "/cmd_vel_safe", 10)
 
         self.pub_invalid_destination = self.create_publisher(
-            Bool, "merchandise_destination_invalid", 10
+            Bool, "/merchandise_destination_invalid", 10
         )
 
-        self.enforcers: List[Enforcer] = [MerchandiseEnforcer()]
+        self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer()]
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
         return self.enforcers[0]
+
+    @property
+    def stop_sign_enforcer(self) -> StopSignEnforcer:
+        return self.enforcers[1]
 
     def load_callback(self, load_msg: Bool) -> None:
         self.merchandise_enforcer.load_detected = load_msg.data
@@ -59,6 +72,13 @@ class EnforcerManagerNode(Node):
         nodes: List[str] = json.loads(msg.data)
         destination_node: str = nodes[-1]
         self.merchandise_enforcer.destination = destination_node
+
+    def aruco_5x5_callback(self, msg: Float32MultiArray) -> None:
+        self.stop_sign_enforcer.stop_detected = True
+        cmd = Twist()
+        cmd.linear.x = 0.0
+        cmd.angular.z = 0.0
+        self.pub_cmd_vel_safe.publish(cmd)
 
 
 def main(args=None):

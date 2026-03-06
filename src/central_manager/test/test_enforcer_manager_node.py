@@ -1,6 +1,6 @@
 from central_manager.enforcer_manager_node import EnforcerManagerNode
 from geometry_msgs.msg import Twist
-from std_msgs.msg import String, Bool
+from std_msgs.msg import String, Bool, Float32MultiArray
 import pytest
 import rclpy
 import json
@@ -224,3 +224,47 @@ def test_given_destination_when_route_nodes_callback_then_updates_destination(no
 
     # Assert
     assert node.merchandise_enforcer.destination == "ZD1"
+
+
+def test_given_aruco_5x5_detection_when_callback_then_sets_stop_and_publishes_zero_cmd(
+    node,
+):
+    received_msgs = []
+
+    def call_back(msg):
+        received_msgs.append(msg)
+
+    node.create_subscription(Twist, "/cmd_vel_safe", call_back, 10)
+
+    msg = Float32MultiArray()
+    msg.data = [1.0, 0.75]
+
+    node.aruco_5x5_callback(msg)
+    rclpy.spin_once(node, timeout_sec=0.1)
+
+    assert node.stop_sign_enforcer.stop_detected is True
+    assert len(received_msgs) == 1
+    assert received_msgs[0].linear.x == 0.0
+    assert received_msgs[0].angular.z == 0.0
+
+
+def test_given_stop_detected_when_cmd_callback_then_publishes_stopped_cmd(node):
+    received_msgs = []
+
+    def call_back(msg):
+        received_msgs.append(msg)
+
+    node.create_subscription(Twist, "/cmd_vel_safe", call_back, 10)
+    node.stop_sign_enforcer.stop_detected = True
+    node.stop_sign_enforcer.stop_duration = 10.0
+
+    cmd = Twist()
+    cmd.linear.x = 0.5
+    cmd.angular.z = 0.2
+
+    node.cmd_callback(cmd)
+    rclpy.spin_once(node, timeout_sec=0.1)
+
+    assert len(received_msgs) == 1
+    assert received_msgs[0].linear.x == 0.0
+    assert received_msgs[0].angular.z == 0.0

@@ -17,6 +17,12 @@ class ArucoReaderNode(Node):
     def __init__(self):
         super().__init__("aruco_reader")
 
+        self.declare_parameter("image_topic", "/oak/rgb/image_rect/compressed")
+        self.declare_parameter("detections_topic", "aruco_detections")
+
+        image_topic = self.get_parameter("image_topic").value
+        detections_topic = self.get_parameter("detections_topic").value
+
         self.bridge = CvBridge()
 
         with dai.Device() as device:
@@ -42,10 +48,10 @@ class ArucoReaderNode(Node):
         self.aruco_params = cv2.aruco.DetectorParameters_create()
 
         self.rgb_sub = self.create_subscription(
-            CompressedImage, "/oak/rgb/image_raw/compressed", self.rgb_callback, 10
+            CompressedImage, image_topic, self.rgb_callback, 10
         )
 
-        self.detections_pub = self.create_publisher(String, "aruco_detections", 10)
+        self.detections_pub = self.create_publisher(String, detections_topic, 10)
 
         self.get_logger().info("ArUco Reader started")
 
