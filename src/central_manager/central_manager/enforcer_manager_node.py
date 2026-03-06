@@ -82,7 +82,6 @@ class EnforcerManagerNode(Node):
                     break
         except Exception:
             pass
-        self.pub_cmd_vel_safe.publish(cmd)
 
 
 def main(args=None):
