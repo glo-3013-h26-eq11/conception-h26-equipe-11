@@ -153,9 +153,11 @@ class ArucoReaderNode(Node):
                 obj_points, img_points, self.mtx, self.dist
             )
             tvec = tvec.flatten()
-        # Euclidean distance (norm of translation vector) — accounts for
-        # lateral and vertical offset when approaching at an angle.
-        return float(np.linalg.norm(tvec))
+        # Horizontal ground-plane distance (XZ only) — the 5x5 marker is
+        # mounted at a fixed height of ~24 cm, so the Y component is a
+        # constant vertical offset that would bias the euclidean norm.
+        # Using sqrt(X² + Z²) gives the true floor distance to the marker.
+        return float(np.linalg.norm([tvec[0], tvec[2]]))
 
 
 def main(args=None):

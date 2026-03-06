@@ -40,6 +40,8 @@ class EnforcerManagerNode(Node):
 
         self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer()]
 
+        self._seen_aruco_ids: set = set()
+
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
         return self.enforcers[0]
@@ -76,8 +78,18 @@ class EnforcerManagerNode(Node):
         try:
             payload = json.loads(msg.data)
             markers = payload.get("markers_5x5", [])
-            for marker in markers:
-                if float(marker.get("depth", 9999)) <= 0.61:
+
+            close_ids = {
+                marker.get("id")
+                for marker in markers
+                if float(marker.get("depth", 9999)) <= 0.61
+            }
+
+            self._seen_aruco_ids &= close_ids
+
+            for marker_id in close_ids:
+                if marker_id not in self._seen_aruco_ids:
+                    self._seen_aruco_ids.add(marker_id)
                     self.stop_sign_enforcer.stop_detected = True
                     break
         except Exception:
