@@ -85,7 +85,6 @@ def generate_launch_description() -> LaunchDescription:
                 executable="route_executor_node",
                 name="route_executor_node",
                 output="screen",
-                condition=IfCondition(LaunchConfiguration("use_navigation")),
                 parameters=[
                     {
                         "wall_cmd_topic": "/wall_follower/cmd_vel",
