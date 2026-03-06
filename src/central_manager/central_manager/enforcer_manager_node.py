@@ -4,7 +4,6 @@ from central_manager.stopSignEnforcer import StopSignEnforcer
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
-from std_msgs.msg import Float32MultiArray
 from typing import List
 import json
 import rclpy
@@ -18,10 +17,10 @@ class EnforcerManagerNode(Node):
             Bool, "is_there_merchandise", self.load_callback, 10
         )
 
-        self.sub_aruco_5x5 = self.create_subscription(
-            Float32MultiArray,
-            "/aruco/detections_5x5",
-            self.aruco_5x5_callback,
+        self.sub_aruco = self.create_subscription(
+            String,
+            "aruco_detections",
+            self.aruco_callback,
             10,
         )
 
@@ -73,11 +72,13 @@ class EnforcerManagerNode(Node):
         destination_node: str = nodes[-1]
         self.merchandise_enforcer.destination = destination_node
 
-    def aruco_5x5_callback(self, msg: Float32MultiArray) -> None:
-        self.stop_sign_enforcer.stop_detected = True
-        cmd = Twist()
-        cmd.linear.x = 0.0
-        cmd.angular.z = 0.0
+    def aruco_callback(self, msg: String) -> None:
+        try:
+            payload = json.loads(msg.data)
+            if payload.get("markers_5x5"):
+                self.stop_sign_enforcer.stop_detected = True
+        except Exception:
+            pass
         self.pub_cmd_vel_safe.publish(cmd)
 
 
