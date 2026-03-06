@@ -50,6 +50,18 @@ class ArucoReaderNode(Node):
         else:
             self.aruco_params = cv2.aruco.DetectorParameters()
 
+        # OpenCV 4.7+ uses ArucoDetector; older versions use detectMarkers directly
+        if hasattr(cv2.aruco, "ArucoDetector"):
+            self.detector_4x4 = cv2.aruco.ArucoDetector(
+                self.vehicule_aruco_dict, self.aruco_params
+            )
+            self.detector_5x5 = cv2.aruco.ArucoDetector(
+                self.intersection_aruco_dict, self.aruco_params
+            )
+        else:
+            self.detector_4x4 = None
+            self.detector_5x5 = None
+
         self.rgb_sub = self.create_subscription(
             Image, image_topic, self.rgb_callback, 10
         )
@@ -67,13 +79,16 @@ class ArucoReaderNode(Node):
                 rgb_msg, desired_encoding="bgr8"
             )
 
-            corners_4x4, ids_4x4, _ = cv2.aruco.detectMarkers(
-                frame, self.vehicule_aruco_dict, parameters=self.aruco_params
-            )
-
-            corners_5x5, ids_5x5, _ = cv2.aruco.detectMarkers(
-                frame, self.intersection_aruco_dict, parameters=self.aruco_params
-            )
+            if self.detector_4x4 is not None:
+                corners_4x4, ids_4x4, _ = self.detector_4x4.detectMarkers(frame)
+                corners_5x5, ids_5x5, _ = self.detector_5x5.detectMarkers(frame)
+            else:
+                corners_4x4, ids_4x4, _ = cv2.aruco.detectMarkers(
+                    frame, self.vehicule_aruco_dict, parameters=self.aruco_params
+                )
+                corners_5x5, ids_5x5, _ = cv2.aruco.detectMarkers(
+                    frame, self.intersection_aruco_dict, parameters=self.aruco_params
+                )
 
             detections_4x4 = []
             detections_5x5 = []
@@ -121,12 +136,26 @@ class ArucoReaderNode(Node):
             self.get_logger().error(str(e))
 
     def calculate_marker_depth(self, corner, marker_size):
-        rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
-            [corner], marker_size, self.mtx, self.dist
-        )
+        # estimatePoseSingleMarkers removed in OpenCV 4.8+; use solvePnP instead
+        if hasattr(cv2.aruco, "estimatePoseSingleMarkers"):
+            rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
+                [corner], marker_size, self.mtx, self.dist
+            )
+            tvec = tvecs[0][0]
+        else:
+            half = marker_size / 2.0
+            obj_points = np.array(
+                [[-half, half, 0], [half, half, 0], [half, -half, 0], [-half, -half, 0]],
+                dtype=np.float32,
+            )
+            img_points = corner.reshape(4, 2).astype(np.float32)
+            _, rvec, tvec = cv2.solvePnP(
+                obj_points, img_points, self.mtx, self.dist
+            )
+            tvec = tvec.flatten()
         # Euclidean distance (norm of translation vector) — accounts for
         # lateral and vertical offset when approaching at an angle.
-        return float(np.linalg.norm(tvecs[0][0]))
+        return float(np.linalg.norm(tvec))
 
 
 def main(args=None):
