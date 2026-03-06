@@ -3,16 +3,14 @@ from fastapi.concurrency import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
 from std_msgs.msg import String
 from pydantic import BaseModel
-from typing import List
 import rclpy
 import uvicorn
 import os
-from ament_index_python.packages import get_package_share_directory
 
 PORT = 5555
 BASE_URL = "0.0.0.0"
 
-WEB_INTERFACE_DIRECTORY = get_package_share_directory("web_interface")
+WEB_INTERFACE_DIRECTORY = "/home/ws/src/web_interface/web_interface"
 
 FILENAME = os.path.basename(__file__)
 
@@ -45,7 +43,7 @@ raw_map_publisher = None
 
 
 class CsvPayload(BaseModel):
-    file_names: List[str]
+    file_names: list[str]
     csv_content: str
 
 
