@@ -25,16 +25,32 @@ class ArucoReaderNode(Node):
 
         self.bridge = CvBridge()
 
-        with dai.Device() as device:
-            calib = device.readCalibration()
-
-            instrinsics = calib.getCameraIntrinsics(
-                dai.CameraBoardSocket.RGB,
-                1280,
-                720,
+        # Try to read camera calibration directly from the OAK-D device.
+        # This may fail if depthai_ros_driver already owns the device; in that
+        # case we fall back to known OAK-D-Lite defaults (1280x720, 1080P ISP
+        # scaled 2/3) so that ArUco pose estimation still works approximately.
+        try:
+            with dai.Device() as device:
+                calib = device.readCalibration()
+                instrinsics = calib.getCameraIntrinsics(
+                    dai.CameraBoardSocket.RGB,
+                    1280,
+                    720,
+                )
+                dist = calib.getDistortionCoefficients(dai.CameraBoardSocket.RGB)
+            self.get_logger().info("Camera calibration loaded from device.")
+        except Exception as calib_err:
+            self.get_logger().warn(
+                f"Could not read calibration from device ({calib_err}). "
+                "Using default OAK-D-Lite intrinsics (approximate)."
             )
-
-            dist = calib.getDistortionCoefficients(dai.CameraBoardSocket.RGB)
+            # OAK-D-Lite RGB camera at 1280x720 (IMX378, 1080P ISP scale 2/3)
+            instrinsics = [
+                [856.0, 0.0, 640.0],
+                [0.0, 856.0, 360.0],
+                [0.0, 0.0, 1.0],
+            ]
+            dist = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         self.dist = np.array(dist)
         self.mtx = np.array(instrinsics)

@@ -1,0 +1,29 @@
+# OAK-D-Lite RGB-only pipeline configuration.
+#
+# The OAK-D-Lite uses OV7251 sensors for the mono (left/right) cameras.
+# Those sensors only support 480P/400P resolution, but the default RGBD
+# pipeline requests 720P and crashes (exit code -11 / SIGSEGV).
+#
+# Setting i_pipeline_type: RGB activates only the colour camera (IMX378)
+# and avoids starting the mono cameras entirely.
+
+camera:
+  i_pipeline_type: RGB
+  i_enable_imu: false
+  i_enable_ir: false
+  i_usb_speed: SUPER_PLUS
+
+rgb:
+  i_publish_topic: true
+  i_fps: 10.0
+  i_height: 720
+  i_width: 1280
+  i_resolution: '1080'
+  i_set_isp_scale: true
+  i_isp_num: 2
+  i_isp_den: 3
+  i_output_isp: true
+  i_low_bandwidth: false
+  i_low_bandwidth_quality: 50
+  i_interleaved: false
+  i_max_q_size: 30
