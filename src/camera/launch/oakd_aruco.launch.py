@@ -38,7 +38,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "image_topic",
-                default_value="/oak/rgb/image_rect/compressed",
+                default_value="/oak/rgb/image_raw",
             ),
             DeclareLaunchArgument(
                 "detections_topic",

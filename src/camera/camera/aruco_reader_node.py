@@ -4,7 +4,7 @@ import json
 import rclpy
 from rclpy.node import Node
 
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import Image
 from std_msgs.msg import String
 from cv_bridge import CvBridge
 
@@ -16,7 +16,7 @@ class ArucoReaderNode(Node):
     def __init__(self):
         super().__init__("aruco_reader")
 
-        self.declare_parameter("image_topic", "/oak/rgb/image_rect/compressed")
+        self.declare_parameter("image_topic", "/oak/rgb/image_raw")
         self.declare_parameter("detections_topic", "aruco_detections")
 
         image_topic = self.get_parameter("image_topic").value
@@ -58,12 +58,12 @@ class ArucoReaderNode(Node):
 
         self.get_logger().info("ArUco Reader started")
 
-    def listener_callback(self, rgb_msg: CompressedImage):
+    def listener_callback(self, rgb_msg: Image):
         self.rgb_callback(rgb_msg)
 
-    def rgb_callback(self, rgb_msg: CompressedImage):
+    def rgb_callback(self, rgb_msg: Image):
         try:
-            frame = self.bridge.compressed_imgmsg_to_cv2(
+            frame = self.bridge.imgmsg_to_cv2(
                 rgb_msg, desired_encoding="bgr8"
             )
 
