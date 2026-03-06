@@ -11,7 +11,7 @@ import os
 PORT = 5555
 BASE_URL = "0.0.0.0"
 
-WEB_INTERFACE_DIRECTORY = "/home/ws/src/web_interface/web_interface"
+WEB_INTERFACE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
 FILENAME = os.path.basename(__file__)
 
