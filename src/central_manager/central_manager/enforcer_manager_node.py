@@ -75,8 +75,11 @@ class EnforcerManagerNode(Node):
     def aruco_callback(self, msg: String) -> None:
         try:
             payload = json.loads(msg.data)
-            if payload.get("markers_5x5"):
-                self.stop_sign_enforcer.stop_detected = True
+            markers = payload.get("markers_5x5", [])
+            for marker in markers:
+                if float(marker.get("depth", 9999)) <= 0.61:
+                    self.stop_sign_enforcer.stop_detected = True
+                    break
         except Exception:
             pass
         self.pub_cmd_vel_safe.publish(cmd)

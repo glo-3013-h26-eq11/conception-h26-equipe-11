@@ -124,7 +124,9 @@ class ArucoReaderNode(Node):
         rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
             [corner], marker_size, self.mtx, self.dist
         )
-        return float(tvecs[0][0][2])
+        # Euclidean distance (norm of translation vector) — accounts for
+        # lateral and vertical offset when approaching at an angle.
+        return float(np.linalg.norm(tvecs[0][0]))
 
 
 def main(args=None):
