@@ -51,7 +51,7 @@ class ArucoReaderNode(Node):
             self.aruco_params = cv2.aruco.DetectorParameters()
 
         self.rgb_sub = self.create_subscription(
-            CompressedImage, image_topic, self.rgb_callback, 10
+            Image, image_topic, self.rgb_callback, 10
         )
 
         self.detections_pub = self.create_publisher(String, detections_topic, 10)
