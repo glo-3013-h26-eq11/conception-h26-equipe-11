@@ -1,8 +1,11 @@
 from collections import deque
 from typing import Dict, List, Optional, Tuple
 
+DIRECTION_KEYS = ("left", "straight", "right")
+
 
 class RouteSelector:
+
     def __init__(self, graph: Dict[str, Dict[str, str]]):
         self.graph = graph
 
@@ -12,13 +15,21 @@ class RouteSelector:
         if goal not in self.graph:
             raise ValueError(f"Unknown goal node: {goal}")
 
+    def _get_neighbors(self, node: str) -> Dict[str, str]:
+        raw = self.graph.get(node, {})
+        return {
+            direction: raw[direction]
+            for direction in DIRECTION_KEYS
+            if raw.get(direction)
+        }
+
     def compute_path(
         self, start: str, goal: str
     ) -> Optional[Tuple[List[str], List[str]]]:
         self._validate_start_goal(start, goal)
 
         if start == goal:
-            return [start], []
+            return ([start], [])
 
         queue = deque([start])
         visited = {start}
@@ -29,7 +40,7 @@ class RouteSelector:
         while queue:
             node = queue.popleft()
 
-            for direction, next_node in self.graph.get(node, {}).items():
+            for direction, next_node in self._get_neighbors(node).items():
                 if next_node in visited:
                     continue
 

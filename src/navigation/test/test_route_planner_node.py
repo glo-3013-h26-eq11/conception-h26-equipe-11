@@ -16,14 +16,14 @@ def rclpy_context():
 
 @pytest.fixture
 def node():
-    # Arrange
+    # Arrange: Map format (left, straight, right)
     temp_graph = {
-        "A1": {"g": "ZC1", "l": "A4", "d": "ZD1"},
-        "A2": {"g": "A4", "l": "ZD1", "d": "A2"},
-        "A3": {"g": "ZD1", "l": "A2", "d": "ZC1"},
-        "A4": {"g": "A2", "l": "ZC1", "d": "A4"},
-        "ZC1": {"l": "A1"},
-        "ZD1": {"l": "A3"},
+        "A1": {"left": "ZC1", "straight": "A4", "right": "ZD1"},
+        "A2": {"left": "A4", "straight": "ZD1", "right": "A2"},
+        "A3": {"left": "ZD1", "straight": "A2", "right": "ZC1"},
+        "A4": {"left": "A2", "straight": "ZC1", "right": "A4"},
+        "ZC1": {"straight": "A1"},
+        "ZD1": {"straight": "A3"},
     }
     route_selector = RouteSelector(graph=temp_graph)
     route_planner_node = RoutePlannerNode(route_selector=route_selector)
