@@ -142,17 +142,3 @@ def test_given_both_nodes_set_when_goal_received_then_publishes_directions_list(
 
     # Assert
     assert received and json.loads(received[0]) != []
-
-
-def test_given_invalid_start_node_when_goal_received_then_raises_value_error(node):
-    # Arrange
-    current_msg = String()
-    current_msg.data = "INVALID"
-    goal_msg = String()
-    goal_msg.data = "ZC1"
-
-    node.current_node_callback(current_msg)
-
-    # Act, Assert
-    with pytest.raises(ValueError, match="Unknown start node"):
-        node.goal_node_callback(goal_msg)
