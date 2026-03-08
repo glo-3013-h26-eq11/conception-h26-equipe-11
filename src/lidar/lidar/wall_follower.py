@@ -114,7 +114,6 @@ class WallFollowNode(Node):
             ):
                 bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
                 corner_steering = MAX_STEERING * bias_strength
-                speed *= speed * bias_strength
                 steering = max(steering, corner_steering)
                 steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
                 self.get_logger().info(
