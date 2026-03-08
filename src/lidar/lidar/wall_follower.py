@@ -10,7 +10,7 @@ LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.10  # m
 INTEGRAL_WINDOW_SIZE = 20
 MIN_FRONT_DISTANCE = 0.5  # m
-KP = 1.2
+KP = 1.0
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 0.9  # radians
@@ -117,21 +117,19 @@ class WallFollowNode(Node):
                 steering = max(steering, corner_steering)
                 steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
                 
-                # speed = SPEED * (1.0 - bias_strength)
-                # speed = max(speed, SPEED * 0.2) 
                 self.get_logger().info(
-                    f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
+                    f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg, speed: {speed:.2f}m/s"
                 )
             elif (
                 is_valid_lidar_scan(a)
                 and a < CORNER_THRESHOLD
                 and b > DESIRED_DISTANCE_FROM_WALL * 2
             ):
-                corner_steering = MAX_STEERING
+                corner_steering = -MAX_STEERING
                 speed = SPEED * 0.3
                 
                 self.get_logger().info(
-                    f"Right turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
+                    f"Right turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg, speed: {speed:.2f}m/s"
                 )
 
         self.get_logger().info(
