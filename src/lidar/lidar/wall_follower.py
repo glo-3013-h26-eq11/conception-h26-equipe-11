@@ -113,7 +113,7 @@ class WallFollowNode(Node):
                 steering = max(steering, corner_steering)
 
             elif is_valid_lidar_scan(a) and a < CORNER_THRESHOLD and dist <= MIN_FRONT_DISTANCE:
-                bias_strength = (CORNER_THRESHOLD * 0.4 - a) / (CORNER_THRESHOLD * 0.4)
+                bias_strength = (CORNER_THRESHOLD - a) / (CORNER_THRESHOLD)
                 corner_steering = -MAX_STEERING * bias_strength
                 steering = min(steering, corner_steering)
                 
