@@ -9,16 +9,16 @@ THETA_DEG = 60
 LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.10  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.5  # m
-KP = 0.6
-KD = 0.6
+MIN_FRONT_DISTANCE = 0.4  # m
+KP = 1.2
+KD = 0.5
 KI = 0.07
 MAX_STEERING = 0.9  # radians
 SPEED = 0.4  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 FRONT_ARC_DEG = 10
-CORNER_THRESHOLD = 0.60  # m
+CORNER_THRESHOLD = 0.50  # m
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
