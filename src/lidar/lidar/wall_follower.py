@@ -122,7 +122,7 @@ class WallFollowNode(Node):
                 )
             elif (
                 is_valid_lidar_scan(a)
-                and a < CORNER_THRESHOLD
+                and a > CORNER_THRESHOLD
                 and b > DESIRED_DISTANCE_FROM_WALL * 2
             ):
                 corner_steering = -MAX_STEERING
