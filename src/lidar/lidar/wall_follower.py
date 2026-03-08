@@ -18,7 +18,7 @@ SPEED = 0.4  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 FRONT_ARC_DEG = 10
-CORNER_THRESHOLD = 0.50  # m
+CORNER_THRESHOLD = 0.60  # m
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -120,7 +120,18 @@ class WallFollowNode(Node):
                 # speed = SPEED * (1.0 - bias_strength)
                 # speed = max(speed, SPEED * 0.2) 
                 self.get_logger().info(
-                    f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
+                    f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
+                )
+            elif (
+                is_valid_lidar_scan(a)
+                and a < CORNER_THRESHOLD
+                and b > DESIRED_DISTANCE_FROM_WALL * 2
+            ):
+                corner_steering = MAX_STEERING
+                speed = SPEED * 0.3
+                
+                self.get_logger().info(
+                    f"Right turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
                 )
 
         self.get_logger().info(
