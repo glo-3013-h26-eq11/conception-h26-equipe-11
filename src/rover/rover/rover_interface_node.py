@@ -20,9 +20,9 @@ class RoverInterfaceNode(Node):
         output_topic = self.get_parameter("output_topic").value
 
         self.subscription = self.create_subscription(
-            Twist, input_topic, self.listener_command_callback, 10
+            Twist, "/cmd_vel_safe", self.listener_command_callback, 10
         )
-        self.publisher = self.create_publisher(String, output_topic, 10)
+        self.publisher = self.create_publisher(String, "/rover/port", 10)
 
     def listener_command_callback(self, msg):
         linear_x = msg.linear.x
