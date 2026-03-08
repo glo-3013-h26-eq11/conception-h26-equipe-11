@@ -12,7 +12,7 @@ INTEGRAL_WINDOW_SIZE = 20
 MIN_FRONT_DISTANCE = 0.4  # m
 KP = 0.9
 KD = 0.4
-KI = 0.02
+KI = 0.05
 MAX_STEERING = 0.9  # radians
 SPEED = 0.5  # m/s
 LIDAR_OFFSET = math.pi / 2
@@ -117,8 +117,8 @@ class WallFollowNode(Node):
                 steering = max(steering, corner_steering)
                 steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
                 
-                speed = SPEED * (1.0 - bias_strength)
-                speed = max(speed, SPEED * 0.2) 
+                # speed = SPEED * (1.0 - bias_strength)
+                # speed = max(speed, SPEED * 0.2) 
                 self.get_logger().info(
                     f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
                 )
