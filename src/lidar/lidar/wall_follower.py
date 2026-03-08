@@ -107,15 +107,15 @@ class WallFollowNode(Node):
                 angle_rad, lidar_range_array, angle_min, angle_increment
             )
 
-            if is_valid_lidar_scan(a) and a > CORNER_THRESHOLD:
-                bias_strength = 1.0 if not is_valid_lidar_scan(a) else min(1.0, (a - CORNER_THRESHOLD) / CORNER_THRESHOLD)
+            if (
+                is_valid_lidar_scan(a)
+                and a < CORNER_THRESHOLD
+                and dist <= MIN_FRONT_DISTANCE
+            ):
+                bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
                 corner_steering = MAX_STEERING * bias_strength
                 steering = max(steering, corner_steering)
-
-            elif is_valid_lidar_scan(a) and a < CORNER_THRESHOLD and dist <= MIN_FRONT_DISTANCE:
-                bias_strength = (CORNER_THRESHOLD - a) / (CORNER_THRESHOLD)
-                corner_steering = -MAX_STEERING * bias_strength
-                steering = min(steering, corner_steering)
+                steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
                 
                 # speed = SPEED * (1.0 - bias_strength)
                 # speed = max(speed, SPEED * 0.2) 
