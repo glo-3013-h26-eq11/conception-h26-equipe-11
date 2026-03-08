@@ -1,6 +1,7 @@
 from central_manager.base_enforcer import Enforcer
 from central_manager.merchandise_enforcer import MerchandiseEnforcer
 from central_manager.stopSignEnforcer import StopSignEnforcer
+from central_manager.car_follow_enforcer import CarFollowEnforcer
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
@@ -38,7 +39,7 @@ class EnforcerManagerNode(Node):
             Bool, "/merchandise_destination_invalid", 10
         )
 
-        self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer()]
+        self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer(), CarFollowEnforcer()]
 
         self._seen_aruco_ids: set = set()
 
@@ -49,6 +50,10 @@ class EnforcerManagerNode(Node):
     @property
     def stop_sign_enforcer(self) -> StopSignEnforcer:
         return self.enforcers[1]
+    
+    @property
+    def car_follow_enforcer(self) -> CarFollowEnforcer:
+        return self.enforcers[2]
 
     def load_callback(self, load_msg: Bool) -> None:
         self.merchandise_enforcer.load_detected = load_msg.data
@@ -77,22 +82,34 @@ class EnforcerManagerNode(Node):
     def aruco_callback(self, msg: String) -> None:
         try:
             payload = json.loads(msg.data)
-            markers = payload.get("markers_5x5", [])
+            markers_5x5 = payload.get("markers_5x5", [])
+            markers_4x4 = payload.get("markers_4x4", [])
 
-            close_ids = {
+            close_ids_5x5 = {
                 marker.get("id")
-                for marker in markers
+                for marker in markers_5x5
+                if float(marker.get("depth", 9999)) <= 0.61
+                and float(marker.get("angle_x_deg", 0)) <= 35.0
+                and float(marker.get("z_forward", 0)) >= 0.15
+            }
+            
+            close_ids_4x4 = {
+                marker.get("id")
+                for marker in markers_4x4
                 if float(marker.get("depth", 9999)) <= 0.61
                 and float(marker.get("angle_x_deg", 0)) <= 35.0
                 and float(marker.get("z_forward", 0)) >= 0.15
             }
 
-            self._seen_aruco_ids &= close_ids
+            self._seen_aruco_ids &= close_ids_5x5
 
-            for marker_id in close_ids:
+            for marker_id in close_ids_5x5:
                 if marker_id not in self._seen_aruco_ids:
                     self._seen_aruco_ids.add(marker_id)
                     self.stop_sign_enforcer.stop_detected = True
+                    break
+            for marker_id in close_ids_4x4:
+                    self.car_follow_enforcer.car_follow()
                     break
         except Exception:
             pass

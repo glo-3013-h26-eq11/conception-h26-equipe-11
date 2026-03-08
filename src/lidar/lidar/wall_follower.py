@@ -9,12 +9,12 @@ THETA_DEG = 60
 LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.10  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.5  # m
-KP = 1.0
+MIN_FRONT_DISTANCE = 0.4  # m
+KP = 0.9
 KD = 0.4
-KI = 0.05
+KI = 0.09
 MAX_STEERING = 0.9  # radians
-SPEED = 0.4  # m/s
+SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 FRONT_ARC_DEG = 10
@@ -50,6 +50,7 @@ class WallFollowNode(Node):
         lidar_range_array = scan.ranges
         angle_min = scan.angle_min
         angle_increment = scan.angle_increment
+        speed = SPEED
 
         front_angles = np.arange(-FRONT_ARC_DEG, FRONT_ARC_DEG + 1, 1)
 
@@ -113,6 +114,7 @@ class WallFollowNode(Node):
             ):
                 bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
                 corner_steering = MAX_STEERING * bias_strength
+                speed *= speed * bias_strength
                 steering = max(steering, corner_steering)
                 steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
                 self.get_logger().info(
@@ -123,7 +125,7 @@ class WallFollowNode(Node):
             f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
         )
 
-        self.send_control_command(SPEED, steering)
+        self.send_control_command(speed, steering)
 
     def send_control_command(self, speed: float, steering: float):
         if abs(steering) < 0.05:
