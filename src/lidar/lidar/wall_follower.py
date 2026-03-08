@@ -123,10 +123,10 @@ class WallFollowNode(Node):
             elif (
                 is_valid_lidar_scan(a)
                 and a > CORNER_THRESHOLD
-                and b > DESIRED_DISTANCE_FROM_WALL * 2
+                and b > DESIRED_DISTANCE_FROM_WALL 
             ):
                 corner_steering = -MAX_STEERING
-                speed = SPEED * 0.3
+                speed = SPEED * 0.8
                 
                 self.get_logger().info(
                     f"Right turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg, speed: {speed:.2f}m/s"
