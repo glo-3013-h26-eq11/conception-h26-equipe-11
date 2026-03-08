@@ -74,9 +74,9 @@ class WallFollowNode(Node):
 
         now = self.get_clock().now().nanoseconds
 
-        self.get_logger().info(
-            f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
-        )
+        # self.get_logger().info(
+        #     f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
+        # )
 
         if self.last_time is None or len(self.last_errors_window) == 0:
             error_diff = 0.0
@@ -117,13 +117,13 @@ class WallFollowNode(Node):
                 speed *= speed * bias_strength
                 steering = max(steering, corner_steering)
                 steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-                self.get_logger().info(
-                    f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
-                )
+                # self.get_logger().info(
+                #     f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
+                # )
 
-        self.get_logger().info(
-            f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
-        )
+        # self.get_logger().info(
+        #     f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
+        # )
 
         self.send_control_command(speed, steering)
 
