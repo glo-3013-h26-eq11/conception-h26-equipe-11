@@ -9,15 +9,14 @@ THETA_DEG = 60
 LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.10  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.5  # m
+MIN_FRONT_DISTANCE = 0.55  # m
 KP = 1.0
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 0.9  # radians
-SPEED = 0.4  # m/s
+SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-FRONT_ARC_DEG = 10
 CORNER_THRESHOLD = 0.60  # m
 
 
@@ -52,7 +51,7 @@ class WallFollowNode(Node):
         angle_increment = scan.angle_increment
         speed = SPEED
 
-        front_angles = np.arange(-FRONT_ARC_DEG, FRONT_ARC_DEG + 1, 1)
+        front_angle = angle_to_distance(90, lidar_range_array, angle_min, angle_increment)
 
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
@@ -100,37 +99,34 @@ class WallFollowNode(Node):
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
 
-        for deg in front_angles:
+        
+        front_distance = angle_to_distance(
+            front_angle, lidar_range_array, angle_min, angle_increment
+        )
 
-            angle_rad = LIDAR_OFFSET + np.radians(deg)
-            dist = angle_to_distance(
-                angle_rad, lidar_range_array, angle_min, angle_increment
+        if (
+            is_valid_lidar_scan(front_distance)
+            and front_distance <= MIN_FRONT_DISTANCE
+        ):
+            bias_strength = (MIN_FRONT_DISTANCE - front_distance) / MIN_FRONT_DISTANCE
+            corner_steering = MAX_STEERING * bias_strength
+            speed = max(SPEED * (1 - bias_strength), 0.2)
+            steering = max(steering, corner_steering)
+            steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+            
+            self.get_logger().info(
+                f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg, speed: {speed:.2f}m/s"
             )
-
-            if (
-                is_valid_lidar_scan(a)
-                and a < CORNER_THRESHOLD
-                and dist <= MIN_FRONT_DISTANCE
-            ):
-                bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
-                corner_steering = MAX_STEERING * bias_strength
-                steering = max(steering, corner_steering)
-                steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-                
-                self.get_logger().info(
-                    f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg, speed: {speed:.2f}m/s"
-                )
-            elif (
-                is_valid_lidar_scan(a)
-                and a > CORNER_THRESHOLD
-                and b > DESIRED_DISTANCE_FROM_WALL 
-            ):
-                corner_steering = -MAX_STEERING
-                speed = SPEED * 0.8
-                
-                self.get_logger().info(
-                    f"Right turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg, speed: {speed:.2f}m/s"
-                )
+        elif (
+            is_valid_lidar_scan(b)
+            and b > DESIRED_DISTANCE_FROM_WALL + 0.05
+        ):
+            corner_steering = max(-MAX_STEERING, -MAX_STEERING * b)
+            speed = SPEED * 0.6
+            
+            self.get_logger().info(
+                f"Right turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg, speed: {speed:.2f}m/s"
+            )
 
         self.get_logger().info(
             f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
