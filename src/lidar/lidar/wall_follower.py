@@ -9,7 +9,7 @@ THETA_DEG = 60
 LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.5  # m
+MIN_FRONT_DISTANCE = 0.55  # m
 KP = 1.5
 KD = 0.5
 KI = 0.05
@@ -18,6 +18,7 @@ SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.45  # m
+RIGHT_TURN_DURATION = 1.5 
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -44,6 +45,8 @@ class WallFollowNode(Node):
         self.last_time = None
         self.last_steering = 0.0
         self.last_errors_window = np.array([])
+        self._turning = False
+        self._turn_start_time = None
 
     def lidar_callback(self, scan: LaserScan):
         lidar_range_array = scan.ranges
@@ -74,6 +77,19 @@ class WallFollowNode(Node):
         self.get_logger().info(
             f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
         )
+        if self._turning:
+            elapsed = (now - self._turn_start_time) * 1e-9
+            if elapsed < RIGHT_TURN_DURATION:
+                self.send_control_command(SPEED * 0.3, -MAX_STEERING)
+                return
+            else:
+                self._turning = False
+
+        if not is_valid_lidar_scan(a) or a > CORNER_THRESHOLD:
+            if not self._turning:
+                self._turning = True
+                self._turn_start_time = now
+                self.get_logger().info("Right turn triggered!")
 
         if self.last_time is None or len(self.last_errors_window) == 0:
             error_diff = 0.0
