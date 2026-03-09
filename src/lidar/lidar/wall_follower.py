@@ -57,8 +57,6 @@ class WallFollowNode(Node):
         angle_increment = scan.angle_increment
         speed = SPEED
 
-        front_angle = angle_to_distance(math.pi/2, lidar_range_array, angle_min, angle_increment)
-
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
         theta_a = theta_b + theta
@@ -107,7 +105,7 @@ class WallFollowNode(Node):
 
         
         front_distance = angle_to_distance(
-            front_angle, lidar_range_array, angle_min, angle_increment
+            math.pi/2, lidar_range_array, angle_min, angle_increment
         )
 
         if (
@@ -128,6 +126,7 @@ class WallFollowNode(Node):
             and b > DESIRED_DISTANCE_FROM_WALL + 0.05
         ):
             corner_steering = max(-MAX_STEERING, -MAX_STEERING * b)
+            steering = min(steering, corner_steering)
             speed = SPEED * 0.6
             
             self.get_logger().info(
