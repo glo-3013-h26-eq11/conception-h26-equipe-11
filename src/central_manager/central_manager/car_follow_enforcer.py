@@ -5,6 +5,11 @@ class CarFollowEnforcer(Enforcer):
     def __init__(self):
         self.min_follow_distance = 0.2  # m
 
+    def enforce_cmd(self, cmd: Twist) -> Twist:
+        if self.follow_distance is None:
+            return cmd
+        return self.car_follow(cmd, self.follow_distance)
+
     def car_follow(self, cmd: Twist, distance: float) -> Twist:
         speed_adjustment = (distance - self.min_follow_distance) / self.min_follow_distance
         cmd.linear.x = cmd.linear.x * max(0.0, min(1.0, speed_adjustment))
