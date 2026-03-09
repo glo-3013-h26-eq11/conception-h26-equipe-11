@@ -51,7 +51,7 @@ class WallFollowNode(Node):
         angle_increment = scan.angle_increment
         speed = SPEED
 
-        front_angle = angle_to_distance(90, lidar_range_array, angle_min, angle_increment)
+        front_angle = angle_to_distance(np.radians(90), lidar_range_array, angle_min, angle_increment)
 
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
