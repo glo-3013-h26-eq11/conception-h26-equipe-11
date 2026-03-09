@@ -18,7 +18,7 @@ SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.45  # m
-RIGHT_TURN_DURATION = 1 
+RIGHT_TURN_DURATION = 1.2
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -80,7 +80,7 @@ class WallFollowNode(Node):
         if self._turning:
             elapsed = (now - self._turn_start_time) * 1e-9
             if elapsed < RIGHT_TURN_DURATION:
-                self.send_control_command(SPEED * 0.3, -MAX_STEERING)
+                self.send_control_command(SPEED * 0.2, -MAX_STEERING)
                 return
             else:
                 self._turning = False
@@ -138,10 +138,8 @@ class WallFollowNode(Node):
         self.send_control_command(speed, steering)
 
     def send_control_command(self, speed: float, steering: float):
-        if abs(steering) < 0.05:
-            angular_z = 0.0
-        else:
-            angular_z = speed * math.tan(steering) / WHEELBASE
+        
+        angular_z = speed * math.tan(steering) / WHEELBASE
 
         twist = Twist()
         twist.linear.x = speed
