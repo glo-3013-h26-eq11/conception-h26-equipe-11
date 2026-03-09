@@ -6,7 +6,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
-LOOKAHEAD = 0.8  # m
+LOOKAHEAD = 0.6  # m
 DESIRED_DISTANCE_FROM_WALL = 0.10  # m
 INTEGRAL_WINDOW_SIZE = 20
 MIN_FRONT_DISTANCE = 0.55  # m
@@ -77,10 +77,6 @@ class WallFollowNode(Node):
 
         now = self.get_clock().now().nanoseconds
 
-        self.get_logger().info(
-            f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
-        )
-
         if self.last_time is None or len(self.last_errors_window) == 0:
             error_diff = 0.0
             error_integral = 0.0
@@ -106,6 +102,9 @@ class WallFollowNode(Node):
         
         front_distance = angle_to_distance(
             math.pi/2, lidar_range_array, angle_min, angle_increment
+        )
+        self.get_logger().info(
+            f"front_distance: {front_distance:.3f}m, a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
         )
 
         if (
