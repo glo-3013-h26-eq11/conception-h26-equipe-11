@@ -46,12 +46,18 @@ class WallFollowNode(Node):
         self.last_errors_window = np.array([])
 
     def lidar_callback(self, scan: LaserScan):
+        if (math.isnan(scan.angle_increment) 
+            or math.isnan(scan.angle_min) 
+            or scan.angle_increment == 0.0
+            or len(scan.ranges) == 0):
+            self.get_logger().warn("Invalid scan metadata, skipping")
+            return
         lidar_range_array = scan.ranges
         angle_min = scan.angle_min
         angle_increment = scan.angle_increment
         speed = SPEED
 
-        front_angle = angle_to_distance(np.radians(90), lidar_range_array, angle_min, angle_increment)
+        front_angle = angle_to_distance(math.pi/2, lidar_range_array, angle_min, angle_increment)
 
         theta = np.radians(THETA_DEG)
         theta_b = 0.0

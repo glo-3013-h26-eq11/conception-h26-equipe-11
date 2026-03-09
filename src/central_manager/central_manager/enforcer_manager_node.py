@@ -108,9 +108,17 @@ class EnforcerManagerNode(Node):
                     self._seen_aruco_ids.add(marker_id)
                     self.stop_sign_enforcer.stop_detected = True
                     break
-            for marker_id in close_ids_4x4:
-                    self.car_follow_enforcer.car_follow()
+            
+            for marker in markers_4x4:
+                if (
+                    float(marker.get("depth", 9999)) <= 0.61
+                    and float(marker.get("angle_x_deg", 0)) <= 35.0
+                    and float(marker.get("z_forward", 0)) >= 0.15
+                ):
+                    self.car_follow_enforcer.follow_distance = float(marker.get("depth", 9999))
                     break
+            else:
+                self.car_follow_enforcer.follow_distance = None
         except Exception:
             pass
 
