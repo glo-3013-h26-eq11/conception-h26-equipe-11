@@ -9,24 +9,19 @@ THETA_DEG = 60
 LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.35  # m
-KP = 1.0
+MIN_FRONT_DISTANCE = 0.4  # m
+KP = 1.5
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 0.9  # radians
 SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-CORNER_THRESHOLD = 0.60  # m
+FRONT_ARC_DEG = 10
+CORNER_THRESHOLD = 0.22  # m
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
-    if (math.isnan(angle_increment) 
-            or math.isnan(angle_min) 
-            or angle_increment == 0.0
-            or len(lidar_array) == 0):
-            print("Invalid scan metadata, skipping")
-            return
     index = int((theta_rad - angle_min) / angle_increment)
     index = max(0, min(index, len(lidar_array) - 1))
     return lidar_array[index]
@@ -57,6 +52,8 @@ class WallFollowNode(Node):
         angle_increment = scan.angle_increment
         speed = SPEED
 
+        front_angles = np.arange(-FRONT_ARC_DEG, FRONT_ARC_DEG + 1, 1)
+
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
         theta_a = theta_b + theta
@@ -76,6 +73,10 @@ class WallFollowNode(Node):
         error = DESIRED_DISTANCE_FROM_WALL - D_tp1
 
         now = self.get_clock().now().nanoseconds
+
+        self.get_logger().info(
+            f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
+        )
 
         if self.last_time is None or len(self.last_errors_window) == 0:
             error_diff = 0.0
@@ -99,38 +100,27 @@ class WallFollowNode(Node):
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
 
-        
-        front_distance = angle_to_distance(
-            math.pi/2, lidar_range_array, angle_min, angle_increment
-        )
-        self.get_logger().info(
-            f"front_distance: {front_distance:.3f}m, a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
-        )
+        for deg in front_angles:
 
-        if (
-            is_valid_lidar_scan(front_distance)
-            and front_distance <= MIN_FRONT_DISTANCE
-        ):
-            bias_strength = (MIN_FRONT_DISTANCE - front_distance) / MIN_FRONT_DISTANCE
-            corner_steering = MAX_STEERING * bias_strength
-            speed = max(SPEED * (1 - bias_strength), 0.2)
-            steering = max(steering, corner_steering)
-            steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-            
-            self.get_logger().info(
-                f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg, speed: {speed:.2f}m/s"
+            angle_rad = LIDAR_OFFSET + np.radians(deg)
+            dist = angle_to_distance(
+                angle_rad, lidar_range_array, angle_min, angle_increment
             )
-        elif (
-            is_valid_lidar_scan(b)
-            and b > DESIRED_DISTANCE_FROM_WALL + 0.05
-        ):
-            corner_steering = max(-MAX_STEERING, -MAX_STEERING * b)
-            steering = min(steering, corner_steering)
-            speed = SPEED * 0.6
-            
-            self.get_logger().info(
-                f"Right turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg, speed: {speed:.2f}m/s"
-            )
+
+            if (
+                is_valid_lidar_scan(a)
+                and a < CORNER_THRESHOLD
+                and dist <= MIN_FRONT_DISTANCE
+            ):
+                bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
+                corner_steering = MAX_STEERING * bias_strength
+                speed = max(SPEED * (1 - bias_strength), 0.2)
+                steering = max(steering, corner_steering)
+                steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+                
+                self.get_logger().info(
+                    f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
+                )
 
         self.get_logger().info(
             f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
