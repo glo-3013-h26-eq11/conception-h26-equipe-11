@@ -21,6 +21,12 @@ CORNER_THRESHOLD = 0.60  # m
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
+    if (math.isnan(angle_increment) 
+            or math.isnan(angle_min) 
+            or angle_increment == 0.0
+            or len(lidar_array) == 0):
+            print("Invalid scan metadata, skipping")
+            return
     index = int((theta_rad - angle_min) / angle_increment)
     index = max(0, min(index, len(lidar_array) - 1))
     return lidar_array[index]
@@ -46,12 +52,6 @@ class WallFollowNode(Node):
         self.last_errors_window = np.array([])
 
     def lidar_callback(self, scan: LaserScan):
-        if (math.isnan(scan.angle_increment) 
-            or math.isnan(scan.angle_min) 
-            or scan.angle_increment == 0.0
-            or len(scan.ranges) == 0):
-            self.get_logger().warn("Invalid scan metadata, skipping")
-            return
         lidar_range_array = scan.ranges
         angle_min = scan.angle_min
         angle_increment = scan.angle_increment
