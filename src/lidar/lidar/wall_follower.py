@@ -18,7 +18,7 @@ SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.45  # m
-RIGHT_TURN_DURATION = 1.5
+RIGHT_TURN_DURATION = 1.4
 COAST_DURATION = 0.25 
 
 
@@ -84,7 +84,7 @@ class WallFollowNode(Node):
                 self.send_control_command(SPEED, 0.0)
                 return
             elif elapsed < COAST_DURATION + RIGHT_TURN_DURATION:
-                self.send_control_command(0.25, -MAX_STEERING)
+                self.send_control_command(0.3, -MAX_STEERING)
                 return
             else:
                 self._corner_detected = False
@@ -127,7 +127,7 @@ class WallFollowNode(Node):
         ):
             bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
             corner_steering = MAX_STEERING * bias_strength
-            speed = max(SPEED * (1 - bias_strength), 0.25)
+            speed = max(SPEED * (1 - bias_strength), 0.3)
             steering = max(steering, corner_steering)
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
             
