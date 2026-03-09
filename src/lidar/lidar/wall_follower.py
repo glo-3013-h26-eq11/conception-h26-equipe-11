@@ -17,8 +17,9 @@ MAX_STEERING = 0.9  # radians
 SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-CORNER_THRESHOLD = 0.45  # m
+CORNER_THRESHOLD = 0.5  # m
 RIGHT_TURN_DURATION = 1.4
+COAST_DURATION = 0.5 
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -77,15 +78,18 @@ class WallFollowNode(Node):
         self.get_logger().info(
             f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
         )
-        if self._turning:
-            elapsed = (now - self._turn_start_time) * 1e-9
-            if elapsed < RIGHT_TURN_DURATION:
-                self.send_control_command(SPEED * 0.2, -MAX_STEERING)
+        if self._corner_detected:
+            elapsed = (now - self._corner_time) * 1e-9
+            if elapsed < COAST_DURATION:
+                self.send_control_command(SPEED, 0.0)
+                return
+            elif elapsed < COAST_DURATION + RIGHT_TURN_DURATION:
+                self.send_control_command(SPEED * 0.4, MAX_STEERING)
                 return
             else:
-                self._turning = False
+                self._corner_detected = False
 
-        if a > CORNER_THRESHOLD:
+        if (not self._corner_detected) and a > CORNER_THRESHOLD:
             if not self._turning:
                 self._turning = True
                 self._turn_start_time = now
@@ -122,7 +126,7 @@ class WallFollowNode(Node):
         ):
             bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
             corner_steering = MAX_STEERING * bias_strength
-            speed = max(SPEED * (1 - bias_strength), 0.2)
+            speed = max(SPEED * (1 - bias_strength), 0.25)
             steering = max(steering, corner_steering)
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
             
