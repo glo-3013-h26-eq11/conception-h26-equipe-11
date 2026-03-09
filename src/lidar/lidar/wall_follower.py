@@ -9,7 +9,7 @@ THETA_DEG = 60
 LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.55  # m
+MIN_FRONT_DISTANCE = 0.3  # m
 KP = 1.5
 KD = 0.5
 KI = 0.05
@@ -122,11 +122,11 @@ class WallFollowNode(Node):
         
         if (
             is_valid_lidar_scan(a)
-            and a < CORNER_THRESHOLD
+            and a < CORNER_THRESHOLD - 0.15
             and front_distance <= MIN_FRONT_DISTANCE
         ):
             bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
-            corner_steering = MAX_STEERING * bias_strength
+            corner_steering = MAX_STEERING
             speed = max(SPEED * (1 - bias_strength), 0.25)
             steering = max(steering, corner_steering)
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
