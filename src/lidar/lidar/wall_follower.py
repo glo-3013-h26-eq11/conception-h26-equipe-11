@@ -17,8 +17,7 @@ MAX_STEERING = 0.9  # radians
 SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-FRONT_ARC_DEG = 10
-CORNER_THRESHOLD = 0.2  # m
+CORNER_THRESHOLD = 0.4  # m
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -51,8 +50,6 @@ class WallFollowNode(Node):
         angle_min = scan.angle_min
         angle_increment = scan.angle_increment
         speed = SPEED
-
-        front_angles = np.arange(-FRONT_ARC_DEG, FRONT_ARC_DEG + 1, 1)
 
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
@@ -100,27 +97,23 @@ class WallFollowNode(Node):
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
 
-        for deg in front_angles:
-
-            angle_rad = LIDAR_OFFSET + np.radians(deg)
-            dist = angle_to_distance(
-                angle_rad, lidar_range_array, angle_min, angle_increment
+        front_distance = angle_to_distance(LIDAR_OFFSET, lidar_range_array, angle_min, angle_increment)
+        
+        if (
+            is_valid_lidar_scan(a)
+            and a < CORNER_THRESHOLD
+            and front_distance <= MIN_FRONT_DISTANCE
+        ):
+            bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
+            corner_steering = MAX_STEERING * bias_strength
+            speed = max(SPEED * (1 - bias_strength), 0.2)
+            steering = max(steering, corner_steering)
+            steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+            
+            self.get_logger().info(
+                f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
             )
 
-            if (
-                is_valid_lidar_scan(a)
-                and a < CORNER_THRESHOLD
-                and dist <= MIN_FRONT_DISTANCE
-            ):
-                bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
-                corner_steering = MAX_STEERING * bias_strength
-                speed = max(SPEED * (1 - bias_strength), 0.2)
-                steering = max(steering, corner_steering)
-                steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-                
-                self.get_logger().info(
-                    f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
-                )
 
         self.get_logger().info(
             f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
