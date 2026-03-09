@@ -17,9 +17,9 @@ MAX_STEERING = 0.9  # radians
 SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-CORNER_THRESHOLD = 0.5  # m
-RIGHT_TURN_DURATION = 1.4
-COAST_DURATION = 0.5 
+CORNER_THRESHOLD = 0.45  # m
+RIGHT_TURN_DURATION = 1.5
+COAST_DURATION = 0.25 
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
