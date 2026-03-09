@@ -46,8 +46,6 @@ class WallFollowNode(Node):
         self.last_time = None
         self.last_steering = 0.0
         self.last_errors_window = np.array([])
-        self._turning = False
-        self._turn_start_time = None
         self._corner_detected = False
         self._corner_time = None
 
@@ -91,11 +89,12 @@ class WallFollowNode(Node):
             else:
                 self._corner_detected = False
 
-        if (not self._corner_detected) and a > CORNER_THRESHOLD:
-            if not self._turning:
-                self._turning = True
-                self._turn_start_time = now
+        if not self._corner_detected:
+            if not is_valid_lidar_scan(a) or a > CORNER_THRESHOLD:
+                self._corner_detected = True
+                self._corner_time = now
                 self.get_logger().info("Right turn triggered!")
+                return
 
         if self.last_time is None or len(self.last_errors_window) == 0:
             error_diff = 0.0
