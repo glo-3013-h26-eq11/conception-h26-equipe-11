@@ -85,7 +85,7 @@ class WallFollowNode(Node):
             else:
                 self._turning = False
 
-        if not is_valid_lidar_scan(a) or a > CORNER_THRESHOLD:
+        if a > CORNER_THRESHOLD and b > DESIRED_DISTANCE_FROM_WALL * 2:
             if not self._turning:
                 self._turning = True
                 self._turn_start_time = now
