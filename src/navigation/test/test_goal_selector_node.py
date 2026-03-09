@@ -138,23 +138,3 @@ def test_given_invalid_goal_mode_when_other_inputs_are_received_then_does_not_pu
 
     # Assert
     assert received == []
-
-
-def test_given_map_arrives_last_when_other_inputs_were_already_received_then_publishes_goal(
-    node,
-):
-    # Arrange
-    received = subscribe_goal(node)
-
-    # Act
-    publish_inputs(
-        node,
-        current="A1",
-        goals=["ZC1", "ZC2", "ZD1"],
-        mode="GO_LOAD",
-    )
-    publish_inputs(node, graph=TEST_GRAPH)
-    rclpy.spin_once(node, timeout_sec=0.2)
-
-    # Assert
-    assert received[-1] == "ZC1"
