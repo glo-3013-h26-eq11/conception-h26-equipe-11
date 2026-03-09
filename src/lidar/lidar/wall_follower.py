@@ -48,6 +48,8 @@ class WallFollowNode(Node):
         self.last_errors_window = np.array([])
         self._turning = False
         self._turn_start_time = None
+        self._corner_detected = False
+        self._corner_time = None
 
     def lidar_callback(self, scan: LaserScan):
         lidar_range_array = scan.ranges
