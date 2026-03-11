@@ -1,13 +1,14 @@
 import pytest
 from navigation.route_selector import RouteSelector
 
+# Map format: left, straight, right (RouteSelector accepts Map dict directly)
 TEST_GRAPH = {
-    "A1": {"g": "ZC1", "l": "A4", "d": "ZD1"},
-    "A2": {"g": "A4", "l": "ZD1", "d": "A2"},
-    "A3": {"g": "ZD1", "l": "A2", "d": "ZC1"},
-    "A4": {"g": "A2", "l": "ZC1", "d": "A4"},
-    "ZC1": {"l": "A1"},
-    "ZD1": {"l": "A3"},
+    "A1": {"left": "ZC1", "straight": "A4", "right": "ZD1"},
+    "A2": {"left": "A4", "straight": "ZD1", "right": "A2"},
+    "A3": {"left": "ZD1", "straight": "A2", "right": "ZC1"},
+    "A4": {"left": "A2", "straight": "ZC1", "right": "A4"},
+    "ZC1": {"straight": "A1"},
+    "ZD1": {"straight": "A3"},
 }
 
 
@@ -64,8 +65,8 @@ def test_given_valid_start_and_goal_when_compute_path_then_returns_expected_node
 def test_given_valid_start_and_goal_when_compute_path_then_returns_expected_directions(
     selector,
 ):
-    # Arrange
-    expected_directions = ["l", "d"]
+    # Arrange: ZC1 --straight--> A1 --right--> ZD1
+    expected_directions = ["straight", "right"]
 
     # Act
     _, directions = selector.compute_path("ZC1", "ZD1")
