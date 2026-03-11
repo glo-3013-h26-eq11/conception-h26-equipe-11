@@ -1,7 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 import rclpy
 import uvicorn
 import os
