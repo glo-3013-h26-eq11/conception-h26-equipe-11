@@ -7,6 +7,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
 from typing import List
 import json
+import time
 import rclpy
 
 
@@ -42,6 +43,8 @@ class EnforcerManagerNode(Node):
         self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer(), CarFollowEnforcer()]
 
         self._seen_aruco_ids: set = set()
+        self._stop_until: float = 0.0  # wallclock timestamp until which to output zeros
+        self._stop_duration: float = 1.5
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
@@ -70,6 +73,9 @@ class EnforcerManagerNode(Node):
             self.pub_invalid_destination.publish(invalid_dest_msg)
 
     def cmd_callback(self, cmd: Twist) -> None:
+        if time.time() < self._stop_until:
+            self.pub_cmd_vel_safe.publish(Twist())
+            return
         for enforcer in self.enforcers:
             cmd = enforcer.enforce_cmd(cmd)
         self.pub_cmd_vel_safe.publish(cmd)
@@ -103,8 +109,8 @@ class EnforcerManagerNode(Node):
             for marker_id in close_ids_5x5:
                 if marker_id not in self._seen_aruco_ids:
                     self._seen_aruco_ids.add(marker_id)
-                    self.stop_sign_enforcer.stop_detected = True
-                    self.get_logger().info(f"STOP TRIGGERED for marker {marker_id}")
+                    self._stop_until = time.time() + self._stop_duration
+                    self.get_logger().info(f"STOP TRIGGERED for marker {marker_id} — stopping for {self._stop_duration}s")
                     break
             
             for marker in markers_4x4:
