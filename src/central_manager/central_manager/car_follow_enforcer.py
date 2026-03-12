@@ -5,6 +5,7 @@ from central_manager.base_enforcer import Enforcer
 
 VEHICLE_STALE_SEC: float = 0.5
 
+
 class CarFollowEnforcer(Enforcer):
     def __init__(self):
         self.min_follow_distance: float = 0.25
@@ -26,6 +27,6 @@ class CarFollowEnforcer(Enforcer):
         if self._logger is not None:
             self._logger.info(f"Véhicule devant à {d:.2f} m — vitesse x{factor:.2f}")
         out = Twist()
-        out.linear.x  = cmd.linear.x * factor
+        out.linear.x = cmd.linear.x * factor
         out.angular.z = cmd.angular.z * factor
         return out

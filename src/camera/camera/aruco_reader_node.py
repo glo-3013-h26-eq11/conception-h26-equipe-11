@@ -75,9 +75,7 @@ class ArucoReaderNode(Node):
 
     def rgb_callback(self, rgb_msg: Image):
         try:
-            frame = self.bridge.imgmsg_to_cv2(
-                rgb_msg, desired_encoding="bgr8"
-            )
+            frame = self.bridge.imgmsg_to_cv2(rgb_msg, desired_encoding="bgr8")
 
             if self.detector_4x4 is not None:
                 corners_4x4, ids_4x4, _ = self.detector_4x4.detectMarkers(frame)
@@ -99,9 +97,18 @@ class ArucoReaderNode(Node):
                         corners_4x4[i], marker_size=0.02
                     )
 
-                    detections_4x4.append({"id": int(marker_id), "depth": float(depth), "angle_x_deg": float(angle), "z_forward": float(z_fwd)})
+                    detections_4x4.append(
+                        {
+                            "id": int(marker_id),
+                            "depth": float(depth),
+                            "angle_x_deg": float(angle),
+                            "z_forward": float(z_fwd),
+                        }
+                    )
 
-                    self.get_logger().info(f"4x4 Marker {marker_id}: {depth:.3f} m  angle={angle:.1f}deg  Z={z_fwd:.3f}m")
+                    self.get_logger().info(
+                        f"4x4 Marker {marker_id}: {depth:.3f} m  angle={angle:.1f}deg  Z={z_fwd:.3f}m"
+                    )
 
             if ids_5x5 is not None:
                 for i, marker_id in enumerate(ids_5x5.flatten()):
@@ -109,9 +116,18 @@ class ArucoReaderNode(Node):
                         corners_5x5[i], marker_size=0.075
                     )
 
-                    detections_5x5.append({"id": int(marker_id), "depth": float(depth), "angle_x_deg": float(angle), "z_forward": float(z_fwd)})
+                    detections_5x5.append(
+                        {
+                            "id": int(marker_id),
+                            "depth": float(depth),
+                            "angle_x_deg": float(angle),
+                            "z_forward": float(z_fwd),
+                        }
+                    )
 
-                    self.get_logger().info(f"5x5 Marker {marker_id}: {depth:.3f} m  angle={angle:.1f}deg  Z={z_fwd:.3f}m")
+                    self.get_logger().info(
+                        f"5x5 Marker {marker_id}: {depth:.3f} m  angle={angle:.1f}deg  Z={z_fwd:.3f}m"
+                    )
 
             if not detections_4x4 and not detections_5x5:
                 return
@@ -145,13 +161,16 @@ class ArucoReaderNode(Node):
         else:
             half = marker_size / 2.0
             obj_points = np.array(
-                [[-half, half, 0], [half, half, 0], [half, -half, 0], [-half, -half, 0]],
+                [
+                    [-half, half, 0],
+                    [half, half, 0],
+                    [half, -half, 0],
+                    [-half, -half, 0],
+                ],
                 dtype=np.float32,
             )
             img_points = corner.reshape(4, 2).astype(np.float32)
-            _, rvec, tvec = cv2.solvePnP(
-                obj_points, img_points, self.mtx, self.dist
-            )
+            _, rvec, tvec = cv2.solvePnP(obj_points, img_points, self.mtx, self.dist)
             tvec = tvec.flatten()
         # Horizontal ground-plane distance (XZ only) — the 5x5 marker is
         # mounted at a fixed height of ~24 cm, so the Y component is a

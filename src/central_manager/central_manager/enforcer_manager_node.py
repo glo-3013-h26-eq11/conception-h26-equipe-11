@@ -39,7 +39,11 @@ class EnforcerManagerNode(Node):
             Bool, "/merchandise_destination_invalid", 10
         )
 
-        self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer(), CarFollowEnforcer()]
+        self.enforcers: List[Enforcer] = [
+            MerchandiseEnforcer(),
+            StopSignEnforcer(),
+            CarFollowEnforcer(),
+        ]
         self.stop_sign_enforcer._logger = self.get_logger()
         self.car_follow_enforcer._logger = self.get_logger()
 
@@ -50,7 +54,7 @@ class EnforcerManagerNode(Node):
     @property
     def stop_sign_enforcer(self) -> StopSignEnforcer:
         return self.enforcers[1]
-    
+
     @property
     def car_follow_enforcer(self) -> CarFollowEnforcer:
         return self.enforcers[2]
@@ -87,7 +91,7 @@ class EnforcerManagerNode(Node):
 
             closest_stop_dist: Optional[float] = None
             for marker in markers_5x5:
-                d     = float(marker.get("depth", 9999))
+                d = float(marker.get("depth", 9999))
                 angle = float(marker.get("angle_x_deg", 0))
                 z_fwd = float(marker.get("z_forward", 0))
                 if d <= 1.0 and angle <= 35.0 and z_fwd >= 0.15:
@@ -98,7 +102,7 @@ class EnforcerManagerNode(Node):
 
             closest_vehicle_dist: Optional[float] = None
             for marker in markers_4x4:
-                d     = float(marker.get("depth", 9999))
+                d = float(marker.get("depth", 9999))
                 angle = float(marker.get("angle_x_deg", 0))
                 if angle <= 45.0:
                     if closest_vehicle_dist is None or d < closest_vehicle_dist:
@@ -106,6 +110,7 @@ class EnforcerManagerNode(Node):
             self.car_follow_enforcer.update_distance(closest_vehicle_dist)
         except Exception:
             pass
+
 
 def main(args=None):
     rclpy.init(args=args)

@@ -43,7 +43,9 @@ class ArucoLocalizerNode(Node):
         if not markers:
             return
 
-        nearest_marker = min(markers, key=lambda marker: marker.get("depth", float("inf")))
+        nearest_marker = min(
+            markers, key=lambda marker: marker.get("depth", float("inf"))
+        )
         marker_id = int(nearest_marker["id"])
         node_id = self.tag_to_node.get(marker_id)
         if node_id is None or node_id == self.last_published_node:

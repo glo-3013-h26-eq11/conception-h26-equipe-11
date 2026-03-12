@@ -22,7 +22,9 @@ class RouteExecutorNode(Node):
         wall_cmd_topic = self.get_parameter("wall_cmd_topic").value
         output_cmd_topic = self.get_parameter("output_cmd_topic").value
 
-        self.create_subscription(String, "route_plan/nodes", self.route_nodes_callback, 10)
+        self.create_subscription(
+            String, "route_plan/nodes", self.route_nodes_callback, 10
+        )
         self.create_subscription(
             String,
             "route_plan/directions",
@@ -66,7 +68,10 @@ class RouteExecutorNode(Node):
         now_sec = self.get_clock().now().nanoseconds * 1e-9
         cooldown = float(self.get_parameter("node_cooldown_sec").value)
 
-        if current_node == self.last_seen_node and now_sec - self.last_seen_time_sec < cooldown:
+        if (
+            current_node == self.last_seen_node
+            and now_sec - self.last_seen_time_sec < cooldown
+        ):
             return
 
         self.last_seen_node = current_node
@@ -118,7 +123,9 @@ class RouteExecutorNode(Node):
             )
             duration = float(self.get_parameter("turn_duration_sec").value)
         else:
-            self.override_cmd.linear.x = float(self.get_parameter("forward_speed").value)
+            self.override_cmd.linear.x = float(
+                self.get_parameter("forward_speed").value
+            )
             self.override_cmd.angular.z = 0.0
             duration = float(self.get_parameter("straight_duration_sec").value)
 

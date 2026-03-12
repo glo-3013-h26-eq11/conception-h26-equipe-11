@@ -19,7 +19,7 @@ LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.45  # m
 RIGHT_TURN_DURATION = 1.2
-COAST_DURATION = 0.15 
+COAST_DURATION = 0.15
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -118,8 +118,10 @@ class WallFollowNode(Node):
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
 
-        front_distance = angle_to_distance(LIDAR_OFFSET, lidar_range_array, angle_min, angle_increment)
-        
+        front_distance = angle_to_distance(
+            LIDAR_OFFSET, lidar_range_array, angle_min, angle_increment
+        )
+
         if (
             is_valid_lidar_scan(a)
             and a < CORNER_THRESHOLD - 0.15
@@ -130,11 +132,10 @@ class WallFollowNode(Node):
             speed = max(SPEED * (1 - bias_strength), 0.25)
             steering = max(steering, corner_steering)
             steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-            
+
             self.get_logger().info(
                 f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
             )
-
 
         self.get_logger().info(
             f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
@@ -143,7 +144,7 @@ class WallFollowNode(Node):
         self.send_control_command(speed, steering)
 
     def send_control_command(self, speed: float, steering: float):
-        
+
         angular_z = speed * math.tan(steering) / WHEELBASE
 
         twist = Twist()
