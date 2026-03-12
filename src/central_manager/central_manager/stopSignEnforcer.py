@@ -58,7 +58,7 @@ class StopSignEnforcer(Enforcer):
             factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
             factor = max(0.0, min(1.0, factor))
             out = Twist()
-            out.linear.x  = max(cmd.linear.x * factor, 0.2)
+            out.linear.x  = max(cmd.linear.x * factor, 0.3)
             out.angular.z = cmd.angular.z
             return out
 
