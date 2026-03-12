@@ -39,6 +39,8 @@ class GoalSelectorNode(Node):
         self._available_goals: list[str] = []
         self._goal_mode: str = GoalMode.GO_LOAD.value
 
+        self._active_goal: str | None = None
+
     def _map_callback(self, msg: String) -> None:
         if self._route_selector is not None:
             return
@@ -56,7 +58,6 @@ class GoalSelectorNode(Node):
 
     def _current_callback(self, msg: String) -> None:
         self._current_node = msg.data.strip()
-        self._try_select_and_publish()
 
     def _available_goals_callback(self, msg: String) -> None:
         try:
@@ -72,11 +73,21 @@ class GoalSelectorNode(Node):
             self.get_logger().warning("Failed to decode available_goals JSON.")
             self._available_goals = []
 
-        self._try_select_and_publish()
+        if self._active_goal is None:
+            self._try_select_and_publish()
 
     def _goal_mode_callback(self, msg: String) -> None:
-        self._goal_mode = msg.data.strip()
-        self._try_select_and_publish()
+        new_mode = msg.data.strip()
+
+        if new_mode not in (GoalMode.GO_LOAD.value, GoalMode.GO_DROP.value):
+            self.get_logger().warning(f"Invalid goal_mode received: {new_mode}")
+            return
+
+        if new_mode != self._goal_mode:
+            self._goal_mode = new_mode
+            self._active_goal = None
+            self.get_logger().info(f"Goal mode changed to: {self._goal_mode}")
+            self._try_select_and_publish()
 
     def _try_select_and_publish(self) -> None:
         if self._goal_selector is None:
@@ -89,7 +100,10 @@ class GoalSelectorNode(Node):
             return
 
         if self._goal_mode not in (GoalMode.GO_LOAD.value, GoalMode.GO_DROP.value):
-            self.get_logger().warning(f"Invalid goal_mode received: {self._goal_mode}")
+            self.get_logger().warning(f"Invalid goal_mode: {self._goal_mode}")
+            return
+
+        if self._active_goal is not None:
             return
 
         try:
@@ -108,9 +122,12 @@ class GoalSelectorNode(Node):
             )
             return
 
+        self._active_goal = selected
+
         out_msg = String()
         out_msg.data = selected
         self._publisher_goal.publish(out_msg)
+
         self.get_logger().info(f"Published selected goal: {selected}")
 
 

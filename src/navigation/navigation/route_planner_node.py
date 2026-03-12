@@ -67,11 +67,11 @@ class RoutePlannerNode(Node):
         if self.goal_node is None or not self.goal_node:
             return
 
-        if self._current_directions is None or len(self._current_directions) == 0:
+        if self._current_directions is None:
             self._publish_full_route()
-        elif self.current_node != self._node_at_last_publish:
+        elif self._current_directions and self.current_node != self._node_at_last_publish:
             self._publish_remaining_route()
-        else:
+        elif self._current_directions:
             self._republish_directions()
 
     def _publish_full_route(self) -> None:
@@ -111,7 +111,7 @@ class RoutePlannerNode(Node):
         remaining = self._current_directions
 
         if not remaining:
-            self._current_directions = None
+            self._current_directions = []
 
         msg_dirs = String()
         msg_dirs.data = json.dumps(remaining)
