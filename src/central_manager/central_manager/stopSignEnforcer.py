@@ -28,7 +28,7 @@ class StopSignEnforcer(Enforcer):
 
             elapsed = time.time() - self.stop_start_time
             if elapsed < self.stop_duration:
-                return self.stop_robot(cmd)
+                return self.stop(cmd)
             else:
                 self.stop_detected = False
                 self.stop_start_time = None
