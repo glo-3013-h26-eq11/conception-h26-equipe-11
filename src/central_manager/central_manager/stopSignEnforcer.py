@@ -1,23 +1,28 @@
-import time
+from typing import Optional
 from geometry_msgs.msg import Twist
 from central_manager.base_enforcer import Enforcer
 
 
 class StopSignEnforcer(Enforcer):
+    BRAKE_START = 1.0
+    STOP_AT = 0.61
+
     def __init__(self):
-        self.stop_detected: bool = False
-        self.stop_start_time: float = None
-        self.stop_duration: float = 1.5
+        self.approach_distance: Optional[float] = None
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
-        if self.stop_detected:
-            if self.stop_start_time is None:
-                self.stop_start_time = time.time()
+        dist = self.approach_distance
+        
+        if dist is None or dist >= self.BRAKE_START:
+            return cmd
 
-            elapsed = time.time() - self.stop_start_time
-            if elapsed < self.stop_duration:
-                return self.stop_robot(cmd)
-            else:
-                self.stop_detected = False
-                self.stop_start_time = None
-        return cmd
+        if dist <= self.STOP_AT:
+            return Twist()
+        
+        factor = (dist - self.STOP_AT) / (self.BRAKE_START - self.STOP_AT)
+        factor = max(0.0, min(1.0, factor))
+
+        scaled = Twist()
+        scaled.linear.x = cmd.linear.x * factor
+        scaled.angular.z = cmd.angular.z
+        return scaled
