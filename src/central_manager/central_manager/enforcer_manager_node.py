@@ -42,9 +42,11 @@ class EnforcerManagerNode(Node):
 
         self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer(), CarFollowEnforcer()]
 
-        self._seen_aruco_ids: set = set()
-        self._stop_until: float = 0.0  # wallclock timestamp until which to output zeros
+        self._seen_aruco_ids: dict = {}
+        self._stop_until: float = 0.0
         self._stop_duration: float = 1.5
+        self._marker_forget_delay: float = 1.0
+        self.create_timer(0.5, self._cleanup_seen_markers)
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
@@ -99,8 +101,9 @@ class EnforcerManagerNode(Node):
                 and float(marker.get("z_forward", 0)) >= 0.15
             }
 
-            # Oublier les marqueurs qui ne sont plus dans le champ de vision proche
-            self._seen_aruco_ids &= close_ids_5x5
+            now_t = time.time()
+            for marker_id in close_ids_5x5:
+                self._seen_aruco_ids[marker_id] = now_t
 
             close_ids_4x4 = {
                 marker.get("id")
@@ -111,7 +114,7 @@ class EnforcerManagerNode(Node):
             }
             for marker_id in close_ids_5x5:
                 if marker_id not in self._seen_aruco_ids:
-                    self._seen_aruco_ids.add(marker_id)
+                    self._seen_aruco_ids[marker_id] = time.time()
                     self._stop_until = time.time() + self._stop_duration
                     self.get_logger().info(f"STOP TRIGGERED for marker {marker_id} — stopping for {self._stop_duration}s")
                     break
@@ -128,6 +131,13 @@ class EnforcerManagerNode(Node):
                 self.car_follow_enforcer.follow_distance = None
         except Exception:
             pass
+
+    def _cleanup_seen_markers(self) -> None:
+        now_t = time.time()
+        expired = [id_ for id_, ts in self._seen_aruco_ids.items() if now_t - ts > self._marker_forget_delay]
+        for id_ in expired:
+            del self._seen_aruco_ids[id_]
+            self.get_logger().debug(f"Marqueur {id_} oublié (plus vu depuis {self._marker_forget_delay}s)")
 
 def main(args=None):
     rclpy.init(args=args)
