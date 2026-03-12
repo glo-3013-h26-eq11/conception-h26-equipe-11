@@ -44,7 +44,7 @@ class EnforcerManagerNode(Node):
 
         self._seen_aruco_ids: dict = {}
         self._stop_until: float = 0.0
-        self._stop_duration: float = 1.5
+        self._stop_duration: float = 30.0
         self._marker_forget_delay: float = 1.0
         self.create_timer(0.5, self._cleanup_seen_markers)
 
@@ -101,7 +101,6 @@ class EnforcerManagerNode(Node):
                 and float(marker.get("z_forward", 0)) >= 0.15
             }
 
-            # Vérifier d'abord si un nouveau marqueur apparaît, PUIS mettre à jour les timestamps
             for marker_id in close_ids_5x5:
                 if marker_id not in self._seen_aruco_ids:
                     self._stop_until = time.time() + self._stop_duration
@@ -110,8 +109,7 @@ class EnforcerManagerNode(Node):
 
             now_t = time.time()
             for marker_id in close_ids_5x5:
-                self._seen_aruco_ids[marker_id] = now_t  # rafraîchir le timestamp
-
+                self._seen_aruco_ids[marker_id] = now_t
             close_ids_4x4 = {
                 marker.get("id")
                 for marker in markers_4x4
