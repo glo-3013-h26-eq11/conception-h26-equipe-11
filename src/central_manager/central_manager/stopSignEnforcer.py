@@ -9,10 +9,6 @@ class StopSignEnforcer(Enforcer):
         self.stop_start_time: float = None
         self.stop_duration: float = 1.5
 
-    @property
-    def is_stopping(self) -> bool:
-        return self.stop_start_time is not None
-
     def enforce_cmd(self, cmd: Twist) -> Twist:
         if self.stop_detected:
             if self.stop_start_time is None:
