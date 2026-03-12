@@ -44,7 +44,7 @@ class EnforcerManagerNode(Node):
 
         self._seen_aruco_ids: dict = {}
         self._stop_until: float = 0.0
-        self._stop_duration: float = 30.0
+        self._stop_duration: float = 1.5
         self._marker_forget_delay: float = 1.0
         self.create_timer(0.5, self._cleanup_seen_markers)
 
