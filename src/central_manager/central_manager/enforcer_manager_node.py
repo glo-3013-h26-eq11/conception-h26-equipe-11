@@ -91,8 +91,8 @@ class EnforcerManagerNode(Node):
                 angle = float(marker.get("angle_x_deg", 0))
                 z_fwd = float(marker.get("z_forward", 0))
                 if d <= 1.0 and angle <= 35.0 and z_fwd >= 0.15:
-                    if closest_stop_dist is None or d < closest_stop_dist:
-                        closest_stop_dist = d
+                    if closest_stop_dist is None or z_fwd < closest_stop_dist:
+                        closest_stop_dist = z_fwd
 
             self.stop_sign_enforcer.update_distance(closest_stop_dist)
 
