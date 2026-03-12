@@ -7,7 +7,6 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
 from typing import List
 import json
-import time
 import rclpy
 
 
@@ -41,12 +40,7 @@ class EnforcerManagerNode(Node):
         )
 
         self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer(), CarFollowEnforcer()]
-
-        self._seen_aruco_ids: dict = {}
-        self._stop_until: float = 0.0
-        self._stop_duration: float = 1.5
-        self._marker_forget_delay: float = 1.0
-        self.create_timer(0.5, self._cleanup_seen_markers)
+        self.stop_sign_enforcer._logger = self.get_logger()
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
@@ -75,9 +69,6 @@ class EnforcerManagerNode(Node):
             self.pub_invalid_destination.publish(invalid_dest_msg)
 
     def cmd_callback(self, cmd: Twist) -> None:
-        if time.time() < self._stop_until:
-            self.pub_cmd_vel_safe.publish(Twist())
-            return
         for enforcer in self.enforcers:
             cmd = enforcer.enforce_cmd(cmd)
         self.pub_cmd_vel_safe.publish(cmd)
@@ -93,50 +84,28 @@ class EnforcerManagerNode(Node):
             markers_5x5 = payload.get("markers_5x5", [])
             markers_4x4 = payload.get("markers_4x4", [])
 
-            close_ids_5x5 = {
-                marker.get("id")
-                for marker in markers_5x5
-                if float(marker.get("depth", 9999)) <= 0.61
-                and float(marker.get("angle_x_deg", 0)) <= 35.0
-                and float(marker.get("z_forward", 0)) >= 0.15
-            }
+            closest_stop_dist: float | None = None
+            for marker in markers_5x5:
+                d     = float(marker.get("depth", 9999))
+                angle = float(marker.get("angle_x_deg", 0))
+                z_fwd = float(marker.get("z_forward", 0))
+                if d <= 1.0 and angle <= 35.0 and z_fwd >= 0.15:
+                    if closest_stop_dist is None or d < closest_stop_dist:
+                        closest_stop_dist = d
 
-            for marker_id in close_ids_5x5:
-                if marker_id not in self._seen_aruco_ids:
-                    self._stop_until = time.time() + self._stop_duration
-                    self.get_logger().info(f"STOP TRIGGERED for marker {marker_id} — stopping for {self._stop_duration}s")
-                    break
+            self.stop_sign_enforcer.update_distance(closest_stop_dist)
 
-            now_t = time.time()
-            for marker_id in close_ids_5x5:
-                self._seen_aruco_ids[marker_id] = now_t
-            close_ids_4x4 = {
-                marker.get("id")
-                for marker in markers_4x4
-                if float(marker.get("depth", 9999)) <= 0.61
-                and float(marker.get("angle_x_deg", 0)) <= 35.0
-                and float(marker.get("z_forward", 0)) >= 0.15
-            }
-            
+            closest_vehicle_dist: float | None = None
             for marker in markers_4x4:
-                if (
-                    float(marker.get("depth", 9999)) <= 0.61
-                    and float(marker.get("angle_x_deg", 0)) <= 35.0
-                    and float(marker.get("z_forward", 0)) >= 0.15
-                ):
-                    self.car_follow_enforcer.follow_distance = float(marker.get("depth", 9999))
-                    break
-            else:
-                self.car_follow_enforcer.follow_distance = None
+                d     = float(marker.get("depth", 9999))
+                angle = float(marker.get("angle_x_deg", 0))
+                z_fwd = float(marker.get("z_forward", 0))
+                if angle <= 35.0 and z_fwd >= 0.15:
+                    if closest_vehicle_dist is None or d < closest_vehicle_dist:
+                        closest_vehicle_dist = d
+            self.car_follow_enforcer.follow_distance = closest_vehicle_dist
         except Exception:
             pass
-
-    def _cleanup_seen_markers(self) -> None:
-        now_t = time.time()
-        expired = [id_ for id_, ts in self._seen_aruco_ids.items() if now_t - ts > self._marker_forget_delay]
-        for id_ in expired:
-            del self._seen_aruco_ids[id_]
-            self.get_logger().debug(f"Marqueur {id_} oublié (plus vu depuis {self._marker_forget_delay}s)")
 
 def main(args=None):
     rclpy.init(args=args)
