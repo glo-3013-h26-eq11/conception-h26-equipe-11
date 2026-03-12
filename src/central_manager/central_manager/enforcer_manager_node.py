@@ -98,7 +98,10 @@ class EnforcerManagerNode(Node):
                 and float(marker.get("angle_x_deg", 0)) <= 35.0
                 and float(marker.get("z_forward", 0)) >= 0.15
             }
-            
+
+            # Oublier les marqueurs qui ne sont plus dans le champ de vision proche
+            self._seen_aruco_ids &= close_ids_5x5
+
             close_ids_4x4 = {
                 marker.get("id")
                 for marker in markers_4x4
