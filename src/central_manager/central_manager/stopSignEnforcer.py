@@ -5,7 +5,7 @@ from geometry_msgs.msg import Twist
 from central_manager.base_enforcer import Enforcer
 
 BRAKE_START_DIST:    float = 1.0
-STOP_TARGET_DIST:    float = 0.55
+STOP_TARGET_DIST:    float = 0.61
 STOP_DURATION:       float = 1.5
 COOLDOWN_DURATION:  float = 2.0
 DISTANCE_STALE_SEC: float = 0.5
@@ -58,7 +58,7 @@ class StopSignEnforcer(Enforcer):
             factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
             factor = max(0.0, min(1.0, factor))
             out = Twist()
-            out.linear.x  = max(cmd.linear.x * factor, 0.25)
+            out.linear.x  = max(cmd.linear.x * factor, 0.3)
             out.angular.z = cmd.angular.z
             return out
 
