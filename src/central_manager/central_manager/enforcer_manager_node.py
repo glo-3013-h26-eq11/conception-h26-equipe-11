@@ -101,9 +101,16 @@ class EnforcerManagerNode(Node):
                 and float(marker.get("z_forward", 0)) >= 0.15
             }
 
+            # Vérifier d'abord si un nouveau marqueur apparaît, PUIS mettre à jour les timestamps
+            for marker_id in close_ids_5x5:
+                if marker_id not in self._seen_aruco_ids:
+                    self._stop_until = time.time() + self._stop_duration
+                    self.get_logger().info(f"STOP TRIGGERED for marker {marker_id} — stopping for {self._stop_duration}s")
+                    break
+
             now_t = time.time()
             for marker_id in close_ids_5x5:
-                self._seen_aruco_ids[marker_id] = now_t
+                self._seen_aruco_ids[marker_id] = now_t  # rafraîchir le timestamp
 
             close_ids_4x4 = {
                 marker.get("id")
@@ -112,12 +119,6 @@ class EnforcerManagerNode(Node):
                 and float(marker.get("angle_x_deg", 0)) <= 35.0
                 and float(marker.get("z_forward", 0)) >= 0.15
             }
-            for marker_id in close_ids_5x5:
-                if marker_id not in self._seen_aruco_ids:
-                    self._seen_aruco_ids[marker_id] = time.time()
-                    self._stop_until = time.time() + self._stop_duration
-                    self.get_logger().info(f"STOP TRIGGERED for marker {marker_id} — stopping for {self._stop_duration}s")
-                    break
             
             for marker in markers_4x4:
                 if (
