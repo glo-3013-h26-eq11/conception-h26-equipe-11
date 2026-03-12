@@ -5,7 +5,7 @@ from central_manager.car_follow_enforcer import CarFollowEnforcer
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
-from typing import List
+from typing import List, Optional
 import json
 import rclpy
 
@@ -84,7 +84,7 @@ class EnforcerManagerNode(Node):
             markers_5x5 = payload.get("markers_5x5", [])
             markers_4x4 = payload.get("markers_4x4", [])
 
-            closest_stop_dist: float | None = None
+            closest_stop_dist: Optional[float] = None
             for marker in markers_5x5:
                 d     = float(marker.get("depth", 9999))
                 angle = float(marker.get("angle_x_deg", 0))
@@ -95,7 +95,7 @@ class EnforcerManagerNode(Node):
 
             self.stop_sign_enforcer.update_distance(closest_stop_dist)
 
-            closest_vehicle_dist: float | None = None
+            closest_vehicle_dist: Optional[float] = None
             for marker in markers_4x4:
                 d     = float(marker.get("depth", 9999))
                 angle = float(marker.get("angle_x_deg", 0))

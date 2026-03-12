@@ -1,5 +1,6 @@
 import time
 from enum import Enum, auto
+from typing import Optional
 from geometry_msgs.msg import Twist
 from central_manager.base_enforcer import Enforcer
 
@@ -19,12 +20,12 @@ class _State(Enum):
 class StopSignEnforcer(Enforcer):
     def __init__(self, stop_duration: float = STOP_DURATION) -> None:
         self._state: _State = _State.IDLE
-        self._stop_start: float | None = None
+        self._stop_start: Optional[float] = None
         self.stop_duration: float = stop_duration
-        self._distance: float | None = None
+        self._distance: Optional[float] = None
         self._logger = None
 
-    def update_distance(self, distance: float | None) -> None:
+    def update_distance(self, distance: Optional[float]) -> None:
         self._distance = distance
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
