@@ -105,6 +105,7 @@ class EnforcerManagerNode(Node):
                 if marker_id not in self._seen_aruco_ids:
                     self._seen_aruco_ids.add(marker_id)
                     self.stop_sign_enforcer.stop_detected = True
+                    self.get_logger().info(f"STOP TRIGGERED for marker {marker_id}")
                     break
             
             for marker in markers_4x4:
