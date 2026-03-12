@@ -101,8 +101,6 @@ class EnforcerManagerNode(Node):
                 and float(marker.get("z_forward", 0)) >= 0.15
             }
 
-            self._seen_aruco_ids &= close_ids_5x5
-
             for marker_id in close_ids_5x5:
                 if marker_id not in self._seen_aruco_ids:
                     self._seen_aruco_ids.add(marker_id)
