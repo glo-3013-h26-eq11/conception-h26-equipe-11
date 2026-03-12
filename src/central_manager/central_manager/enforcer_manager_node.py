@@ -93,22 +93,9 @@ class EnforcerManagerNode(Node):
             markers_5x5 = payload.get("markers_5x5", [])
             markers_4x4 = payload.get("markers_4x4", [])
 
-            approach_markers_5x5 = [
-                marker for marker in markers_5x5
-                if float(marker.get("depth", 9999)) <= StopSignEnforcer.BRAKE_START
-                and float(marker.get("angle_x_deg", 0)) <= 35.0
-                and float(marker.get("z_forward", 0)) >= 0.15
-            ]
-
-            if approach_markers_5x5:
-                closest = min(approach_markers_5x5, key=lambda m: float(m.get("depth", 9999)))
-                self.stop_sign_enforcer.approach_distance = float(closest.get("depth", 9999))
-            else:
-                self.stop_sign_enforcer.approach_distance = None
-
             close_ids_5x5 = {
                 marker.get("id")
-                for marker in approach_markers_5x5
+                for marker in markers_5x5
                 if float(marker.get("depth", 9999)) <= 0.61
                 and float(marker.get("angle_x_deg", 0)) <= 35.0
                 and float(marker.get("z_forward", 0)) >= 0.15
