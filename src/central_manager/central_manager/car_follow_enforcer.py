@@ -4,7 +4,7 @@ from central_manager.base_enforcer import Enforcer
 
 class CarFollowEnforcer(Enforcer):
     def __init__(self):
-        self.min_follow_distance = 0.2
+        self.min_follow_distance = 0.4
         self.follow_distance: Optional[float] = None
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
