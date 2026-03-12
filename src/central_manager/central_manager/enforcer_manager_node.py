@@ -121,7 +121,12 @@ class EnforcerManagerNode(Node):
                 self.car_follow_enforcer.follow_distance = None
         except Exception:
             pass
-
+    def aruco_5x5_callback(self) -> None:
+        enforcer = self.stop_sign_enforcer
+        if not enforcer.is_stopping and not enforcer.is_in_cooldown:
+            enforcer.stop_detected = True
+        cmd = self.stop_sign_enforcer.enforce_cmd(enforcer)
+        self.pub_cmd_vel_safe(cmd)
 
 def main(args=None):
     rclpy.init(args=args)
