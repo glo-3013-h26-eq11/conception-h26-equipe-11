@@ -41,6 +41,7 @@ class EnforcerManagerNode(Node):
 
         self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer(), CarFollowEnforcer()]
         self.stop_sign_enforcer._logger = self.get_logger()
+        self.car_follow_enforcer._logger = self.get_logger()
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
@@ -99,11 +100,10 @@ class EnforcerManagerNode(Node):
             for marker in markers_4x4:
                 d     = float(marker.get("depth", 9999))
                 angle = float(marker.get("angle_x_deg", 0))
-                z_fwd = float(marker.get("z_forward", 0))
-                if angle <= 35.0 and z_fwd >= 0.15:
+                if angle <= 45.0:
                     if closest_vehicle_dist is None or d < closest_vehicle_dist:
                         closest_vehicle_dist = d
-            self.car_follow_enforcer.follow_distance = closest_vehicle_dist
+            self.car_follow_enforcer.update_distance(closest_vehicle_dist)
         except Exception:
             pass
 

@@ -95,13 +95,13 @@ class ArucoReaderNode(Node):
 
             if ids_4x4 is not None:
                 for i, marker_id in enumerate(ids_4x4.flatten()):
-                    depth, angle, _ = self.calculate_marker_depth(
+                    depth, angle, z_fwd = self.calculate_marker_depth(
                         corners_4x4[i], marker_size=0.02
                     )
 
-                    detections_4x4.append({"id": int(marker_id), "depth": float(depth)})
+                    detections_4x4.append({"id": int(marker_id), "depth": float(depth), "angle_x_deg": float(angle), "z_forward": float(z_fwd)})
 
-                    self.get_logger().info(f"4x4 Marker {marker_id}: {depth:.3f} m")
+                    self.get_logger().info(f"4x4 Marker {marker_id}: {depth:.3f} m  angle={angle:.1f}deg  Z={z_fwd:.3f}m")
 
             if ids_5x5 is not None:
                 for i, marker_id in enumerate(ids_5x5.flatten()):
