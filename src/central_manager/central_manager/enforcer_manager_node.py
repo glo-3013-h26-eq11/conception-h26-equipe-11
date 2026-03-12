@@ -5,7 +5,7 @@ from central_manager.car_follow_enforcer import CarFollowEnforcer
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
-from typing import List
+from typing import List, Optional
 import json
 import rclpy
 
@@ -40,8 +40,7 @@ class EnforcerManagerNode(Node):
         )
 
         self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), StopSignEnforcer(), CarFollowEnforcer()]
-
-        self._seen_aruco_ids: set = set()
+        self.stop_sign_enforcer._logger = self.get_logger()
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
@@ -85,43 +84,28 @@ class EnforcerManagerNode(Node):
             markers_5x5 = payload.get("markers_5x5", [])
             markers_4x4 = payload.get("markers_4x4", [])
 
-            close_ids_5x5 = {
-                marker.get("id")
-                for marker in markers_5x5
-                if float(marker.get("depth", 9999)) <= 0.61
-                and float(marker.get("angle_x_deg", 0)) <= 35.0
-                and float(marker.get("z_forward", 0)) >= 0.15
-            }
-            
-            close_ids_4x4 = {
-                marker.get("id")
-                for marker in markers_4x4
-                if float(marker.get("depth", 9999)) <= 0.61
-                and float(marker.get("angle_x_deg", 0)) <= 35.0
-                and float(marker.get("z_forward", 0)) >= 0.15
-            }
+            closest_stop_dist: Optional[float] = None
+            for marker in markers_5x5:
+                d     = float(marker.get("depth", 9999))
+                angle = float(marker.get("angle_x_deg", 0))
+                z_fwd = float(marker.get("z_forward", 0))
+                if d <= 1.0 and angle <= 35.0 and z_fwd >= 0.15:
+                    if closest_stop_dist is None or d < closest_stop_dist:
+                        closest_stop_dist = d
 
-            self._seen_aruco_ids &= close_ids_5x5
+            self.stop_sign_enforcer.update_distance(closest_stop_dist)
 
-            for marker_id in close_ids_5x5:
-                if marker_id not in self._seen_aruco_ids:
-                    self._seen_aruco_ids.add(marker_id)
-                    self.stop_sign_enforcer.stop_detected = True
-                    break
-            
+            closest_vehicle_dist: Optional[float] = None
             for marker in markers_4x4:
-                if (
-                    float(marker.get("depth", 9999)) <= 0.61
-                    and float(marker.get("angle_x_deg", 0)) <= 35.0
-                    and float(marker.get("z_forward", 0)) >= 0.15
-                ):
-                    self.car_follow_enforcer.follow_distance = float(marker.get("depth", 9999))
-                    break
-            else:
-                self.car_follow_enforcer.follow_distance = None
+                d     = float(marker.get("depth", 9999))
+                angle = float(marker.get("angle_x_deg", 0))
+                z_fwd = float(marker.get("z_forward", 0))
+                if angle <= 35.0 and z_fwd >= 0.15:
+                    if closest_vehicle_dist is None or d < closest_vehicle_dist:
+                        closest_vehicle_dist = d
+            self.car_follow_enforcer.follow_distance = closest_vehicle_dist
         except Exception:
             pass
-
 
 def main(args=None):
     rclpy.init(args=args)
