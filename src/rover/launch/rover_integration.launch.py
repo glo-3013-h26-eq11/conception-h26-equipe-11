@@ -30,7 +30,7 @@ def generate_launch_description() -> LaunchDescription:
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(lidar_launch),
                 condition=IfCondition(LaunchConfiguration("use_lidar")),
-                launch_arguments={"output_topic": "/cmd_vel_safe"}.items(),
+                launch_arguments={"output_topic": "/cmd_vel"}.items(),
             ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(camera_launch),
