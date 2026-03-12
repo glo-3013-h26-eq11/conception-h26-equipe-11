@@ -7,7 +7,7 @@ VEHICLE_STALE_SEC: float = 0.5
 
 class CarFollowEnforcer(Enforcer):
     def __init__(self):
-        self.min_follow_distance: float = 0.5
+        self.min_follow_distance: float = 0.3
         self._follow_distance: Optional[float] = None
         self._last_update: float = 0.0
         self._logger = None
@@ -27,5 +27,5 @@ class CarFollowEnforcer(Enforcer):
             self._logger.info(f"Véhicule devant à {d:.2f} m — vitesse x{factor:.2f}")
         out = Twist()
         out.linear.x  = cmd.linear.x * factor
-        out.angular.z = cmd.angular.z
+        out.angular.z = cmd.angular.z * factor
         return out
