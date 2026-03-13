@@ -41,6 +41,7 @@ class EnforcerManagerNode(Node):
         )
 
         self.enforcers: List[Enforcer] = [
+            LeftTurnEnforcer(),
             MerchandiseEnforcer(),
             StopSignEnforcer(),
             CarFollowEnforcer(),
@@ -49,16 +50,20 @@ class EnforcerManagerNode(Node):
         self.car_follow_enforcer._logger = self.get_logger()
 
     @property
-    def merchandise_enforcer(self) -> MerchandiseEnforcer:
-        return self.enforcers[0]
+    def left_turn_enforcer(self) -> LeftTurnEnforcer:
+        return self.left_turn_enforcer[0]
 
     @property
-    def stop_sign_enforcer(self) -> StopSignEnforcer:
+    def merchandise_enforcer(self) -> MerchandiseEnforcer:
         return self.enforcers[1]
 
     @property
-    def car_follow_enforcer(self) -> CarFollowEnforcer:
+    def stop_sign_enforcer(self) -> StopSignEnforcer:
         return self.enforcers[2]
+
+    @property
+    def car_follow_enforcer(self) -> CarFollowEnforcer:
+        return self.enforcers[3]
 
     def load_callback(self, load_msg: Bool) -> None:
         self.merchandise_enforcer.load_detected = load_msg.data
@@ -77,9 +82,9 @@ class EnforcerManagerNode(Node):
     def cmd_callback(self, cmd: Twist) -> None:
         for enforcer in self.enforcers:
             cmd = enforcer.enforce_cmd(cmd)
-        
+
         self.left_turn_enforcer.update_real_speed(cmd)
-            
+
         self.pub_cmd_vel_safe.publish(cmd)
 
     def route_nodes_callback(self, msg: String) -> None:

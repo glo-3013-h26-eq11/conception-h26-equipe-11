@@ -22,16 +22,6 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription(
         [
-            DeclareLaunchArgument("use_lidar", default_value="true"),
-            DeclareLaunchArgument("use_camera", default_value="true"),
-            DeclareLaunchArgument("use_navigation", default_value="true"),
-            DeclareLaunchArgument("use_rover_usb", default_value="false"),
-            DeclareLaunchArgument("start_depthai", default_value="true"),
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(lidar_launch),
-                condition=IfCondition(LaunchConfiguration("use_lidar")),
-                launch_arguments={"output_topic": "/cmd_vel"}.items(),
-            ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(camera_launch),
                 condition=IfCondition(LaunchConfiguration("use_camera")),
@@ -60,37 +50,10 @@ def generate_launch_description() -> LaunchDescription:
                 condition=IfCondition(LaunchConfiguration("use_rover_usb")),
             ),
             Node(
-                package="navigation",
-                executable="map_processor_node",
-                name="map_processor_node",
+                package="central_manager",
+                executable="left_turn_enforcer_node",
+                name="left_turn_enforcer_node",
                 output="screen",
-                condition=IfCondition(LaunchConfiguration("use_navigation")),
-            ),
-            Node(
-                package="navigation",
-                executable="route_planner",
-                name="route_planner_node",
-                output="screen",
-                condition=IfCondition(LaunchConfiguration("use_navigation")),
-            ),
-            Node(
-                package="navigation",
-                executable="aruco_localizer_node",
-                name="aruco_localizer_node",
-                output="screen",
-                condition=IfCondition(LaunchConfiguration("use_navigation")),
-            ),
-            Node(
-                package="navigation",
-                executable="route_executor_node",
-                name="route_executor_node",
-                output="screen",
-                parameters=[
-                    {
-                        "wall_cmd_topic": "/wall_follower/cmd_vel",
-                        "output_cmd_topic": "/cmd_vel",
-                    }
-                ],
             ),
         ]
     )
