@@ -17,6 +17,12 @@ if [! -f "scripts/rover.service"]; then
     exit 1
 fi
 
+# Check if Docker is installed
+if ! command -v docker &> /dev/null; then
+    echo "[ERROR] Docker is not installed!"
+    echo "        Please install Docker first."
+    exit 1
+fi
 
 # Check if running with sudo
 if ["EUID" -ne 0]; then
@@ -28,14 +34,18 @@ if ["EUID" -ne 0]; then
 fi
 
 
-echo "[1/3] Copying rover.service to /etc/systemd/system/..."
+echo "[1/4] Copying rover.service to /etc/systemd/system/..."
 cp scripts/rover.service /etc/systemd/system/
 
-echo "[2/3] Reloading Systemd daemon..."
+echo "[2/4] Reloading Systemd daemon..."
 systemctl daemon-reload
 
-echo "[3/3] Enabling rover service for auto-start on boot..."
+echo "[3/4] Enabling rover service for auto-start on boot..."
 systemctl enable rover.service
+
+echo "[4/4] Pulling latest Docker image..."
+docker pull ghcr.io/glo-3013-h26-eq11/conception-h26-equipe-11/ros2-test-image:latest || 
+       echo "[WARNING] Failed to pull image, will try at service start"
 
 
 echo ""
