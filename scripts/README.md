@@ -1,52 +1,59 @@
 # Rover System Initialization
 
-This directory contains the systemd service configuration and installation script for the rover robot.
+This directory contains the scripts required to automatically start the rover ROS2 system using **systemd** and **Docker**.
 
 ## Files
 
-- **`rover.service`** - systemd service configuration file
-- **`install_systemd.sh`** - automated installation script
-- **`README.md`** - this file for documentation
-
-## Structure
-````
 scripts/
-├── rover.service         
-├── install_systemd.sh    
-└── README.md        
+├── rover.service           # systemd service definition
+├── install_systemd.sh      # installation script
+├── run_rover_docker.sh     # starts the Docker container
+└── README.md
+
+ROS2 package:
 
 src/rover/rover/launch/
 └── main.launch.py
-````
 
-## Installation
+---
 
-### 1. Build the workspace
-```bash
-cd ~/ros2_ws
-git pull (optional)
+# System Architecture
+
+The rover system runs inside a Docker container and is automatically started using systemd.
+
+Execution flow:
+
+Installation
+    ↓
+install_systemd.sh
+    ↓
+systemd service installed
+    ↓
+Rover boot
+    ↓
+systemd starts rover.service
+    ↓
+run_rover_docker.sh
+    ↓
+docker pull latest image
+    ↓
+docker run container
+    ↓
 colcon build
-source install/setup.bash
-```
+    ↓
+ros2 launch rover main.launch.py
 
-### 2. Run the installation script
+---
 
-From the workspace root directory:
+# Installation
+
+Run once on the rover machine.
+
+From the **repository root directory**:
+
 ```bash
+cd /home/norlab/repos/conception-h26-equipe-11
 ./scripts/install_systemd.sh
-```
-
-The script will automatically:
-- Copy `rover.service` to `/etc/systemd/system/`
-- Reload the systemd daemon
-- Enable auto-start on boot
-- Request sudo privileges if needed
-
-### 3. Start the service (optional)
-
-To start the robot immediately without rebooting:
-```bash
-sudo systemctl start rover.service
 ```
 
 ## Usage
@@ -63,12 +70,11 @@ sudo systemctl start rover.service
 | `sudo systemctl enable rover.service` | Enable auto-start on boot |
 | `sudo systemctl disable rover.service` | Disable auto-start on boot |
 
-### Development Workflow
+### Development Workflow - Local Test
 
 After modifying code:
 ```bash
-# 1. Build the workspace
-colcon build
+# 1. Modify code
 
 # 2. Restart the service to apply changes
 sudo systemctl restart rover.service
@@ -79,7 +85,7 @@ journalctl -u rover.service -f
 
 ## Notes
 
-- The service automatically restarts on failure (5 second delay)
+- The service always automatically restarts (5 second delay)
 - Logs are stored in the systemd journal (use `journalctl` to view)
 - The service waits for network availability before starting
 ````
