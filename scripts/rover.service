@@ -1,17 +1,14 @@
 [unit]
 Description=Rover Initialization
-After=network.target
+After=network.target docker.service
+Requires=docker.service
 
 [service]
 Type=simple
-User=jetson
-WorkingDirectory=/home/jetson/ros2_ws
+User=norlab
+WorkingDirectory=/home/norlab/repos/conception-h26-equipe-11
 Environment="ROS_DOMAIN_ID=11"
-ExecStart=/bin/bash -c '
-    source /opt/ros/humble/setup.bash &&
-    source /home/jetson/ros2_ws/install/setup.bash &&
-    ros launch rover main.launch.py
-'
+ExecStart=./scripts/run_rover_docker.sh
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
