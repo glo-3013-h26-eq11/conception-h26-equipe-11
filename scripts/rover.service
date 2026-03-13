@@ -1,18 +1,21 @@
-[unit]
+[Unit]
 Description=Rover Initialization
 After=network.target docker.service
 Requires=docker.service
 
-[service]
+[Service]
 Type=simple
 User=norlab
 WorkingDirectory=/home/norlab/repos/conception-h26-equipe-11
 Environment="ROS_DOMAIN_ID=11"
-ExecStart=./scripts/run_rover_docker.sh
-Restart=on-failure
+ExecStart=/home/norlab/repos/conception-h26-equipe-11/scripts/run_rover_docker.sh
+Restart=always
 RestartSec=5
+
 StandardOutput=journal
 StandardError=journal
 
-[install]
-WantedBy=mutli-user.target
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
