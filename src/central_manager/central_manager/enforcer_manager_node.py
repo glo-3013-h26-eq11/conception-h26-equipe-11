@@ -51,7 +51,7 @@ class EnforcerManagerNode(Node):
 
     @property
     def left_turn_enforcer(self) -> LeftTurnEnforcer:
-        return self.left_turn_enforcer[0]
+        return self.enforcers[0]
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
