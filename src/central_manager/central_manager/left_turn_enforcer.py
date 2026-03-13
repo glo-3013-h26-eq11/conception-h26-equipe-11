@@ -8,6 +8,7 @@ import time
 ARC_RADIUS = 0.27  # m
 LEFT_TURN_SPEED = 0.4  # m
 
+
 class LeftTurnEnforcer(Enforcer):
     def __init__(self):
         self.last_real_speed_timer = None
@@ -54,13 +55,15 @@ class LeftTurnNode(Node):
 
         self.publisher = self.create_publisher(Twist, "/cmd_vel", 10)
 
-        self.start_delay_timer = self.create_timer(10.0, self.start_delay_timer_callback)
+        self.start_delay_timer = self.create_timer(
+            10.0, self.start_delay_timer_callback
+        )
 
         self.timer_period = 0.2  # s
 
     def start_delay_timer_callback(self):
         self.timer = self.create_timer(self.timer_period, self.timer_callback)
-        
+
         self.start_delay_timer.cancel()
 
     def timer_callback(self):
