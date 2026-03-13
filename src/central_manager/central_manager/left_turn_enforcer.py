@@ -22,7 +22,7 @@ class LeftTurnEnforcer(Enforcer):
     def update_real_speed(self, real_speed_cmd: Twist):
         dt = self._compute_delta_time()
 
-        self.travel_distance_already_done = real_speed_cmd.linear.x * dt
+        self.travel_distance_already_done += real_speed_cmd.linear.x * dt
 
     def _compute_delta_time(self):
         if self.last_real_speed_timer is None:
