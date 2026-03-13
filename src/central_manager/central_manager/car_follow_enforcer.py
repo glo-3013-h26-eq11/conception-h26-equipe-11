@@ -29,5 +29,4 @@ class CarFollowEnforcer(Enforcer):
         out = Twist()
         out.linear.x = cmd.linear.x * factor
         out.angular.z = cmd.angular.z * factor
-        
         return out
