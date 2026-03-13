@@ -10,7 +10,7 @@ echo "-----------------------------------------"
 echo ""
 
 # Check if running from correct directory
-if [! -f "scripts/rover.service"]; then
+if [ ! -f "scripts/rover.service" ]; then
     echo "[ERROR] rover.service not found!"
     echo "        Please run this script from the workspace root:"
     echo "        ./scripts/install_systemd.sh"
@@ -25,7 +25,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check if running with sudo
-if ["EUID" -ne 0]; then
+if [ "$EUID" -ne 0 ]; then
     echo "[INFO] This script requires sudo privileges."
     echo "       Re-running with sudo"
     echo ""
@@ -33,19 +33,22 @@ if ["EUID" -ne 0]; then
     exit $?
 fi
 
+# Check if actual user has docker permissions
+if ! groups "$SUDO_USER" | grep -q docker; then
+    echo "[WARNING] User $SUDO_USER is not in the docker group."
+    echo "          Docker commands may require sudo."
+fi
 
-echo "[1/4] Copying rover.service to /etc/systemd/system/..."
-cp scripts/rover.service /etc/systemd/system/
+chmod +x scripts/run_rover_docker.sh
 
-echo "[2/4] Reloading Systemd daemon..."
+echo "[1/3] Copying rover.service to /etc/systemd/system/..."
+cp scripts/rover.service /etc/systemd/system/rover.service
+
+echo "[2/3] Reloading Systemd daemon..."
 systemctl daemon-reload
 
-echo "[3/4] Enabling rover service for auto-start on boot..."
+echo "[3/3] Enabling rover service for auto-start on boot..."
 systemctl enable rover.service
-
-echo "[4/4] Pulling latest Docker image..."
-docker pull ghcr.io/glo-3013-h26-eq11/conception-h26-equipe-11/ros2-test-image:latest || 
-       echo "[WARNING] Failed to pull image, will try at service start"
 
 
 echo ""
