@@ -12,10 +12,9 @@ LEFT_TURN_SPEED = 0.2  # m
 
 class LeftTurnEnforcer(Enforcer):
     def __init__(self):
-        self.real_speed = 0.0
         self.last_real_speed_timer = None
 
-        self.steering_angle_90 = math.atan(WHEEL_BASE / ARC_RADIUS)
+        self.steering_angle_90 = LEFT_TURN_SPEED / ARC_RADIUS
         self.travel_distance_90 = 2 * math.pi * ARC_RADIUS / 4
         self.travel_distance_already_done = 0
 
