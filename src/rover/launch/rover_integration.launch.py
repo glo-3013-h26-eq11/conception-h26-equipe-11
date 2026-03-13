@@ -22,6 +22,10 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument("use_lidar", default_value="true"),
+            DeclareLaunchArgument("use_camera", default_value="true"),
+            DeclareLaunchArgument("use_rover_usb", default_value="true"),
+            DeclareLaunchArgument("start_depthai", default_value="true"),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(camera_launch),
                 condition=IfCondition(LaunchConfiguration("use_camera")),
