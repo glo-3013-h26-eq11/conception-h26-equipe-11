@@ -54,8 +54,14 @@ class LeftTurnNode(Node):
 
         self.publisher = self.create_publisher(Twist, "/cmd_vel", 10)
 
+        self.start_delay_timer = self.create_timer(5.0, self.start_delay_timer_callback)
+
         self.timer_period = 0.2  # s
+
+    def start_delay_timer_callback(self):
         self.timer = self.create_timer(self.timer_period, self.timer_callback)
+        
+        self.start_delay_timer.cancel()
 
     def timer_callback(self):
         self.publisher.publish(Twist())
