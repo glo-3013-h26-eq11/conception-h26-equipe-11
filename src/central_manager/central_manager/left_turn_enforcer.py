@@ -5,7 +5,7 @@ import rclpy
 import math
 import time
 
-ARC_RADIUS = 0.22  # m
+ARC_RADIUS = 0.25  # m
 LEFT_TURN_SPEED = 0.4  # m
 
 class LeftTurnEnforcer(Enforcer):
