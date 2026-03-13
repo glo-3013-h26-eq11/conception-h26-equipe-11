@@ -28,6 +28,7 @@ RUN git submodule update --init --recursive
 RUN python3 -m pip install --user -r requirements.txt
 
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash"
+RUN rm -rf build/ install/ log/
 
 RUN cd src/web_interface/web_interface && \
     npm install && \

@@ -7,18 +7,19 @@ from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
 LOOKAHEAD = 0.8  # m
-DESIRED_DISTANCE_FROM_WALL = 0.10  # m
+DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.5  # m
-KP = 1.0
-KD = 0.4
+MIN_FRONT_DISTANCE = 0.4  # m
+KP = 1.5
+KD = 0.5
 KI = 0.05
 MAX_STEERING = 0.9  # radians
-SPEED = 0.4  # m/s
+SPEED = 0.5  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-FRONT_ARC_DEG = 10
-CORNER_THRESHOLD = 0.60  # m
+CORNER_THRESHOLD = 0.45  # m
+RIGHT_TURN_DURATION = 1.2
+COAST_DURATION = 0.15
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -34,18 +35,25 @@ def is_valid_lidar_scan(scan: float) -> bool:
 class WallFollowNode(Node):
     def __init__(self):
         super().__init__("wall_follow_node")
-        self.create_subscription(LaserScan, "/scan", self.lidar_callback, 10)
-        self.drive_pub = self.create_publisher(Twist, "cmd_vel", 10)
+        self.declare_parameter("scan_topic", "/scan")
+        self.declare_parameter("output_topic", "/cmd_vel")
+
+        scan_topic = self.get_parameter("scan_topic").value
+        output_topic = self.get_parameter("output_topic").value
+
+        self.create_subscription(LaserScan, scan_topic, self.lidar_callback, 10)
+        self.drive_pub = self.create_publisher(Twist, output_topic, 10)
         self.last_time = None
         self.last_steering = 0.0
         self.last_errors_window = np.array([])
+        self._corner_detected = False
+        self._corner_time = None
 
     def lidar_callback(self, scan: LaserScan):
         lidar_range_array = scan.ranges
         angle_min = scan.angle_min
         angle_increment = scan.angle_increment
-
-        front_angles = np.arange(-FRONT_ARC_DEG, FRONT_ARC_DEG + 1, 1)
+        speed = SPEED
 
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
@@ -70,6 +78,23 @@ class WallFollowNode(Node):
         self.get_logger().info(
             f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
         )
+        if self._corner_detected:
+            elapsed = (now - self._corner_time) * 1e-9
+            if elapsed < COAST_DURATION:
+                self.send_control_command(SPEED, 0.0)
+                return
+            elif elapsed < COAST_DURATION + RIGHT_TURN_DURATION:
+                self.send_control_command(0.25, -MAX_STEERING)
+                return
+            else:
+                self._corner_detected = False
+
+        if not self._corner_detected:
+            if not is_valid_lidar_scan(a) or a > CORNER_THRESHOLD + 0.2:
+                self._corner_detected = True
+                self._corner_time = now
+                self.get_logger().info("Right turn triggered!")
+                return
 
         if self.last_time is None or len(self.last_errors_window) == 0:
             error_diff = 0.0
@@ -93,37 +118,34 @@ class WallFollowNode(Node):
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
 
-        for deg in front_angles:
+        front_distance = angle_to_distance(
+            LIDAR_OFFSET, lidar_range_array, angle_min, angle_increment
+        )
 
-            angle_rad = LIDAR_OFFSET + np.radians(deg)
-            dist = angle_to_distance(
-                angle_rad, lidar_range_array, angle_min, angle_increment
+        if (
+            is_valid_lidar_scan(a)
+            and a < CORNER_THRESHOLD - 0.15
+            and front_distance <= MIN_FRONT_DISTANCE
+        ):
+            bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
+            corner_steering = MAX_STEERING
+            speed = max(SPEED * (1 - bias_strength), 0.25)
+            steering = max(steering, corner_steering)
+            steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+
+            self.get_logger().info(
+                f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
             )
-
-            if (
-                is_valid_lidar_scan(a)
-                and a < CORNER_THRESHOLD
-                and dist <= MIN_FRONT_DISTANCE
-            ):
-                bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
-                corner_steering = MAX_STEERING * bias_strength
-                steering = max(steering, corner_steering)
-                steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-                self.get_logger().info(
-                    f"Right corner at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
-                )
 
         self.get_logger().info(
             f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
         )
 
-        self.send_control_command(SPEED, steering)
+        self.send_control_command(speed, steering)
 
     def send_control_command(self, speed: float, steering: float):
-        if abs(steering) < 0.05:
-            angular_z = 0.0
-        else:
-            angular_z = speed * math.tan(steering) / WHEELBASE
+
+        angular_z = speed * math.tan(steering) / WHEELBASE
 
         twist = Twist()
         twist.linear.x = speed

@@ -2,25 +2,26 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
-from launch.conditions import UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description() -> LaunchDescription:
-    depthai_share_dir = get_package_share_directory("depthai_ros_driver")
-    depthai_rgbd_pcl_launch_path = os.path.join(
-        depthai_share_dir,
-        "launch",
-        "rgbd_pcl.launch.py",
-    )
     depthai_camera_launch_path = os.path.join(
-        depthai_share_dir,
+        get_package_share_directory("depthai_ros_driver"),
         "launch",
         "camera.launch.py",
+    )
+
+    # RGB-only params file: avoids RGBD pipeline that crashes OV7251 mono sensors
+    # on OAK-D-Lite (those sensors only support 480P/400P, not the 720P RGBD needs).
+    oakd_lite_params = os.path.join(
+        get_package_share_directory("camera"),
+        "config",
+        "oakd_lite_rgb.yaml",
     )
 
     return LaunchDescription(
@@ -31,16 +32,13 @@ def generate_launch_description() -> LaunchDescription:
                 description="Start depthai_ros_driver inside this launch.",
             ),
             DeclareLaunchArgument(
-                "use_rgbd_pcl",
-                default_value="true",
-                description=(
-                    "If true, start depthai_ros_driver/rgbd_pcl.launch.py (recommended). "
-                    "If false, start depthai_ros_driver/camera.launch.py."
-                ),
+                "params_file",
+                default_value=oakd_lite_params,
+                description="Path to depthai_ros_driver params YAML file.",
             ),
             DeclareLaunchArgument(
                 "image_topic",
-                default_value="/oak/rgb/image_rect/compressed",
+                default_value="/oak/rgb/image_raw",
             ),
             DeclareLaunchArgument(
                 "detections_topic",
@@ -48,17 +46,11 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument("publish_empty", default_value="false"),
             DeclareLaunchArgument("log_every_n", default_value="10"),
-            GroupAction(
-                actions=[
-                    IncludeLaunchDescription(
-                        PythonLaunchDescriptionSource(depthai_rgbd_pcl_launch_path),
-                        condition=IfCondition(LaunchConfiguration("use_rgbd_pcl")),
-                    ),
-                    IncludeLaunchDescription(
-                        PythonLaunchDescriptionSource(depthai_camera_launch_path),
-                        condition=UnlessCondition(LaunchConfiguration("use_rgbd_pcl")),
-                    ),
-                ],
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(depthai_camera_launch_path),
+                launch_arguments={
+                    "params_file": LaunchConfiguration("params_file"),
+                }.items(),
                 condition=IfCondition(LaunchConfiguration("start_depthai")),
             ),
             Node(

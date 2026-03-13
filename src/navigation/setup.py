@@ -26,6 +26,8 @@ setup(
             "route_planner = navigation.route_planner_node:main",
             "map_processor_node = navigation.map_processor_node:main",
             "goal_selector_node = navigation.goal_selector_node:main",
+            "aruco_localizer_node = navigation.aruco_localizer_node:main",
+            "route_executor_node = navigation.route_executor_node:main",
         ],
     },
 )
