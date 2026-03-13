@@ -1,5 +1,6 @@
 from central_manager.base_enforcer import Enforcer
 from central_manager.merchandise_enforcer import MerchandiseEnforcer
+from central_manager.left_turn_enforcer import LeftTurnEnforcer
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
@@ -30,11 +31,15 @@ class EnforcerManagerNode(Node):
             Bool, "merchandise_destination_invalid", 10
         )
 
-        self.enforcers: List[Enforcer] = [MerchandiseEnforcer()]
+        self.enforcers: List[Enforcer] = [MerchandiseEnforcer(), LeftTurnEnforcer()]
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
         return self.enforcers[0]
+
+    @property
+    def left_turn_enforcer(self) -> LeftTurnEnforcer:
+        return self.enforcers[1]
 
     def load_callback(self, load_msg: Bool) -> None:
         self.merchandise_enforcer.load_detected = load_msg.data
@@ -53,6 +58,9 @@ class EnforcerManagerNode(Node):
     def cmd_callback(self, cmd: Twist) -> None:
         for enforcer in self.enforcers:
             cmd = enforcer.enforce_cmd(cmd)
+        
+        self.left_turn_enforcer.update_real_speed(cmd)
+            
         self.pub_cmd_vel_safe.publish(cmd)
 
     def route_nodes_callback(self, msg: String) -> None:
