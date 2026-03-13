@@ -113,7 +113,7 @@ class EnforcerManagerNode(Node):
             for marker in markers_4x4:
                 d = float(marker.get("depth", 9999))
                 angle = float(marker.get("angle_x_deg", 0))
-                if angle <= 75.0:
+                if angle <= 90.0:
                     if closest_vehicle_dist is None or d < closest_vehicle_dist:
                         closest_vehicle_dist = d
             self.car_follow_enforcer.update_distance(closest_vehicle_dist)
