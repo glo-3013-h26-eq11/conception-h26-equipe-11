@@ -8,6 +8,7 @@ import time
 ARC_RADIUS = 0.27  # m
 LEFT_TURN_SPEED = 0.4  # m
 
+
 class LeftTurnEnforcer(Enforcer):
     def __init__(self):
         self.last_real_speed_timer = None

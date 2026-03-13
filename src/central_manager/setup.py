@@ -24,7 +24,7 @@ setup(
     entry_points={
         "console_scripts": [
             "enforcer_manager_node = central_manager.enforcer_manager_node:main",
-            "left_turn_enforcer_node = central_manager.enforcer_manager_node:main"
+            "left_turn_enforcer_node = central_manager.enforcer_manager_node:main",
         ],
     },
 )
