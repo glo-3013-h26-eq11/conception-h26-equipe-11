@@ -1,0 +1,21 @@
+[unit]
+Description=Rover Initialization
+After=network.target
+
+[service]
+Type=simple
+User=jetson
+WorkingDirectory=/home/jetson/ros2_ws
+Environment="ROS_DOMAIN_ID=11"
+ExecStart=/bin/bash -c '
+    source /opt/ros/humble/setup.bash &&
+    source /home/jetson/ros2_ws/install/setup.bash &&
+    ros launch rover main.launch.py
+'
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[install]
+WantedBy=mutli-user.target
