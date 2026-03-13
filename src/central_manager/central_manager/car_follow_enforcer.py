@@ -3,7 +3,7 @@ from typing import Optional
 from geometry_msgs.msg import Twist
 from central_manager.base_enforcer import Enforcer
 
-VEHICLE_STALE_SEC: float = 0.5
+VEHICLE_STALE_SEC: float = 1.0
 
 
 class CarFollowEnforcer(Enforcer):
@@ -29,4 +29,5 @@ class CarFollowEnforcer(Enforcer):
         out = Twist()
         out.linear.x = cmd.linear.x * factor
         out.angular.z = cmd.angular.z * factor
+        
         return out
