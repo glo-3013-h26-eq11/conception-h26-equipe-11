@@ -34,7 +34,7 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(web_interface_launch)
         ),
-        
+
         Node(
             package='proximity_sensor',
             executable='proximity_sensor_node',
