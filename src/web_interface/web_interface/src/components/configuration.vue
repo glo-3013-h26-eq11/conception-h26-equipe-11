@@ -1,8 +1,31 @@
 <script setup lang="ts">
 import {ref} from 'vue'
+import {Ros, Topic} from "roslib";
 
 const topographie = ref()
 const aruco = ref()
+
+var ros = new Ros({
+  url: 'ws://localhost:9999'
+});
+
+ros.on('connection', function () {
+  console.log('Configuration connected to ROS');
+});
+
+ros.on('error', (err) => {
+  console.error(err);
+})
+
+ros.on('close', function () {
+  console.log('Websocket closed');
+})
+
+var mapPublisher = new Topic({
+      ros: ros,
+      name: '/map_manager/raw_map_topic',
+      messageType: 'std_msgs/msg/String'
+    })
 
 async function uploadFile() {
 
@@ -14,18 +37,9 @@ async function uploadFile() {
 
   const mergedCsv = `${csvTopographie}\n---\n${csvAruco}`
 
-  const res = await fetch('/api/csv/concat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      file_names: [fileTopographie.name, fileAruco.name],
-      csv_content: mergedCsv })
-  })
+  let message = {data: mergedCsv}
 
-  const data = await res.json()
-  if (!res.ok) {
-    return
-  }
+  mapPublisher.publish(message)
 }
 </script>
 
