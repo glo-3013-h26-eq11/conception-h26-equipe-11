@@ -7,7 +7,6 @@ import os
 
 
 def generate_launch_description():
-    # Existing launches
     camera_and_aruco_launch = os.path.join(
         get_package_share_directory('camera'),
         'launch', 'oakd_aruco.launch.py'
@@ -24,22 +23,18 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        # Camera + Aruco
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(camera_and_aruco_launch)
         ),
 
-        # Lidar
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(lidar_launch)
         ),
 
-        # Web Interface
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(web_interface_launch)
         ),
-
-        # New Launches
+        
         Node(
             package='proximity_sensor',
             executable='proximity_sensor_node',
@@ -81,6 +76,4 @@ def generate_launch_description():
             executable='rover_port_usb_node',
             name='rover_port_usb'
         )
-
-
     ])
