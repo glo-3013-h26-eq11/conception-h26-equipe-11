@@ -69,7 +69,9 @@ class RoutePlannerNode(Node):
 
         if self._current_directions is None:
             self._publish_full_route()
-        elif self._current_directions and self.current_node != self._node_at_last_publish:
+        elif (
+            self._current_directions and self.current_node != self._node_at_last_publish
+        ):
             self._publish_remaining_route()
         elif self._current_directions:
             self._republish_directions()
