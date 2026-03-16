@@ -20,5 +20,5 @@ docker run --rm \
         cd /home/ws
         colcon build
         source install/setup.bash
-        exec ros2 launch rover main.launch.py
+        exec ros2 launch rover init.launch.py
     "

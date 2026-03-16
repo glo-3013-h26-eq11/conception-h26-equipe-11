@@ -13,7 +13,7 @@ scripts/
 ROS2 package:
 
 src/rover/rover/launch/
-└── main.launch.py
+└── init.launch.py
 
 ---
 
@@ -41,7 +41,7 @@ docker run container
     ↓
 colcon build
     ↓
-ros2 launch rover main.launch.py
+ros2 launch rover init.launch.py
 
 ---
 
