@@ -2,6 +2,7 @@
 set -e
 
 echo "[INFO] Pulling latest Docker image..."
+docker login ghcr.io --username Louis-Etienne -p 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
 docker pull ghcr.io/glo-3013-h26-eq11/conception-h26-equipe-11/ros2-test-image:latest
 
 echo "[INFO] Starting rover container..."
