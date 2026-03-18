@@ -12,11 +12,6 @@ def generate_launch_description():
         'launch', 'oakd_aruco.launch.py'
     )
 
-    lidar_launch = os.path.join(
-        get_package_share_directory('lidar'),
-        'launch', 'lidar_system.launch.py'
-    )
-
     web_interface_launch = os.path.join(
         get_package_share_directory('web_interface'),
         'launch', 'web_interface_launch.py'
@@ -25,10 +20,6 @@ def generate_launch_description():
     return LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(camera_and_aruco_launch)
-        ),
-
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(lidar_launch)
         ),
 
         IncludeLaunchDescription(
