@@ -36,7 +36,7 @@ class WallFollowNode(Node):
     def __init__(self):
         super().__init__("wall_follow_node")
         self.declare_parameter("scan_topic", "/scan")
-        self.declare_parameter("output_topic", "/cmd_vel")
+        self.declare_parameter("output_topic", "/cmd_vel_safe")
 
         scan_topic = self.get_parameter("scan_topic").value
         output_topic = self.get_parameter("output_topic").value
