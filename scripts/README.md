@@ -4,16 +4,18 @@ This directory contains the scripts required to automatically start the rover RO
 
 ## Files
 
+```bash
 scripts/
-├── rover.service           # systemd service definition
-├── install_systemd.sh      # installation script
-├── run_rover_docker.sh     # starts the Docker container
+├── rover.service         # systemd service definition
+├── install_systemd.sh    # installation script
+├── run_rover_docker.sh   # starts the Docker container
 └── README.md
 
 ROS2 package:
 
 src/rover/launch/
 └── init.launch.py
+```
 
 ---
 
@@ -23,6 +25,7 @@ The rover system runs inside a Docker container and is automatically started usi
 
 Execution flow:
 
+``` bash
 Installation
     ↓
 install_systemd.sh
@@ -42,6 +45,7 @@ docker run container
 colcon build
     ↓
 ros2 launch rover init.launch.py
+```
 
 ---
 
@@ -88,4 +92,3 @@ journalctl -u rover.service -f
 - The service always automatically restarts (5 second delay)
 - Logs are stored in the systemd journal (use `journalctl` to view)
 - The service waits for network availability before starting
-````
