@@ -19,7 +19,7 @@ LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.425 # m
 RIGHT_TURN_DURATION = 1.2
-COAST_DURATION = 0.15
+COAST_DURATION = 0.175
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -36,7 +36,7 @@ class WallFollowNode(Node):
     def __init__(self):
         super().__init__("wall_follow_node")
         self.declare_parameter("scan_topic", "/scan")
-        self.declare_parameter("output_topic", "/cmd_vel")
+        self.declare_parameter("output_topic", "/cmd_vel_safe")
 
         scan_topic = self.get_parameter("scan_topic").value
         output_topic = self.get_parameter("output_topic").value
