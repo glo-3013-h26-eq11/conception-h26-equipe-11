@@ -75,9 +75,9 @@ class WallFollowNode(Node):
 
         now = self.get_clock().now().nanoseconds
 
-        self.get_logger().info(
-            f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
-        )
+        # self.get_logger().info(
+        #     f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
+        # )
         if self._corner_detected:
             elapsed = (now - self._corner_time) * 1e-9
             if elapsed < COAST_DURATION:
@@ -137,9 +137,9 @@ class WallFollowNode(Node):
                 f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
             )
 
-        self.get_logger().info(
-            f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
-        )
+        # self.get_logger().info(
+        #     f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
+        # )
 
         self.send_control_command(speed, steering)
 
