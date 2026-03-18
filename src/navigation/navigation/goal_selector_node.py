@@ -80,6 +80,8 @@ class GoalSelectorNode(Node):
         new_mode = msg.data.strip()
 
         if new_mode not in (GoalMode.GO_LOAD.value, GoalMode.GO_DROP.value):
+            self._goal_mode = new_mode
+            self._active_goal = None
             self.get_logger().warning(f"Invalid goal_mode received: {new_mode}")
             return
 
