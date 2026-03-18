@@ -12,7 +12,7 @@ scripts/
 
 ROS2 package:
 
-src/rover/rover/launch/
+src/rover/launch/
 └── init.launch.py
 
 ---
