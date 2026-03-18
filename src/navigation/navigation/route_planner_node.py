@@ -67,7 +67,10 @@ class RoutePlannerNode(Node):
         if self.goal_node is None or not self.goal_node:
             return
 
-        if self._current_directions is None or self.current_node != self._node_at_last_publish:
+        if (
+            self._current_directions is None
+            or self.current_node != self._node_at_last_publish
+        ):
             self._publish_full_route()
             return
 
