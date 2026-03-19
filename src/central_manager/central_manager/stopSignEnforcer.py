@@ -7,88 +7,81 @@ from central_manager.base_enforcer import Enforcer
 BRAKE_START_DIST:    float = 1.0
 STOP_TARGET_DIST:    float = 0.55
 STOP_DURATION:       float = 1.5
-COOLDOWN_DURATION:  float = 2.0
-DISTANCE_STALE_SEC: float = 0.5
-COASTING_DURATION: float = 0.15
-COASTING_SPEED: float = 0.5
+DISTANCE_STALE_SEC:  float = 0.5
 
 
 class _State(Enum):
     IDLE     = auto()
     BRAKING  = auto()
     STOPPED  = auto()
-    COASTING = auto()
-    COOLDOWN = auto()
+    DONE     = auto()
 
 
 class StopSignEnforcer(Enforcer):
     def __init__(self, stop_duration: float = STOP_DURATION) -> None:
         self._state: _State = _State.IDLE
         self._stop_start: Optional[float] = None
-        self._cooldown_start: float = 0.0
+
         self.stop_duration: float = stop_duration
+
         self._distance: Optional[float] = None
         self._last_update: float = 0.0
+
         self._logger = None
+
+        self._has_triggered: bool = False
 
     def update_distance(self, distance: Optional[float]) -> None:
         self._distance = distance
         self._last_update = time.time()
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
-        stale = (time.time() - self._last_update) > DISTANCE_STALE_SEC
+        now = time.time()
+
+        stale = (now - self._last_update) > DISTANCE_STALE_SEC
         d = None if stale else self._distance
 
-        if self._state == _State.IDLE:
+        if self._state == _State.DONE:
+            return cmd
+
+        if self._state == _State.IDLE and not self._has_triggered:
             if d is not None and d <= BRAKE_START_DIST:
                 self._state = _State.BRAKING
-                self._log(f"Panneau STOP détecté à {d:.2f} m — freinage progressif")
+                self._has_triggered = True
+                self._log(f"STOP détecté à {d:.2f} m — freinage")
 
         if self._state == _State.BRAKING:
-            if d is None or d > BRAKE_START_DIST:
+            if d is None:
                 self._state = _State.IDLE
+                self._has_triggered = False
                 return cmd
 
             if d <= STOP_TARGET_DIST:
                 self._state = _State.STOPPED
-                self._stop_start = time.time()
+                self._stop_start = now
                 self._log(
-                    f"ARRÊT au panneau STOP — distance {d:.2f} m, "
-                    f"pause {self.stop_duration:.1f} s"
+                    f"ARRÊT — distance {d:.2f} m, pause {self.stop_duration:.1f}s"
                 )
                 return self.stop_robot(cmd)
 
             factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
             factor = max(0.0, min(1.0, factor))
+
             out = Twist()
-            out.linear.x  = max(cmd.linear.x * factor, 0.25)
-            out.angular.z = cmd.angular.z
+            out.linear.x = max(cmd.linear.x * factor, 0.25)
+            out.angular.z = 0.0
             return out
 
         if self._state == _State.STOPPED:
-            elapsed = time.time() - self._stop_start
+            elapsed = now - self._stop_start
+
             if elapsed < self.stop_duration:
                 return self.stop_robot(cmd)
 
-            self._state = _State.COASTING
-            self._coast_start = time.time()
-            self._log("Coasting forward after stop")
-            
-        if self._state == _State.COASTING:
-            elapsed = time.time() - self._coast_start
-            if elapsed < COASTING_DURATION:
-                out = Twist()
-                out.linear.x = COASTING_SPEED
-                out.angular.z = 0.0
-                return out
-
-            self._state = _State.COOLDOWN
-            self._cooldown_start = time.time()
-
-        if self._state == _State.COOLDOWN:
-            if d is None or (time.time() - self._cooldown_start) > COOLDOWN_DURATION:
-                self._state = _State.IDLE
-
+            self._state = _State.DONE
+            self._log("Stop terminé — contrôle relâché")
+            return cmd
+        
         return cmd
 
     def _log(self, msg: str) -> None:
