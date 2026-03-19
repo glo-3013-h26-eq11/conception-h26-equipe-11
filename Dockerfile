@@ -26,6 +26,7 @@ COPY . /home/ws
 ENV PATH="/root/.local/bin:${PATH}"
 RUN git submodule update --init --recursive
 RUN python3 -m pip install --user -r requirements.txt
+RUN python3 -m playwright install
 
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash"
 
