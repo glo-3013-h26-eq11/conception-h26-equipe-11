@@ -61,6 +61,7 @@ class StopSignEnforcer(Enforcer):
             factor = max(0.0, min(1.0, factor))
             out = Twist()
             out.linear.x = max(cmd.linear.x * factor, 0.25)
+            out.angular.z = cmd.angular.z
             return out
 
         if self._state == _State.STOPPED:
