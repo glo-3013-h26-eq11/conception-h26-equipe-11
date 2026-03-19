@@ -20,7 +20,7 @@ def test_given_travel_done_when_enforce_cmd_then_return_empty_twist(enforcer):
     assert resulting_command.linear.y == 0
 
 
-def test_given_traval_not_done_when_enforce_cmd_then_move_forward(enforcer):
+def test_given_travel_not_done_when_enforce_cmd_then_move_forward(enforcer):
     initial_command = Twist()
 
     resulting_command = enforcer.enforce_cmd(initial_command)
