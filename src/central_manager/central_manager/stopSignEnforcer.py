@@ -47,6 +47,7 @@ class StopSignEnforcer(Enforcer):
                 return cmd
             else:
                 self._state = _State.IDLE
+                self._has_triggered = False
                 return cmd
 
         if self._state == _State.IDLE and not self._has_triggered:
