@@ -8,12 +8,14 @@ BRAKE_START_DIST:    float = 1.0
 STOP_TARGET_DIST:    float = 0.55
 STOP_DURATION:       float = 1.5
 DISTANCE_STALE_SEC:  float = 0.5
+TURN_TIME: float = 1.4
 
 
 class _State(Enum):
     IDLE     = auto()
     BRAKING  = auto()
     STOPPED  = auto()
+    DONE     = auto()
 
 
 class StopSignEnforcer(Enforcer):
@@ -24,35 +26,39 @@ class StopSignEnforcer(Enforcer):
         self.stop_duration: float = stop_duration
 
         self._distance: Optional[float] = None
-        self._prev_distance: Optional[float] = None
         self._last_update: float = 0.0
 
         self._logger = None
 
+        self._has_triggered: bool = False
+
     def update_distance(self, distance: Optional[float]) -> None:
-        self._prev_distance = self._distance
         self._distance = distance
         self._last_update = time.time()
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         now = time.time()
+
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
         d = None if stale else self._distance
-        prev_d = self._prev_distance
 
-        if self._state == _State.IDLE:
-            if (
-                d is not None and
-                prev_d is not None and
-                prev_d > BRAKE_START_DIST and
-                d <= BRAKE_START_DIST
-            ):
+        if self._state == _State.DONE:
+            if now < TURN_TIME:
+                return cmd
+            else:
+                self._state = _State.IDLE
+                return cmd
+
+        if self._state == _State.IDLE and not self._has_triggered:
+            if d is not None and d <= BRAKE_START_DIST:
                 self._state = _State.BRAKING
+                self._has_triggered = True
                 self._log(f"STOP détecté à {d:.2f} m — freinage")
 
         if self._state == _State.BRAKING:
             if d is None:
                 self._state = _State.IDLE
+                self._has_triggered = False
                 return cmd
 
             if d <= STOP_TARGET_DIST:
@@ -62,13 +68,12 @@ class StopSignEnforcer(Enforcer):
                     f"ARRÊT — distance {d:.2f} m, pause {self.stop_duration:.1f}s"
                 )
                 return self.stop_robot(cmd)
+
             factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
             factor = max(0.0, min(1.0, factor))
 
             out = Twist()
             out.linear.x = max(cmd.linear.x * factor, 0.25)
-            out.angular.z = cmd.angular.z
-
             return out
 
         if self._state == _State.STOPPED:
@@ -76,11 +81,11 @@ class StopSignEnforcer(Enforcer):
 
             if elapsed < self.stop_duration:
                 return self.stop_robot(cmd)
-            self._state = _State.IDLE
-            self._log("Stop terminé — reprise")
 
+            self._state = _State.DONE
+            self._log("Stop terminé — contrôle relâché")
             return cmd
-
+        
         return cmd
 
     def _log(self, msg: str) -> None:
