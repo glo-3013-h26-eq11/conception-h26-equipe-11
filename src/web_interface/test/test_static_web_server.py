@@ -5,6 +5,8 @@ from web_interface.static_web_server import BASE_URL, PORT
 import subprocess
 import requests
 import time
+import os
+import signal
 
 PACKAGE_NAME = "web_interface"
 EXECUTABLE_NAME = "static_web_server"
@@ -29,6 +31,7 @@ def full_integration_ros_setup():
         executable="/bin/bash",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        preexec_fn=os.setsid,
     )
 
     wait_for_server_response(process=process)
@@ -53,11 +56,15 @@ def wait_for_server_response(process):
 
 
 def terminate_server(process):
-    process.terminate()
+    try:
+        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+    except ProcessLookupError:
+        return
+
     try:
         process.wait(timeout=5)
     except subprocess.TimeoutExpired:
-        process.kill()
+        os.killpg(os.getpgid(process.pid), signal.SIGKILL)
 
 
 def test_given_local_launch_when_get_index_then_return_200(client):
