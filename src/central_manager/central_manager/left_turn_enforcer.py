@@ -14,7 +14,7 @@ class LeftTurnEnforcer(Enforcer):
         self.last_real_speed_timer = None
 
         self.steering_angle_90 = LEFT_TURN_SPEED / ARC_RADIUS
-        self.travel_distance_90 = 2 * math.pi * ARC_RADIUS / 1.5
+        self.total_distance_to_travel = 2 * math.pi * ARC_RADIUS / 1.5
         self.travel_distance_already_done = 0
 
     def update_real_speed(self, real_speed_cmd: Twist):
@@ -46,7 +46,7 @@ class LeftTurnEnforcer(Enforcer):
         return cmd
 
     def _is_arc_already_done(self) -> bool:
-        return self.travel_distance_already_done >= self.travel_distance_90
+        return self.travel_distance_already_done >= self.total_distance_to_travel
 
 
 class LeftTurnNode(Node):
