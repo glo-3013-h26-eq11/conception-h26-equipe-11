@@ -81,7 +81,7 @@ class WallFollowNode(Node):
             elapsed = (now - self._corner_time) * 1e-9
 
             if elapsed < RIGHT_TURN_DURATION:
-                self.send_control_command(0.25, -0.7)
+                self.send_control_command(0.20, -0.8)
                 return
             else:
                 self._corner_detected = False
