@@ -9,7 +9,7 @@ STOP_TARGET_DIST:    float = 0.55
 STOP_DURATION:       float = 1.5
 COOLDOWN_DURATION:  float = 2.0
 DISTANCE_STALE_SEC: float = 0.5
-COASTING_DURATION: float = 0.1
+COASTING_DURATION: float = 0.05
 COASTING_SPEED: float = 0.5
 
 
