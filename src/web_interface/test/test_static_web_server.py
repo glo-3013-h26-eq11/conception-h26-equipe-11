@@ -44,7 +44,7 @@ def wait_for_server_response(process):
     start = time.time()
     while True:
         try:
-            r = requests.get(f"{URL}/")
+            r = requests.get(f"{URL}/", timeout=2)
             if r.status_code == 200:
                 break
         except requests.ConnectionError:
