@@ -19,7 +19,7 @@ LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.425 # m
 RIGHT_TURN_DURATION = 1
-COAST_DURATION = 0.225
+COAST_DURATION = 0.35
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -91,7 +91,7 @@ class WallFollowNode(Node):
                 self._corner_detected = False
 
         if not self._corner_detected:
-            if  a > (CORNER_THRESHOLD + 0.3) and b > DESIRED_DISTANCE_FROM_WALL + 0.2:
+            if  a > (CORNER_THRESHOLD + 0.3):
                 self._corner_detected = True
                 self._corner_time = now
                 self.get_logger().info("Right turn triggered!")
