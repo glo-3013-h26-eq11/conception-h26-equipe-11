@@ -52,4 +52,4 @@ class TestRosbridge(unittest.TestCase):
 
                 time.sleep(1)
 
-        self.fail("Could not connect to rosbridge websocket on port 9999")
+        self.fail(f"Could not connect to rosbridge websocket on port {PORT}")
