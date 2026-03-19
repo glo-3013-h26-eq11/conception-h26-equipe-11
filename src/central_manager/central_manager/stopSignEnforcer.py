@@ -76,6 +76,8 @@ class StopSignEnforcer(Enforcer):
                 
                 return cmd
             return self.stop_robot(cmd)
+        
+        return cmd
 
     def _log(self, msg: str) -> None:
         if self._logger is not None:
