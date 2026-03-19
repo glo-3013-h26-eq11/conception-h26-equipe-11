@@ -43,7 +43,7 @@ class StopSignEnforcer(Enforcer):
         d = None if stale else self._distance
 
         if self._state == _State.DONE:
-            if now < TURN_TIME:
+            if now < TURN_TIME + STOP_DURATION:
                 return cmd
             else:
                 self._state = _State.IDLE
