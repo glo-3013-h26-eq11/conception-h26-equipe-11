@@ -15,7 +15,6 @@ class _State(Enum):
     IDLE     = auto()
     BRAKING  = auto()
     STOPPED  = auto()
-    DONE     = auto()
 
 
 class StopSignEnforcer(Enforcer):
@@ -41,14 +40,6 @@ class StopSignEnforcer(Enforcer):
 
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
         d = None if stale else self._distance
-
-        if self._state == _State.DONE:
-            if now < TURN_TIME + STOP_DURATION:
-                return cmd
-            else:
-                self._state = _State.IDLE
-                self._has_triggered = False
-                return cmd
 
         if self._state == _State.IDLE and not self._has_triggered:
             if d is not None and d <= BRAKE_START_DIST:
@@ -79,15 +70,11 @@ class StopSignEnforcer(Enforcer):
 
         if self._state == _State.STOPPED:
             elapsed = now - self._stop_start
-
-            if elapsed < self.stop_duration:
-                return self.stop_robot(cmd)
-
-            self._state = _State.DONE
-            self._log("Stop terminé — contrôle relâché")
-            return cmd
-        
-        return cmd
+            if elapsed >= STOP_DURATION:
+                self._state = _State.IDLE
+                self._has_triggered = False
+                
+                return cmd
 
     def _log(self, msg: str) -> None:
         if self._logger is not None:
