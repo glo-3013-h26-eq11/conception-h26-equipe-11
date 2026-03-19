@@ -75,6 +75,7 @@ class StopSignEnforcer(Enforcer):
                 self._has_triggered = False
                 
                 return cmd
+            return self.stop_robot(cmd)
 
     def _log(self, msg: str) -> None:
         if self._logger is not None:
