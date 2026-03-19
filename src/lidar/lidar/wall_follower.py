@@ -91,7 +91,7 @@ class WallFollowNode(Node):
                 self._corner_detected = False
 
         if not self._corner_detected:
-            if not is_valid_lidar_scan(a) or a > CORNER_THRESHOLD + 0.2:
+            if not is_valid_lidar_scan(a) or a > (CORNER_THRESHOLD + 0.3):
                 self._corner_detected = True
                 self._corner_time = now
                 self.get_logger().info("Right turn triggered!")
