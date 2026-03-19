@@ -13,12 +13,6 @@ class RoverInterfaceNode(Node):
     def __init__(self):
         super().__init__("rover_interface_node")
 
-        self.declare_parameter("input_topic", "/cmd_vel_safe")
-        self.declare_parameter("output_topic", "/rover/port")
-
-        input_topic = self.get_parameter("input_topic").value
-        output_topic = self.get_parameter("output_topic").value
-
         self.subscription = self.create_subscription(
             Twist, "/cmd_vel_safe", self.listener_command_callback, 10
         )
@@ -28,9 +22,9 @@ class RoverInterfaceNode(Node):
         linear_x = msg.linear.x
 
         angular_z = msg.angular.z
-        # self.get_logger().info(
-        #     f"Received cmd_vel_safe: linear_x={linear_x:.2f}, angular_z={angular_z:.2f}"
-        # )
+        self.get_logger().info(
+            f"Received cmd_vel_safe: linear_x={linear_x:.2f}, angular_z={angular_z:.2f}"
+        )
 
         command = self.create_movement_dictionnary(linear_x, angular_z)
 
