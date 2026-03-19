@@ -9,12 +9,15 @@ STOP_TARGET_DIST:    float = 0.55
 STOP_DURATION:       float = 1.5
 COOLDOWN_DURATION:  float = 2.0
 DISTANCE_STALE_SEC: float = 0.5
+COASTING_DURATION: float = 0.175
+COASTING_SPEED: float = 0.5
 
 
 class _State(Enum):
     IDLE     = auto()
     BRAKING  = auto()
     STOPPED  = auto()
+    COASTING = auto()
     COOLDOWN = auto()
 
 
@@ -66,9 +69,21 @@ class StopSignEnforcer(Enforcer):
             elapsed = time.time() - self._stop_start
             if elapsed < self.stop_duration:
                 return self.stop_robot(cmd)
+
+            self._state = _State.COASTING
+            self._coast_start = time.time()
+            self._log("Coasting forward after stop")
+            
+        if self._state == _State.COASTING:
+            elapsed = time.time() - self._coast_start
+            if elapsed < COASTING_DURATION:
+                out = Twist()
+                out.linear.x = COASTING_SPEED
+                out.angular.z = 0.0
+                return out
+
             self._state = _State.COOLDOWN
             self._cooldown_start = time.time()
-            self._log("Reprise — fin de pause au panneau STOP")
 
         if self._state == _State.COOLDOWN:
             if d is None or (time.time() - self._cooldown_start) > COOLDOWN_DURATION:
