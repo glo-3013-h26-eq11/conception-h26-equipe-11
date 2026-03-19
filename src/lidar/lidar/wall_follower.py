@@ -19,8 +19,7 @@ LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.425 # m
 RIGHT_TURN_DURATION = 1
-COAST_DURATION = 0.35
-POST_TURN_RECOVERY_DURATION = 0.35
+COAST_DURATION = 0.15
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -89,12 +88,6 @@ class WallFollowNode(Node):
             elif elapsed < COAST_DURATION + RIGHT_TURN_DURATION:
                 self.send_control_command(0.25, -MAX_STEERING)
                 return
-
-            elif elapsed < COAST_DURATION + RIGHT_TURN_DURATION + POST_TURN_RECOVERY_DURATION:
-                self.send_control_command(0.4, 0.0)
-                self.get_logger().info("Recovering after turn")
-                return
-
             else:
                 self._corner_detected = False
                 self.last_errors_window = np.array([])
