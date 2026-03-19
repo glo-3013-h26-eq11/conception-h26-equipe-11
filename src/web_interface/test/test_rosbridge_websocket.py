@@ -4,6 +4,7 @@ import websockets
 import os
 import subprocess
 import signal
+import time
 
 PORT = 9999
 ADDRESS = "localhost"
@@ -48,8 +49,6 @@ class TestRosbridge(unittest.TestCase):
                 self.assertTrue(result)
                 return
             except Exception:
-                import time
-
                 time.sleep(1)
 
-        self.fail("Could not connect to rosbridge websocket on port 9999")
+        self.fail(f"Could not connect to rosbridge websocket on port {PORT}")
