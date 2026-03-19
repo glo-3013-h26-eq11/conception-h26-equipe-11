@@ -37,9 +37,11 @@ class StopSignEnforcer(Enforcer):
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         now = time.time()
-
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
         d = None if stale else self._distance
+        if self._has_triggered and (d is None or d > BRAKE_START_DIST):
+            self._has_triggered = False
+            self._state = _State.IDLE
 
         if self._state == _State.IDLE and not self._has_triggered:
             if d is not None and d <= BRAKE_START_DIST:
@@ -49,36 +51,26 @@ class StopSignEnforcer(Enforcer):
 
         if self._state == _State.BRAKING:
             if d is None:
-                self._state = _State.IDLE
-                self._has_triggered = False
                 return cmd
-
             if d <= STOP_TARGET_DIST:
                 self._state = _State.STOPPED
                 self._stop_start = now
-                self._log(
-                    f"ARRÊT — distance {d:.2f} m, pause {self.stop_duration:.1f}s"
-                )
+                self._log(f"ARRÊT — distance {d:.2f} m, pause {self.stop_duration:.1f}s")
                 return self.stop_robot(cmd)
-
             factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
             factor = max(0.0, min(1.0, factor))
-
             out = Twist()
             out.linear.x = max(cmd.linear.x * factor, 0.25)
             return out
 
         if self._state == _State.STOPPED:
             elapsed = now - self._stop_start
-            if elapsed >= STOP_DURATION:
+            if elapsed >= self.stop_duration:
                 self._state = _State.IDLE
-                self._has_triggered = False
-                
                 return cmd
             return self.stop_robot(cmd)
-        
-        return cmd
 
+        return cmd
     def _log(self, msg: str) -> None:
         if self._logger is not None:
             self._logger.info(msg)
