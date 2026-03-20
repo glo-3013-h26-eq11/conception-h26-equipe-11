@@ -40,6 +40,7 @@ class StopSignEnforcer(Enforcer):
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         now = time.time()
+        initial_command = cmd
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
         d = None if stale else self._distance
 
@@ -86,7 +87,7 @@ class StopSignEnforcer(Enforcer):
                 self._stop_start = None
                 self._cooldown_start = None
                 self._log("COOLDOWN terminé — retour IDLE")
-                return cmd
+                return initial_command
             # during cooldown, release command to wall follower / upstream controller
             return cmd
 
