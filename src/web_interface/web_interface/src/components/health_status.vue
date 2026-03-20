@@ -2,22 +2,7 @@
 import {ref} from "vue";
 import {Ros, Topic} from "roslib";
 
-const status = ref(
-    {
-        "rover": {
-            "rover_interface": "LOADING",
-            "rover_port_usb": "ACTIVE"
-        },
-
-        "navigation": {
-            "goal_selector_node": "CRASHED"
-        },
-
-        "web_interface": {
-            "goal_selector_node": "CRASHED"
-        }
-    }
-)
+const status = ref({})
 var ros = new Ros({
   url: 'ws://localhost:9999'
 });
