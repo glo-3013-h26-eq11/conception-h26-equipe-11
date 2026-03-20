@@ -144,8 +144,13 @@ class WallFollowNode(Node):
 
     def send_control_command(self, speed: float, steering: float):
 
+        # Convert steering angle (rad) en vitesse de rotation (rad/s)
         angular_z = speed * math.tan(steering) / WHEELBASE
 
+        twist = Twist()
+        twist.linear.x = speed
+        twist.angular.z = angular_z
+        self.drive_pub.publish(twist)
 
 
 def main(args=None):
