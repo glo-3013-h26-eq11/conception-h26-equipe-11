@@ -30,7 +30,13 @@ class ConsoleNode(Node):
 
     def log_callback(self, log: Log):
 
-        entry = f"[{self.format_log_stamp_et(log)}] -- [{LEVEL_NAMES.get(log.level)}] -- {log.file} -- [{log.name}] -- {log.msg}"
+        entry = (
+            f"[{self.format_log_stamp_et(log)}] -- " 
+            f"[{LEVEL_NAMES.get(log.level)}] -- "
+            f"{log.file} -- "
+            f"[{log.name}] -- "
+            f"{log.msg}"
+        )
 
         if self.filter_ignore_log(entry):
             return
