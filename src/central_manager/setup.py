@@ -25,6 +25,7 @@ setup(
         "console_scripts": [
             "enforcer_manager_node = central_manager.enforcer_manager_node:main",
             "state_machine_node = central_manager.state_machine_node:main",
+            "left_turn_enforcer_node = central_manager.enforcer_manager_node:main",
         ],
     },
 )

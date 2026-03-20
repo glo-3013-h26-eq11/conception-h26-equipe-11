@@ -5,7 +5,7 @@ import rclpy
 import uvicorn
 import os
 
-PORT = 5555
+PORT = 5556
 BASE_URL = "0.0.0.0"
 
 WEB_INTERFACE_DIRECTORY = "/home/ws/src/web_interface/web_interface"

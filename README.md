@@ -21,7 +21,12 @@ black .
 
 ### Run les tests avec tous les logs
 ```bash
-colcon test --packages-skip ldlidar_ros2 --event-handlers console_cohesion+
+colcon test --packages-skip ldlidar_ros2 integration_tests --event-handlers console_cohesion+
+```
+
+### Exemple de test unique
+```bash
+colcon test --packages-select integration_tests --pytest-args "-k test_proximity_sensor_updates_web" --event-handlers console_cohesion+
 ```
 
 ### Créer un package/module
