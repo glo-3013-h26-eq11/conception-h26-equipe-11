@@ -24,5 +24,8 @@ def generate_launch_description():
                 executable="static_web_server",
                 name="static_web_server",
             ),
+            launch_ros.actions.Node(
+                package="web_interface", executable="console_node", name="console_node"
+            ),
         ]
     )

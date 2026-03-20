@@ -30,6 +30,10 @@ class EnforcerManagerNode(Node):
             Bool, "merchandise_destination_invalid", 10
         )
 
+        self.pub_dangerous_distance_car_follower = self.create_publisher(
+            Bool, "/car_follower/dangerous_distance", 10
+        )
+
         self.enforcers: List[Enforcer] = [MerchandiseEnforcer()]
 
     @property
@@ -59,6 +63,11 @@ class EnforcerManagerNode(Node):
         nodes: List[str] = json.loads(msg.data)
         destination_node: str = nodes[-1]
         self.merchandise_enforcer.destination = destination_node
+
+    def publish_dangerous_distance(self):
+        dangerous_distance = Bool()
+        dangerous_distance.data = True
+        self.pub_dangerous_distance_car_follower.publish(dangerous_distance)
 
 
 def main(args=None):

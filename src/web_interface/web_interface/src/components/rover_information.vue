@@ -29,7 +29,8 @@ var directionTopic = new Topic(
 )
 
 directionTopic.subscribe(message => {
-  direction.value = message.data
+  const parsed = JSON.parse(message.data)
+  direction.value = parsed[0]
 })
 </script>
 
@@ -42,7 +43,7 @@ directionTopic.subscribe(message => {
           <v-spacer v-show="direction != 'left'"/>
         </v-col>
         <v-col align="center" cols="4">
-          <v-icon size="x-large" icon="mdi-arrow-up" v-show="direction == 'forward'"/>
+          <v-icon size="x-large" icon="mdi-arrow-up" v-show="direction == 'straight'"/>
           <v-spacer v-show="direction != 'forward'"/>
         </v-col>
         <v-col align="center" cols="4">

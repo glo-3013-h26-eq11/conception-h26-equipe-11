@@ -30,8 +30,8 @@ var destinationTopic = new Topic(
 )
 
 destinationTopic.subscribe(message => {
-  destination.value = message.data
-})
+  destination.value = (JSON.parse(message.data) || []).at(-1);
+});
 
 var startTopic = new Topic(
     {
