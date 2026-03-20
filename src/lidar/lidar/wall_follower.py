@@ -14,7 +14,10 @@ KP = 1.5
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 0.9  # radians
-SPEED = 0.5  # m/s
+SPEED = 0.4  # m/s
+MAX_ANGULAR_VEL = 2.0  # rad/s
+MIN_SPEED = 0.15  # m/s
+MAX_SPEED = 0.5  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.425 # m
@@ -145,6 +148,16 @@ class WallFollowNode(Node):
     def send_control_command(self, speed: float, steering: float):
 
         angular_z = speed * math.tan(steering) / WHEELBASE
+        if abs(angular_z) > MAX_ANGULAR_VEL:
+            self.get_logger().warn(
+                f"angular_z clamped {angular_z:.2f} -> {math.copysign(MAX_ANGULAR_VEL, angular_z):.2f}"
+            )
+            angular_z = math.copysign(MAX_ANGULAR_VEL, angular_z)
+
+        speed = max(MIN_SPEED, min(MAX_SPEED, speed))
+
+        if abs(angular_z) > (MAX_ANGULAR_VEL * 0.75):
+            speed = min(speed, 0.22)
 
         twist = Twist()
         twist.linear.x = speed
