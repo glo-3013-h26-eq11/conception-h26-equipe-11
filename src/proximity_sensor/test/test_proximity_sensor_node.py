@@ -40,7 +40,7 @@ def test_when_transition_up_then_publishes_no_merchandise(fake_gpio):
         flag = MerchandiseFlag(msg.data)
         received_msgs.append(flag)
 
-    node.create_subscription(Bool, "is_there_merchandise", capture_callback, 10)
+    node.create_subscription(Bool, "/proximity_sensor/merchandise", capture_callback, 10)
 
     # Act
     fake_gpio.set_input(1)
@@ -71,7 +71,7 @@ def test_when_transition_down_then_publishes_there_is_merchandise(fake_gpio):
         flag = MerchandiseFlag(msg.data)
         received_msgs.append(flag)
 
-    node.create_subscription(Bool, "is_there_merchandise", capture_callback, 10)
+    node.create_subscription(Bool, "/proximity_sensor/merchandise", capture_callback, 10)
 
     # Act
     fake_gpio.set_input(0)

@@ -49,14 +49,16 @@ unsafe_distance.subscribe(message => {
     <v-container>
       <v-row align="center" justify="center">
         <v-col align="center" justify="center">
-          <v-chip prepend-icon="mdi-package" size="x-large" :color="loaded ? 'green':'primary-variant'">Loaded</v-chip>
+          <v-chip prepend-icon="mdi-package" size="x-large" :color="loaded ? 'green' : 'primary-variant'">
+            {{ loaded ? 'Loaded' : 'Not Loaded' }}
+          </v-chip>
         </v-col>
       </v-row>
       <v-row align="center" justify="center">
         <v-col align="center" justify="center">
-          <v-chip prepend-icon="mdi-alert" size="x-large" :color="roverTooClose ? 'error':'primary-variant'">Rover too
-            close
-          </v-chip>
+          <v-chip prepend-icon="mdi-alert" size="x-large" :color="roverTooClose ? 'error' : 'primary-variant'">
+          {{ roverTooClose ? 'Rover too close' : 'Rover safe distance' }}
+        </v-chip>
         </v-col>
       </v-row>
     </v-container>

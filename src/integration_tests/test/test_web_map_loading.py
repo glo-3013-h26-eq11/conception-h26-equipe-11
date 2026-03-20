@@ -10,6 +10,7 @@ from integration_tests.integration_helper import (
     stop_process,
     StringTopicListener,
 )
+import pytest
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
 
@@ -29,6 +30,13 @@ WEB_AND_ROSBRIDGE_CMD = (
 ROS_NODE_CMD = "source install/setup.bash && ros2 run navigation map_processor_node"
 
 
+@pytest.fixture(scope="module", autouse=True)
+def ros_context():
+    rclpy.init()
+    yield
+    rclpy.shutdown()
+
+
 def test_full_file_upload():
 
     web_and_rosbridge = start_process(WEB_AND_ROSBRIDGE_CMD)
@@ -36,7 +44,6 @@ def test_full_file_upload():
 
     wait_for_server(WEBAPP_URL)
 
-    rclpy.init()
     listener = StringTopicListener(ROS_TOPIC)
 
     with sync_playwright() as p:
@@ -60,7 +67,6 @@ def test_full_file_upload():
         rclpy.spin_once(listener, timeout_sec=0.1)
 
     listener.destroy_node()
-    rclpy.shutdown()
 
     stop_process(rosnode)
     stop_process(web_and_rosbridge)
