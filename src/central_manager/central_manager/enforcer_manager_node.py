@@ -60,7 +60,6 @@ class EnforcerManagerNode(Node):
         destination_node: str = nodes[-1]
         self.merchandise_enforcer.destination = destination_node
 
-
 def main(args=None):
     rclpy.init(args=args)
 

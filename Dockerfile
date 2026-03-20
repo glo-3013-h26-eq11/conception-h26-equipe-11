@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-colcon-common-extensions \
     ros-humble-depthai-ros \
+    ros-humble-yasmin \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
