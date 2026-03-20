@@ -64,27 +64,36 @@ def generate_launch_description() -> LaunchDescription:
                 executable="map_processor_node",
                 name="map_processor_node",
                 output="screen",
-                condition=IfCondition(LaunchConfiguration("use_navigation")),
+                condition=IfCondition(
+                    LaunchConfiguration("use_navigation"), evaluate_as_boolean=True
+                ),
             ),
             Node(
                 package="navigation",
                 executable="route_planner",
                 name="route_planner_node",
                 output="screen",
-                condition=IfCondition(LaunchConfiguration("use_navigation")),
+                condition=IfCondition(
+                    LaunchConfiguration("use_navigation"), evaluate_as_boolean=True
+                ),
             ),
             Node(
                 package="navigation",
                 executable="aruco_localizer_node",
                 name="aruco_localizer_node",
                 output="screen",
-                condition=IfCondition(LaunchConfiguration("use_navigation")),
+                condition=IfCondition(
+                    LaunchConfiguration("use_navigation"), evaluate_as_boolean=True
+                ),
             ),
             Node(
                 package="navigation",
                 executable="route_executor_node",
                 name="route_executor_node",
                 output="screen",
+                condition=IfCondition(
+                    LaunchConfiguration("use_navigation"), evaluate_as_boolean=True
+                ),
                 parameters=[
                     {
                         "wall_cmd_topic": "/wall_follower/cmd_vel",
