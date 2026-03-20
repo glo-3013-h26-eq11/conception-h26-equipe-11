@@ -11,7 +11,8 @@ class WallFollowingState(State):
 
     def execute(self, blackboard):
         node = blackboard["node"]
-
+        
+        #Liste à changer selon les enforcers finaux
         active_enforcers = [
             "wall_following_enforcer",
             "follow_vehicle_enforcer"
