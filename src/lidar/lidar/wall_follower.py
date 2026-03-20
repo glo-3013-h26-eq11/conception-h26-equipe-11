@@ -126,7 +126,7 @@ class WallFollowNode(Node):
 
         if (
             is_valid_lidar_scan(a)
-            and a < CORNER_THRESHOLD
+            and a < CORNER_THRESHOLD - 0.15
             and front_distance <= MIN_FRONT_DISTANCE
         ):
             bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
