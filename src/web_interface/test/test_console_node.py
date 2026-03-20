@@ -3,7 +3,6 @@ import rclpy
 from std_msgs.msg import String
 from rcl_interfaces.msg import Log
 from web_interface.console_node import ConsoleNode
-import json
 
 
 @pytest.fixture(scope="module", autouse=True)
