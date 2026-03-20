@@ -11,7 +11,6 @@ from integration_tests.integration_helper import (
 import pytest
 import sys
 
-
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
 
 WEB_AND_ROSBRIDGE_CMD = (
@@ -38,9 +37,11 @@ def test_web_updates_map_manager():
     wait_for_server(WEBAPP_URL)
 
     from unittest.mock import MagicMock
+
     sys.modules["Jetson"] = MagicMock()
-    sys.modules["Jetson.GPIO"] = (MagicMock())
+    sys.modules["Jetson.GPIO"] = MagicMock()
     from proximity_sensor.proximity_sensor_node import ProximitySensorNode
+
     proximity_sensor_node = ProximitySensorNode()
 
     with sync_playwright() as p:
@@ -49,9 +50,9 @@ def test_web_updates_map_manager():
 
         page.goto(WEBAPP_URL)
 
-        rover_chip = page.locator(".v-chip").filter(has=page.locator(ICON_REFERENCE))
-
         page.wait_for_timeout(2000)
+
+        rover_chip = page.locator(".v-chip").filter(has=page.locator(ICON_REFERENCE))
 
         expect(rover_chip).to_have_text(TEXT_NOT_LOADED, timeout=5000)
 

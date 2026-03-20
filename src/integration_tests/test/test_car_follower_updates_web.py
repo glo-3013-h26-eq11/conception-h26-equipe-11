@@ -30,7 +30,7 @@ def ros_context():
     rclpy.shutdown()
 
 
-def test_web_updates_map_manager():
+def test_car_follower_updates_web():
     build_web_interface()
 
     web_and_rosbridge = start_process(WEB_AND_ROSBRIDGE_CMD)

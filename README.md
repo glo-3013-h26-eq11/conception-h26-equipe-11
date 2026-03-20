@@ -21,7 +21,7 @@ black .
 
 ### Run les tests avec tous les logs
 ```bash
-colcon test --packages-skip ldlidar_ros2 --event-handlers console_cohesion+
+colcon test --packages-skip ldlidar_ros2 integration_tests --event-handlers console_cohesion+
 ```
 
 ### Exemple de test unique
