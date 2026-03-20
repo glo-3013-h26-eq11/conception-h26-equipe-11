@@ -29,6 +29,8 @@ RUN apt-get update && apt-get install -y curl \
 # Install rosbridge-suite for easy websocket connections
 RUN apt-get install -y ros-humble-rosbridge-suite
 
+# Install yasmin
+RUN apt-get install -y ros-$ROS_DISTRO-yasmin ros-$ROS_DISTRO-yasmin-*
 
 # Check versions
 RUN node -v
