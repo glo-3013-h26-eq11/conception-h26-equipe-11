@@ -28,7 +28,7 @@ def ros_context():
     rclpy.shutdown()
 
 
-def test_full_file_upload():
+def test_web_updates_start():
 
     web_and_rosbridge = start_process(WEB_AND_ROSBRIDGE_CMD)
 

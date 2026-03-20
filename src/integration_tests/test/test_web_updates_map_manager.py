@@ -37,7 +37,7 @@ def ros_context():
     rclpy.shutdown()
 
 
-def test_full_file_upload():
+def test_web_updates_map_manager():
 
     web_and_rosbridge = start_process(WEB_AND_ROSBRIDGE_CMD)
     rosnode = start_process(ROS_NODE_CMD)
