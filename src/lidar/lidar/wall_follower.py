@@ -14,7 +14,7 @@ KP = 1.5
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 0.9  # radians
-SPEED = 0.4  # m/s
+SPEED = 0.3  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.425 # m
@@ -126,14 +126,13 @@ class WallFollowNode(Node):
 
         if (
             is_valid_lidar_scan(a)
-            and a < CORNER_THRESHOLD - 0.15
+            and a < CORNER_THRESHOLD
             and front_distance <= MIN_FRONT_DISTANCE
         ):
             bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
             corner_steering = MAX_STEERING
             speed = max(SPEED * (1 - bias_strength), 0.25)
-            steering = max(steering, corner_steering)
-            steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+            steering = corner_steering
 
             self.get_logger().info(
                 f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
