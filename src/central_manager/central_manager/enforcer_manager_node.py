@@ -3,7 +3,7 @@ from central_manager.merchandise_enforcer import MerchandiseEnforcer
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
-from typing import List
+from typing import List, Dict
 import json
 import rclpy
 
@@ -23,6 +23,13 @@ class EnforcerManagerNode(Node):
         self.sub_route_nodes = self.create_subscription(
             String, "route_plan/nodes", self.route_nodes_callback, 10
         )
+        
+        self.sub_active_enforcers = self.create_subscription(
+            String,
+            "state_machine/active_enforcers",
+            self.active_enforcers_callback,
+            10,
+        )
 
         self.pub_cmd_vel_safe = self.create_publisher(Twist, "cmd_vel_safe", 10)
 
@@ -33,13 +40,37 @@ class EnforcerManagerNode(Node):
         self.pub_dangerous_distance_car_follower = self.create_publisher(
             Bool, "/car_follower/dangerous_distance", 10
         )
-
-        self.enforcers: List[Enforcer] = [MerchandiseEnforcer()]
+        
+        #Faut rajouter les enforcer et ce qu'ils équivalent dans les states
+        self.enforcer_registry: Dict[str, Enforcer] = {
+            "merchandise_enforcer": MerchandiseEnforcer(),
+            # "left_turn_enforcer": LeftTurnEnforcer(),
+            # "forward_turn_enforcer": ForwardTurnEnforcer(),
+            # "follow_vehicle_enforcer": FollowVehicleEnforcer(),
+            # "stop_enforcer": StopEnforcer(),
+        }
+        
+        self.enforcers: List[Enforcer] = []
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
-        return self.enforcers[0]
+        return self.enforcer_registry["merchandise_enforcer"]
+    
+    def active_enforcers_callback(self, msg: String) -> None:
+        try:
+            enforcer_names = json.loads(msg.data)
 
+            new_enforcers = []
+            for name in enforcer_names:
+                new_enforcers.append(self.enforcer_registry[name])
+
+            self.enforcers = new_enforcers
+
+        except Exception as e:
+            self.get_logger().error(
+                f"Error in active_enforcers_callback: {e}"
+            )
+            
     def load_callback(self, load_msg: Bool) -> None:
         self.merchandise_enforcer.load_detected = load_msg.data
 
@@ -53,6 +84,9 @@ class EnforcerManagerNode(Node):
             invalid_dest_msg = Bool()
             invalid_dest_msg.data = True
             self.pub_invalid_destination.publish(invalid_dest_msg)
+            
+
+
 
     def cmd_callback(self, cmd: Twist) -> None:
         for enforcer in self.enforcers:
