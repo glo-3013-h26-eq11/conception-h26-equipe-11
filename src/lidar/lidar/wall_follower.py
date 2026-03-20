@@ -147,6 +147,18 @@ class WallFollowNode(Node):
         # Convert steering angle (rad) en vitesse de rotation (rad/s)
         angular_z = speed * math.tan(steering) / WHEELBASE
 
+        # Limiter la rotation pour éviter les valeurs extrêmes
+        MAX_ANGULAR_Z = 1.8
+        if abs(angular_z) > MAX_ANGULAR_Z:
+            self.get_logger().warn(
+                f"angular_z clamped {angular_z:.2f} -> {math.copysign(MAX_ANGULAR_Z, angular_z):.2f}"
+            )
+            angular_z = math.copysign(MAX_ANGULAR_Z, angular_z)
+
+        # Limiter la vitesse quand tourne fort
+        if abs(angular_z) > (MAX_ANGULAR_Z * 0.7):
+            speed = min(speed, 0.30)
+
         twist = Twist()
         twist.linear.x = speed
         twist.angular.z = angular_z
