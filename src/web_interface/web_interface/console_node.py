@@ -13,6 +13,7 @@ MESSAGES_STACK_SIZE = 100
 
 FILTERS = ["rosbridge"]
 
+
 class ConsoleNode(Node):
     def __init__(self, message_stack_size=MESSAGES_STACK_SIZE, filters=FILTERS):
         super().__init__("console_node")
@@ -24,11 +25,11 @@ class ConsoleNode(Node):
         self.publisher = self.create_publisher(String, "/console", 10)
 
         self.messages_stack = deque(maxlen=message_stack_size)
-        
+
         self.filters = filters
 
     def log_callback(self, log: Log):
-    
+
         entry = f"[{self.format_log_stamp_et(log)}] -- [{LEVEL_NAMES.get(log.level)}] -- {log.file} -- [{log.name}] -- {log.msg}"
 
         if self.filter_ignore_log(entry):
@@ -38,7 +39,7 @@ class ConsoleNode(Node):
 
         msg = String()
         msg.data = json.dumps(list(self.messages_stack))
-            
+
         self.publisher.publish(msg)
 
     def format_log_stamp_et(self, log: Log):

@@ -19,18 +19,19 @@ def console_node():
     yield node
     node.destroy_node()
 
+
 @pytest.fixture
 def small_console_node():
     node = ConsoleNode(message_stack_size=2)
     yield node
-    node.destroy_node()  
+    node.destroy_node()
+
 
 @pytest.fixture
 def filter_console_node():
     node = ConsoleNode(filters=["to_filter"])
     yield node
-    node.destroy_node()  
-
+    node.destroy_node()
 
 
 def test_when_receives_log_then_publish_to_console(console_node):
@@ -65,7 +66,7 @@ def test_when_receives_log_overflow_then_erase_old_logs(small_console_node):
 
     input_log_2 = Log()
     input_log_2.file = "test_2"
-    
+
     input_log_3 = Log()
     input_log_3.file = "test_3"
 
@@ -98,4 +99,3 @@ def test_when_receives_log_to_filter_then_nothing_is_published(filter_console_no
     rclpy.spin_once(filter_console_node, timeout_sec=0.1)
 
     assert len(received_msgs) == 0
-

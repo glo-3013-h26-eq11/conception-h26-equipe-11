@@ -18,15 +18,11 @@ def generate_launch_description():
     )
 
     rover_interface_launch = os.path.join(
-        get_package_share_directory("rover"),
-        "launch",
-        "rover_interface.launch.py"
+        get_package_share_directory("rover"), "launch", "rover_interface.launch.py"
     )
-    
+
     navigation_launch = os.path.join(
-        get_package_share_directory("navigation"),
-        "launch",
-        "navigation.launch.py"
+        get_package_share_directory("navigation"), "launch", "navigation.launch.py"
     )
 
     return LaunchDescription(
@@ -38,11 +34,9 @@ def generate_launch_description():
                 PythonLaunchDescriptionSource(web_interface_launch)
             ),
             IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(rover_interface_launch)    
+                PythonLaunchDescriptionSource(rover_interface_launch)
             ),
-            IncludeLaunchDescription(
-              PythonLaunchDescriptionSource(navigation_launch)  
-            ),
+            IncludeLaunchDescription(PythonLaunchDescriptionSource(navigation_launch)),
             Node(
                 package="proximity_sensor",
                 executable="proximity_sensor_node",
