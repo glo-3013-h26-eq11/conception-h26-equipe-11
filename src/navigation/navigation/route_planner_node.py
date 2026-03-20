@@ -32,6 +32,8 @@ class RoutePlannerNode(Node):
 
         self.current_node: str | None = None
         self.goal_node: str | None = None
+        self._current_directions: list | None = None
+        self._node_at_last_publish: str | None = None
 
     def _map_callback(self, msg: String) -> None:
         if self._route_selector is not None:
@@ -53,18 +55,29 @@ class RoutePlannerNode(Node):
 
     def goal_node_callback(self, msg: String) -> None:
         self.goal_node = msg.data.strip()
+        self._current_directions = None
+        self._node_at_last_publish = None
         self._try_compute_route()
 
     def _try_compute_route(self) -> None:
         if self._route_selector is None:
             return
-
         if self.current_node is None or not self.current_node:
             return
-
         if self.goal_node is None or not self.goal_node:
             return
 
+        if (
+            self._current_directions is None
+            or self.current_node != self._node_at_last_publish
+        ):
+            self._publish_full_route()
+            return
+
+        if self._current_directions:
+            self._republish_directions()
+
+    def _publish_full_route(self) -> None:
         try:
             result = self._route_selector.compute_path(
                 self.current_node, self.goal_node
@@ -76,10 +89,12 @@ class RoutePlannerNode(Node):
         if result is None:
             nodes_path, directions_path = [], []
             self.get_logger().warning(
-                f"No path foundfrom '{self.current_node}' to '{self.goal_node}'."
+                f"No path found from '{self.current_node}' to '{self.goal_node}'."
             )
         else:
             nodes_path, directions_path = result
+
+        self._current_directions = list(directions_path)
 
         msg_dirs = String()
         msg_dirs.data = json.dumps(directions_path)
@@ -88,10 +103,24 @@ class RoutePlannerNode(Node):
         msg_nodes = String()
         msg_nodes.data = json.dumps(nodes_path)
         self.publisher_nodes.publish(msg_nodes)
+        self._node_at_last_publish = self.current_node
 
-        self.get_logger().info(
-            f"Published route from '{self.current_node}' to '{self.goal_node}'."
-        )
+    def _republish_directions(self) -> None:
+        msg_dirs = String()
+        msg_dirs.data = json.dumps(self._current_directions)
+        self.publisher_directions.publish(msg_dirs)
+
+    def _publish_remaining_route(self) -> None:
+        self._current_directions.pop(0)
+        remaining = self._current_directions
+
+        if not remaining:
+            self._current_directions = []
+
+        msg_dirs = String()
+        msg_dirs.data = json.dumps(remaining)
+        self.publisher_directions.publish(msg_dirs)
+        self._node_at_last_publish = self.current_node
 
 
 def main(args=None):

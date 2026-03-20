@@ -1,21 +1,36 @@
 <script setup lang="ts">
 import {ref} from "vue";
+import {Ros, Topic} from "roslib";
 
 const messageList = ref([""])
 
-async function getLoadUnsafe() {
-  const res = await fetch("/api/console", {"method": "GET"})
+var ros = new Ros({
+  url: 'ws://localhost:9999'
+});
 
-  const data = await res.json()
-  if (res.ok) {
-    for (let i = 0; i < data.messages.length; i++) {
-      messageList.value.push(data.messages[i])
+ros.on('connection', function () {
+  console.log('Console connected to ROS');
+});
 
+ros.on('error', (err) => {
+  console.error(err);
+})
+
+ros.on('close', function () {
+  console.log('Websocket closed');
+})
+
+var console_ros = new Topic(
+    {
+      ros: ros,
+      name: '/console',
+      messageType: 'std_msgs/msg/String'
     }
-  }
-}
+)
 
-setInterval(getLoadUnsafe, 500)
+console_ros.subscribe(message => {
+  messageList.value.push(message.data)
+})
 </script>
 
 <template>

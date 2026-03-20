@@ -1,18 +1,36 @@
 <script setup lang="ts">
 import {ref} from "vue";
+import {Ros, Topic} from "roslib";
 
 const direction = ref("none")
 
-async function getDirection() {
-  const res = await fetch("/api/direction", {"method": "GET"})
+var ros = new Ros({
+  url: 'ws://localhost:9999'
+});
 
-  const data = await res.json()
-  if (res.ok) {
-    direction.value = data.direction
-  }
-}
+ros.on('connection', function () {
+  console.log('Direction connected to ROS');
+});
 
-setInterval(getDirection, 500)
+ros.on('error', (err) => {
+  console.error(err);
+})
+
+ros.on('close', function () {
+  console.log('Websocket closed');
+})
+
+var directionTopic = new Topic(
+    {
+      ros: ros,
+      name: '/route_plan/directions',
+      messageType: 'std_msgs/msg/String'
+    }
+)
+
+directionTopic.subscribe(message => {
+  direction.value = message.data
+})
 </script>
 
 <template>
