@@ -5,7 +5,7 @@ from geometry_msgs.msg import Twist
 from central_manager.base_enforcer import Enforcer
 
 BRAKE_START_DIST:    float = 1.0
-STOP_TARGET_DIST:    float = 0.55
+STOP_TARGET_DIST:    float = 0.61
 STOP_DURATION:       float = 1.5
 DISTANCE_STALE_SEC:  float = 0.5
 TURN_TIME: float = 1.4
