@@ -84,7 +84,7 @@ class WallFollowNode(Node):
                 self.send_control_command(SPEED, 0.0)
                 return
             elif elapsed < RIGHT_TURN_DURATION + COAST_DURATION:
-                self.send_control_command(0.1, -MAX_STEERING)
+                self.send_control_command(0.2, -MAX_STEERING)
                 return
             else:
                 self._corner_detected = False
