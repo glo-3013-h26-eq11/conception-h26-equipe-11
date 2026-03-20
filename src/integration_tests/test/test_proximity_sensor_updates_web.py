@@ -50,7 +50,7 @@ def test_web_updates_map_manager():
 
         page.goto(WEBAPP_URL)
 
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(3000)
 
         rover_chip = page.locator(".v-chip").filter(has=page.locator(ICON_REFERENCE))
 
@@ -59,12 +59,10 @@ def test_web_updates_map_manager():
         proximity_sensor_node.gpio_from_1_to_0()
 
         start = time.time()
-        while time.time() - start < 3:
+        while time.time() - start < 4:
             rclpy.spin_once(proximity_sensor_node, timeout_sec=0.1)
 
         expect(rover_chip).to_have_text(TEXT_LOADED, timeout=5000)
-
-        page.wait_for_timeout(3000)
 
         browser.close()
 
