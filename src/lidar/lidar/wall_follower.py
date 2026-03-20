@@ -19,7 +19,7 @@ LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.425 # m
 RIGHT_TURN_DURATION = 1.2
-COAST_DURATION = 0.5
+COAST_DURATION = 1.0
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
