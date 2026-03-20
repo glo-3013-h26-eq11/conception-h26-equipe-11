@@ -92,7 +92,7 @@ class WallFollowNode(Node):
                 self.last_time = None
 
         if not self._corner_detected:
-            if  a > (CORNER_THRESHOLD + 0.2):
+            if  a > (CORNER_THRESHOLD + 0.3):
                 self._corner_detected = True
                 self._corner_time = now
                 self.get_logger().info("Right turn triggered!")
