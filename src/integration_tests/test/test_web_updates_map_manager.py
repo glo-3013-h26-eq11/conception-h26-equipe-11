@@ -54,6 +54,8 @@ def test_web_updates_map_manager():
 
         page.goto(WEBAPP_URL)
 
+        page.wait_for_timeout(2000)
+
         page.locator("input[type='file']").nth(0).set_input_files(CSV_FILE_TOPOGRAPHIE)
 
         page.locator("input[type='file']").nth(1).set_input_files(CSV_FILE_ARUCO)
@@ -65,7 +67,7 @@ def test_web_updates_map_manager():
         browser.close()
 
     start = time.time()
-    while time.time() - start < 10:
+    while time.time() - start < 2:
         rclpy.spin_once(listener, timeout_sec=0.1)
 
     listener.destroy_node()

@@ -43,6 +43,8 @@ def test_web_updates_start():
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
+        page.wait_for_timeout(2000)
+
         page.goto(WEBAPP_URL)
 
         page.get_by_role("button", name=START_BUTTON).click()
@@ -52,7 +54,7 @@ def test_web_updates_start():
         browser.close()
 
     start = time.time()
-    while time.time() - start < 10:
+    while time.time() - start < 2:
         rclpy.spin_once(listener, timeout_sec=0.1)
 
     listener.destroy_node()

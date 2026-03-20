@@ -13,6 +13,7 @@
   <test_depend>python3-pytest</test_depend>
   <test_depend>web_interface</test_depend>
   <test_depend>proximity_sensor</test_depend>
+  <test_depend>central_manager</test_depend>
 
   <export>
     <build_type>ament_python</build_type>

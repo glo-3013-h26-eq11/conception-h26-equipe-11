@@ -9,6 +9,7 @@ from integration_tests.integration_helper import (
     build_web_interface,
 )
 import pytest
+from central_manager.enforcer_manager_node import EnforcerManagerNode
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
 
@@ -17,9 +18,8 @@ WEB_AND_ROSBRIDGE_CMD = (
 )
 
 
-
 TEXT_SAFE_DISTANCE = "Rover distance sécuritaire"
-TEXT_UNSAFE_DISTANCE = "Rover trop proche"
+TEXT_DANGEROUS_DISTANCE = "Rover trop proche"
 ICON_REFERENCE = ".mdi-alert"
 
 
@@ -37,7 +37,7 @@ def test_web_updates_map_manager():
 
     wait_for_server(WEBAPP_URL)
 
-    proximity_sensor_node = ProximitySensorNode()
+    enforcer_manager_node = EnforcerManagerNode()
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -51,13 +51,13 @@ def test_web_updates_map_manager():
 
         expect(rover_chip).to_have_text(TEXT_SAFE_DISTANCE, timeout=5000)
 
-        proximity_sensor_node.gpio_from_1_to_0()
+        enforcer_manager_node.publish_dangerous_distance()
 
         start = time.time()
         while time.time() - start < 2:
-            rclpy.spin_once(proximity_sensor_node, timeout_sec=0.1)
+            rclpy.spin_once(enforcer_manager_node, timeout_sec=0.1)
 
-        expect(rover_chip).to_have_text(TEXT_UNSAFE_DISTANCE, timeout=5000)
+        expect(rover_chip).to_have_text(TEXT_DANGEROUS_DISTANCE, timeout=5000)
 
         page.wait_for_timeout(3000)
 

@@ -35,7 +35,7 @@ is_there_merchandise.subscribe(message => {
 
 var unsafe_distance = new Topic(
     {ros: ros,
-      name: '/car_distance/dangerous',
+      name: '/car_follower/dangerous_distance',
       messageType: 'std_msgs/msg/Bool'}
 )
 
