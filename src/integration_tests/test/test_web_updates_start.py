@@ -8,6 +8,7 @@ from integration_tests.integration_helper import (
     stop_process,
     wait_for_server,
     BoolTopicListener,
+    build_web_interface
 )
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
@@ -29,6 +30,8 @@ def ros_context():
 
 
 def test_web_updates_start():
+
+    build_web_interface()
 
     web_and_rosbridge = start_process(WEB_AND_ROSBRIDGE_CMD)
 

@@ -7,6 +7,17 @@ from std_msgs.msg import Bool, String
 from rclpy.node import Node
 
 
+def build_web_interface(cwd="../.."):
+    result = subprocess.run(
+        "cd src/web_interface/web_interface && npx vite build",
+        cwd=cwd,
+        shell=True,
+        executable="/bin/bash",
+    )
+    if result.returncode != 0:
+        raise RuntimeError("Vite build failed")
+
+
 def start_process(cmd, cwd="../.."):
     return subprocess.Popen(
         cmd,

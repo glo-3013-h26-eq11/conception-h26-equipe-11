@@ -28,12 +28,12 @@ class ProximitySensorNode(Node):
         else:
             self.gpio_from_1_to_0(pin)
 
-    def gpio_from_0_to_1(self, pin):
+    def gpio_from_0_to_1(self, pin=7):
         boolean_msg = Bool()
         boolean_msg.data = MerchandiseFlag.NOT_DETECTED.value
         self.publisher.publish(boolean_msg)
 
-    def gpio_from_1_to_0(self, pin):
+    def gpio_from_1_to_0(self, pin=7):
         boolean_msg = Bool()
         boolean_msg.data = MerchandiseFlag.IS_DETECTED.value
         self.publisher.publish(boolean_msg)

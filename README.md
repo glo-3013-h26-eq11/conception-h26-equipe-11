@@ -24,6 +24,11 @@ black .
 colcon test --packages-skip ldlidar_ros2 --event-handlers console_cohesion+
 ```
 
+### Exemple de test unique
+```bash
+colcon test --packages-select integration_tests --pytest-args "-k test_proximity_sensor_updates_web" --event-handlers console_cohesion+
+```
+
 ### Créer un package/module
 
 Voir la [doc](https://docs.ros.org/en/humble/How-To-Guides/Developing-a-ROS-2-Package.html#python-packages) pour plus d'info.

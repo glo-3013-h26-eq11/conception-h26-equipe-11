@@ -9,6 +9,7 @@ from integration_tests.integration_helper import (
     start_process,
     stop_process,
     StringTopicListener,
+    build_web_interface
 )
 import pytest
 
@@ -39,6 +40,7 @@ def ros_context():
 
 def test_web_updates_map_manager():
 
+    build_web_interface()
     web_and_rosbridge = start_process(WEB_AND_ROSBRIDGE_CMD)
     rosnode = start_process(ROS_NODE_CMD)
 
