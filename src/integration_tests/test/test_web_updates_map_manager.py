@@ -9,7 +9,7 @@ from integration_tests.integration_helper import (
     start_process,
     stop_process,
     StringTopicListener,
-    build_web_interface
+    build_web_interface,
 )
 import pytest
 

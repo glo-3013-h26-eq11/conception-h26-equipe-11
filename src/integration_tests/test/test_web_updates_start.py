@@ -8,7 +8,7 @@ from integration_tests.integration_helper import (
     stop_process,
     wait_for_server,
     BoolTopicListener,
-    build_web_interface
+    build_web_interface,
 )
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"

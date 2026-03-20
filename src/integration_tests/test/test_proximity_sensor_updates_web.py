@@ -1,6 +1,4 @@
-import os
 import time
-from pathlib import Path
 import rclpy
 from playwright.sync_api import sync_playwright, expect
 from web_interface.static_web_server import PORT
@@ -8,16 +6,17 @@ from web_interface.static_web_server import PORT
 import sys
 from unittest.mock import MagicMock
 
-sys.modules['Jetson'] = MagicMock()
-sys.modules['Jetson.GPIO'] = MagicMock() # To prevent immediate failure for absence of Jetson.GPIO
-
+sys.modules["Jetson"] = MagicMock()
+sys.modules["Jetson.GPIO"] = (
+    MagicMock()
+)  # To prevent immediate failure for absence of Jetson.GPIO
 from proximity_sensor.proximity_sensor_node import ProximitySensorNode
 
 from integration_tests.integration_helper import (
     wait_for_server,
     start_process,
     stop_process,
-    build_web_interface
+    build_web_interface,
 )
 import pytest
 
@@ -54,18 +53,17 @@ def test_web_updates_map_manager():
 
         page.goto(WEBAPP_URL)
 
-        rover_chip = page.locator(".v-chip").filter(
-            has=page.locator(ICON_REFERENCE))
-        
+        rover_chip = page.locator(".v-chip").filter(has=page.locator(ICON_REFERENCE))
+
         page.wait_for_timeout(2000)
-        
+
         expect(rover_chip).to_have_text(TEXT_NOT_LOADED, timeout=5000)
 
         proximity_sensor_node.gpio_from_1_to_0()
-        
+
         start = time.time()
         while time.time() - start < 2:
-            rclpy.spin_once(proximity_sensor_node, timeout_sec=0.1) 
+            rclpy.spin_once(proximity_sensor_node, timeout_sec=0.1)
 
         expect(rover_chip).to_have_text(TEXT_LOADED, timeout=5000)
 
