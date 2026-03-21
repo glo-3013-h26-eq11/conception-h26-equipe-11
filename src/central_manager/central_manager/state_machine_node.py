@@ -8,14 +8,21 @@ from threading import Thread
 
 
 from central_manager.states.initial_state import InitialState
-from central_manager.states.wall_following_state import WallFollowingState
+from central_manager.central_manager.states.positioning.wall_following_positioning_state import (
+    WallFollowingState,
+)
 from central_manager.states.at_intersection_state import AtIntersectionState
 from central_manager.states.turning_left_state import TurningLeftState
 from central_manager.states.turning_forward_state import TurningForwardState
 from central_manager.states.at_pickup_zone_state import AtPickupZoneState
-from central_manager.states.waiting_pickup_merchandise_state import WaitingPickupMerchandiseState
+from central_manager.states.waiting_pickup_merchandise_state import (
+    WaitingPickupMerchandiseState,
+)
 from central_manager.states.at_delivery_zone_state import AtDeliveryZoneState
-from central_manager.states.waiting_delivery_merchandise_state import WaitingDeliveryMerchandiseState
+from central_manager.states.waiting_delivery_merchandise_state import (
+    WaitingDeliveryMerchandiseState,
+)
+
 
 class StateMachineNode(Node):
     def __init__(self):
@@ -29,9 +36,7 @@ class StateMachineNode(Node):
             String, "state_machine/active_enforcers", 10
         )
 
-        self.create_subscription(
-            String, "aruco_detections", self.aruco_callback, 10
-        )
+        self.create_subscription(String, "aruco_detections", self.aruco_callback, 10)
 
         self.create_subscription(
             String, "route_plan/directions", self.route_directions_callback, 10
@@ -41,20 +46,18 @@ class StateMachineNode(Node):
             Bool, "is_there_merchandise", self.merchandise_callback, 10
         )
 
-        self.create_subscription(
-            Bool, "turn_complete", self.turn_complete_callback, 10
-        )
-        
+        self.create_subscription(Bool, "turn_complete", self.turn_complete_callback, 10)
+
         self.create_subscription(
             Bool, "zone_stop_complete", self.zone_stop_complete_callback, 10
         )
 
         self.states = self.create_states()
         self.sm = self.create_state_machine()
-        
+
         self.fsm_thread = Thread(target=self.run_state_machine, daemon=True)
         self.fsm_thread.start()
-        
+
     def _init_blackboard(self):
         self.blackboard["system_ready_flag"] = True
 
@@ -81,7 +84,7 @@ class StateMachineNode(Node):
             "AT_DELIVERY_ZONE": AtDeliveryZoneState(),
             "WAITING_DELIVERY_MERCHANDISE": WaitingDeliveryMerchandiseState(),
         }
-        
+
     def create_state_machine(self):
         sm = StateMachine(outcomes=["mission_complete", "error"])
 
@@ -91,7 +94,6 @@ class StateMachineNode(Node):
             transitions={
                 "system_ready": "WALL_FOLLOWING",
                 "continue": "INITIAL",
-                
             },
         )
 
@@ -172,14 +174,14 @@ class StateMachineNode(Node):
         )
 
         return sm
-    
+
     def run_state_machine(self):
         try:
             outcome = self.sm(self.blackboard)
             self.get_logger().info(f"FSM finished with outcome: {outcome}")
         except Exception as e:
             self.get_logger().error(f"FSM execution error: {e}")
-    
+
     def publish_active_enforcers(self, enforcer_names):
         msg = String()
         msg.data = json.dumps(enforcer_names)
@@ -211,12 +213,13 @@ class StateMachineNode(Node):
 
     def merchandise_callback(self, msg: Bool):
         self.blackboard["merchandise_detected_flag"] = msg.data
-        
+
     def turn_complete_callback(self, msg: Bool):
         self.blackboard["turn_complete_flag"] = msg.data
-        
+
     def zone_stop_complete_callback(self, msg: Bool):
         self.blackboard["zone_stop_complete_flag"] = msg.data
+
 
 def main(args=None):
     rclpy.init(args=args)

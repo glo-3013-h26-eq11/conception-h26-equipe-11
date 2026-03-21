@@ -23,7 +23,7 @@ class EnforcerManagerNode(Node):
         self.sub_route_nodes = self.create_subscription(
             String, "route_plan/nodes", self.route_nodes_callback, 10
         )
-        
+
         self.sub_active_enforcers = self.create_subscription(
             String,
             "state_machine/active_enforcers",
@@ -40,8 +40,8 @@ class EnforcerManagerNode(Node):
         self.pub_dangerous_distance_car_follower = self.create_publisher(
             Bool, "/car_follower/dangerous_distance", 10
         )
-        
-        #Faut rajouter les enforcer et ce qu'ils équivalent dans les states
+
+        # Faut rajouter les enforcer et ce qu'ils équivalent dans les states
         self.enforcer_registry: Dict[str, Enforcer] = {
             "merchandise_enforcer": MerchandiseEnforcer(),
             # "left_turn_enforcer": LeftTurnEnforcer(),
@@ -49,13 +49,13 @@ class EnforcerManagerNode(Node):
             # "follow_vehicle_enforcer": FollowVehicleEnforcer(),
             # "stop_enforcer": StopEnforcer(),
         }
-        
+
         self.enforcers: List[Enforcer] = []
 
     @property
     def merchandise_enforcer(self) -> MerchandiseEnforcer:
         return self.enforcer_registry["merchandise_enforcer"]
-    
+
     def active_enforcers_callback(self, msg: String) -> None:
         try:
             enforcer_names = json.loads(msg.data)
@@ -67,10 +67,8 @@ class EnforcerManagerNode(Node):
             self.enforcers = new_enforcers
 
         except Exception as e:
-            self.get_logger().error(
-                f"Error in active_enforcers_callback: {e}"
-            )
-            
+            self.get_logger().error(f"Error in active_enforcers_callback: {e}")
+
     def load_callback(self, load_msg: Bool) -> None:
         self.merchandise_enforcer.load_detected = load_msg.data
 
@@ -84,9 +82,6 @@ class EnforcerManagerNode(Node):
             invalid_dest_msg = Bool()
             invalid_dest_msg.data = True
             self.pub_invalid_destination.publish(invalid_dest_msg)
-            
-
-
 
     def cmd_callback(self, cmd: Twist) -> None:
         for enforcer in self.enforcers:

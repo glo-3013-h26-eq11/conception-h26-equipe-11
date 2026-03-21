@@ -1,27 +1,31 @@
 from yasmin import State
+from std_msgs.msg import Bool
+import rclpy
+from central_manager.immobile_enforcer import ImmobileEnforcer
 
 
 class InitialState(State):
-    def __init__(self):
-        super().__init__(outcomes=[
-            "system_ready",
-            "continue"
-        ])
+    def __init__(self, node):
+        super().__init__(
+            outcomes=[
+                "system_ready",
+            ]
+        )
+
+        node.create_subscription(Bool, "rover/start", self.rover_start_callback, 10)
+
+        self.outcome = None
+
+    def rover_start_callback(self, msg):
+        if msg.data:
+            self.outcome = "system_ready"
 
     def execute(self, blackboard):
-        node = blackboard["node"]
+        self.outcome = None
 
-        active_enforcers = [
-            "wall_following_enforcer",
-            "follow_vehicle_enforcer"
-        ]
-        
-        if blackboard["active_enforcers"] != active_enforcers:
-            blackboard["active_enforcers"] = active_enforcers
-            node.publish_active_enforcers(active_enforcers)
-            
-        if blackboard["system_ready_flag"]:
-            blackboard["system_ready_flag"] = False
-            return "system_ready"
+        blackboard["enforcers"] = [ImmobileEnforcer()]
 
-        return "continue"
+        while self.outcome is None:
+            rclpy.spin_once(blackboard["node"], timeout_sec=0.1)
+
+        return self.outcome
