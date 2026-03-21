@@ -5,7 +5,9 @@ from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 
 from navigation.route_planner_node import RoutePlannerNode
-from central_manager.states.to_deposit.at_intersection_to_deposit_state import AtIntersectionToDepositState
+from central_manager.states.to_deposit.at_intersection_to_deposit_state import (
+    AtIntersectionToDepositState,
+)
 
 
 def test_route_planner_service_integration():
