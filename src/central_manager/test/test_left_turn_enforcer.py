@@ -1,5 +1,5 @@
 import pytest
-from central_manager.left_turn_enforcer import LeftTurnEnforcer
+from central_manager.enforcers.left_turn_enforcer import LeftTurnEnforcer
 from geometry_msgs.msg import Twist
 
 

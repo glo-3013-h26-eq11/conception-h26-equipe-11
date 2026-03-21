@@ -1,5 +1,5 @@
 import pytest
-from central_manager.forward_turn_enforcer import ForwardTurnEnforcer
+from central_manager.enforcers.forward_turn_enforcer import ForwardTurnEnforcer
 from geometry_msgs.msg import Twist
 
 
