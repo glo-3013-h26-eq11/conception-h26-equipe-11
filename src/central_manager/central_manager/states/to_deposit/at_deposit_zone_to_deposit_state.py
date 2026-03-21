@@ -4,7 +4,7 @@ from std_msgs.msg import String
 from central_manager.wait_at_deposit_enforcer import WaitAtDepositEnforcer
 
 
-class TurningLeftToDepositState(State):
+class AtDepositZoneToDeposit(State):
     def __init__(self, node):
         super().__init__(
             outcomes=[

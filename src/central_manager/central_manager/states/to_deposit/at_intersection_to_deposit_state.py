@@ -1,5 +1,4 @@
 from yasmin import State
-from std_msgs.msg import String
 from central_manager.immobile_enforcer import ImmobileEnforcer
 from central_manager.states.node_action_enum import NodeAction
 
@@ -29,6 +28,9 @@ class AtIntersectionToDepositState(State):
 
         elif node_action == NodeAction.WAIT_DEPOSIT_ZONE:
             self.outcome = "wait_deposit_zone"
+        
+        else:
+            blackboard["node"].get_logger().error(f"INVALID node action : {self.outcome}")
 
         blackboard["node"].get_logger().info(f"Node action : {self.outcome}")
 
