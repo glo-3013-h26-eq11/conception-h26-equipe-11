@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from central_manager.states.to_deposit.at_intersection_to_deposit_state import (
     AtIntersectionToDepositState,
@@ -50,3 +50,35 @@ def test_invalid_node_action_logs_error(blackboard_mock):
         outcome = state.execute(blackboard_mock)
 
     assert outcome is None
+
+
+class FakeFuture:
+    def __init__(self, action: str):
+        self._action = action
+
+    def result(self):
+        class Response:
+            pass
+
+        r = Response()
+        r.action = self._action
+        return r
+
+
+@patch("rclpy.spin_until_future_complete", return_value=None)
+def test_left_turn_transition(blackboard_mock):
+    fake_node = MagicMock()
+
+    fake_client = MagicMock()
+    fake_client.wait_for_service.return_value = True
+    fake_client.call_async.return_value = FakeFuture(NodeAction.LEFT_TURN.value)
+
+    fake_node.create_client.return_value = fake_client
+
+    state = AtIntersectionToDepositState(fake_node)
+
+    blackboard = {"node": fake_node}
+
+    outcome = state.execute(blackboard)
+
+    assert outcome == "left_turn"

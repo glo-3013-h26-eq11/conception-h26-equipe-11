@@ -8,6 +8,7 @@ from navigation.route_selector import RouteSelector
 from central_manager.states.node_action_enum import NodeAction
 from navigation_interfaces.srv import GetNodeAction
 
+
 class RoutePlannerNode(Node):
     def __init__(self, route_selector: RouteSelector | None = None):
         super().__init__("route_planner_node")
@@ -30,8 +31,10 @@ class RoutePlannerNode(Node):
             String, "route_plan/directions", 10
         )
         self.publisher_nodes = self.create_publisher(String, "route_plan/nodes", 10)
-        
-        self.get_node_action_service = self.create_service(GetNodeAction, "get_node_action", self.handle_get_node_action)
+
+        self.get_node_action_service = self.create_service(
+            GetNodeAction, "get_node_action", self.handle_get_node_action
+        )
 
         self.current_node: str | None = None
         self.goal_node: str | None = None

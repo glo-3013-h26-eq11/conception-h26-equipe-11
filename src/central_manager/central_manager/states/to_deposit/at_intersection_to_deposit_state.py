@@ -1,6 +1,8 @@
 from yasmin import State
 from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.states.node_action_enum import NodeAction
+import rclpy
+from navigation_interfaces.srv import GetNodeAction
 
 
 class AtIntersectionToDepositState(State):
@@ -8,6 +10,8 @@ class AtIntersectionToDepositState(State):
         super().__init__(
             outcomes=["left_turn", "forward_turn", "right_turn", "wait_deposit_zone"]
         )
+
+        self.node = node
 
         self.outcome = None
 
@@ -39,4 +43,20 @@ class AtIntersectionToDepositState(State):
         return self.outcome
 
     def get_current_node_action(self) -> NodeAction:
-        pass
+        client = self.node.create_client(GetNodeAction, "get_node_action")
+
+        if not client.wait_for_service(timeout_sec=5.0):
+            self.node.get_logger().error("Service 'get_node_action' not available")
+            raise RuntimeError("Service 'get_node_action' not available")
+
+        request = GetNodeAction.Request()
+        future = client.call_async(request)
+
+        rclpy.spin_until_future_complete(self.node, future)
+
+        if future.result() is not None:
+            action_str = future.result().action
+            return NodeAction(action_str)
+
+        self.node.get_logger().error("Failed to get node action from service")
+        raise RuntimeError("Failed to get node action from service")
