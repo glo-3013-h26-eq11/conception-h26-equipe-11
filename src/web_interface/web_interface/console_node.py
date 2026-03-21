@@ -1,11 +1,11 @@
 import rclpy
-from rclpy.node import Node
 from rcl_interfaces.msg import Log
 from std_msgs.msg import String
 from collections import deque
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from web_interface.system_health_node import HealthPingingNode
 
 LEVEL_NAMES = {10: "DEBUG", 20: "INFO", 30: "WARN", 40: "ERROR", 50: "FATAL"}
 
@@ -14,9 +14,9 @@ MESSAGES_STACK_SIZE = 100
 FILTERS = ["rosbridge"]
 
 
-class ConsoleNode(Node):
+class ConsoleNode(HealthPingingNode):
     def __init__(self, message_stack_size=MESSAGES_STACK_SIZE, filters=FILTERS):
-        super().__init__("console_node")
+        super().__init__("console_node", "web_interface")
 
         self.subscription = self.create_subscription(
             Log, "rosout", self.log_callback, 10

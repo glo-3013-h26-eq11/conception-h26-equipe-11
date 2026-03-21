@@ -33,9 +33,39 @@ class NodeInfo:
             self.status = NodeStatus.CRASHED
 
 
-class HealthMonitorNode(Node):
+class HealthPingingNode(Node):
+    def __init__(self, node_name, package_name):
+        super().__init__(node_name)
+
+        self.name = node_name
+        self.package = package_name
+
+        self.create_timer(1.0, self._tick_ping)
+
+        self.health_pinging_publisher = self.create_publisher(
+            String, "/health/heartbeat", 10
+        )
+
+        self.state = NodeStatus.ACTIVE
+
+    def _tick_ping(self):
+        data = {"name": self.name, "system": self.package, "status": self.state.value}
+
+        msg = String()
+        msg.data = json.dumps(data)
+
+        self.health_pinging_publisher.publish(msg)
+
+    def set_state_loading(self):
+        self.state = NodeStatus.LOADING
+
+    def set_state_active(self):
+        self.state = NodeStatus.ACTIVE
+
+
+class HealthMonitorNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("health_monitor")
+        super().__init__("health_monitor", "web_interface")
 
         self._nodes: dict[str, NodeInfo] = {}
 

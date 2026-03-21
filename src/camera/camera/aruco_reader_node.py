@@ -2,7 +2,7 @@
 
 import json
 import rclpy
-from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import String
@@ -13,9 +13,9 @@ import numpy as np
 import depthai as dai
 
 
-class ArucoReaderNode(Node):
+class ArucoReaderNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("aruco_reader")
+        super().__init__("aruco_reader", "camera")
 
         self.bridge = CvBridge()
 

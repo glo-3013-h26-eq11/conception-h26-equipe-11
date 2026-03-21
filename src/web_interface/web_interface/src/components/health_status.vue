@@ -8,7 +8,7 @@ var ros = new Ros({
 });
 
 ros.on('connection', function () {
-  console.log('Console connected to ROS');
+  console.log('System Health connected to ROS');
 });
 
 ros.on('error', (err) => {
