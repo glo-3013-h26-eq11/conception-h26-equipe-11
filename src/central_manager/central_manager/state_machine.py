@@ -1,38 +1,26 @@
 from rclpy.node import Node
 from yasmin import StateMachine
 
-from central_manager.central_manager.states.initial.initial_state import InitialState
-
-from central_manager.states.positioning.wall_following_positioning_state import (
-    WallFollowingPositioningState,
-)
+from central_manager.states.initial.initial_state import InitialState
 
 from central_manager.states.to_load.at_intersection_to_load_state import (
     AtIntersectionToLoadState,
 )
-from central_manager.states.to_load.turning_left_to_load_state import (
-    TurningLeftToLoadState,
+from central_manager.states.movement.turning_left_state import (
+    TurningLeftState,
 )
-from central_manager.states.to_load.turning_forward_to_load_state import (
-    TurningForwardToLoadState,
+from central_manager.states.movement.turning_forward_state import (
+    TurningForwardState,
 )
-from central_manager.states.to_load.wall_following_to_load_state import (
-    WallFollowingToLoadState,
+from central_manager.states.movement.wall_following_state import (
+    WallFollowingState,
 )
 from central_manager.states.to_load.at_load_zone_to_load_state import AtLoadZoneToLoad
 
 from central_manager.states.to_deposit.at_intersection_to_deposit_state import (
     AtIntersectionToDepositState,
 )
-from central_manager.states.to_deposit.turning_left_to_deposit_state import (
-    TurningLeftToDepositState,
-)
-from central_manager.states.to_deposit.turning_forward_to_deposit_state import (
-    TurningForwardToDepositState,
-)
-from central_manager.states.to_deposit.wall_following_to_deposit_state import (
-    WallFollowingToDepositState,
-)
+
 from central_manager.states.to_deposit.at_deposit_zone_to_deposit_state import (
     AtDepositZoneToDeposit,
 )
@@ -58,16 +46,16 @@ class StateMachineRover:
     def create_states(self, node):
         return {
             "INITIAL": InitialState(node),
-            "WALL_FOLLOWING_POSITIONING": WallFollowingPositioningState(node),
+            "WALL_FOLLOWING_POSITIONING": WallFollowingState(node),
             "AT_INTERSECTION_TO_LOAD": AtIntersectionToLoadState(node),
-            "TURNING_LEFT_TO_LOAD": TurningLeftToLoadState(node),
-            "TURNING_FORWARD_TO_LOAD": TurningForwardToLoadState(node),
-            "WALL_FOLLOWING_TO_LOAD": WallFollowingToLoadState(node),
+            "TURNING_LEFT_TO_LOAD": TurningLeftState(node),
+            "TURNING_FORWARD_TO_LOAD": TurningForwardState(node),
+            "WALL_FOLLOWING_TO_LOAD": WallFollowingState(node),
             "AT_LOAD_ZONE_TO_LOAD": AtLoadZoneToLoad(node),
             "AT_INTERSECTION_TO_DEPOSIT": AtIntersectionToDepositState(node),
-            "TURNING_LEFT_TO_DEPOSIT": TurningLeftToDepositState(node),
-            "TURNING_FORWARD_TO_DEPOSIT": TurningForwardToDepositState(node),
-            "WALL_FOLLOWING_TO_DEPOSIT": WallFollowingToDepositState(node),
+            "TURNING_LEFT_TO_DEPOSIT": TurningLeftState(node),
+            "TURNING_FORWARD_TO_DEPOSIT": TurningForwardState(node),
+            "WALL_FOLLOWING_TO_DEPOSIT": WallFollowingState(node),
             "AT_LOAD_ZONE_TO_DEPOSIT": AtDepositZoneToDeposit(node),
         }
 

@@ -1,11 +1,11 @@
 from yasmin import State
 import rclpy
 from std_msgs.msg import String
-from central_manager.enforcers.left_turn_enforcer import LeftTurnEnforcer
+from central_manager.enforcers.forward_turn_enforcer import ForwardTurnEnforcer
 from central_manager.enforcers.stop_enforcer import StopEnforcer
 
 
-class TurningLeftToLoadState(State):
+class TurningForwardState(State):
     def __init__(self, node):
         super().__init__(
             outcomes=[
@@ -23,7 +23,7 @@ class TurningLeftToLoadState(State):
     def execute(self, blackboard):
         self.outcome = None
 
-        blackboard["enforcers"] = [LeftTurnEnforcer(), StopEnforcer()]
+        blackboard["enforcers"] = [ForwardTurnEnforcer(), StopEnforcer()]
 
         while self.outcome is None:
             rclpy.spin_once(blackboard["node"], timeout_sec=0.1)

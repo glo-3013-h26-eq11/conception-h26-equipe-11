@@ -12,6 +12,7 @@ class AtIntersectionToLoadState(State):
         self.outcome = None
 
     def execute(self, blackboard):
+        self.outcome = None
 
         blackboard["enforcers"] = [ImmobileEnforcer()]
 
@@ -26,7 +27,7 @@ class AtIntersectionToLoadState(State):
         elif node_action == NodeAction.RIGHT_TURN:
             self.outcome = "right_turn"
 
-        elif node_action == NodeAction.WAIT_LOADING_ZONE:
+        elif node_action == NodeAction.WAIT_LOAD_ZONE:
             self.outcome = "wait_load_zone"
 
         else:

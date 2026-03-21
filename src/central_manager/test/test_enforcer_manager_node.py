@@ -1,9 +1,6 @@
 from central_manager.enforcer_manager_node import EnforcerManagerNode
-from geometry_msgs.msg import Twist
-from std_msgs.msg import String, Bool
 import pytest
 import rclpy
-import json
 
 
 @pytest.fixture(scope="module", autouse=True)
