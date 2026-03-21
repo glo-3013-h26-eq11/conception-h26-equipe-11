@@ -24,27 +24,25 @@ class EnforcerManagerNode(Node):
         self.blackboard = {}
 
         self.blackboard["enforcers"] = []
-        
+
         self.sm = StateMachineRover(self.blackboard, self)
-        
+
         self.start_timer = self.create_timer(0.1, self._start_sm_once)
-        
 
     def _get_enforcers(self) -> List[Enforcer]:
         return self.blackboard["enforcers"]
 
     def _start_sm_once(self):
         self.start_timer.cancel()
-        
-        self.get_logger().info("Starting the state machine...")
-        
-        self.sm.run()
 
+        self.get_logger().info("Starting the state machine...")
+
+        self.sm.run()
 
     def cmd_callback(self, cmd: Twist) -> None:
         for enforcer in self._get_enforcers():
             cmd = enforcer.enforce_cmd(cmd)
-        
+
         self.pub_cmd_vel_safe.publish(cmd)
 
     def publish_dangerous_distance(self):

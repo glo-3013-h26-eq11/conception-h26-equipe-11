@@ -30,7 +30,9 @@ class AtIntersectionToLoadState(State):
             self.outcome = "wait_load_zone"
 
         else:
-            blackboard["node"].get_logger().error(f"INVALID node action : {self.outcome}")
+            blackboard["node"].get_logger().error(
+                f"INVALID node action : {self.outcome}"
+            )
 
         blackboard["node"].get_logger().info(f"Node action : {self.outcome}")
 
