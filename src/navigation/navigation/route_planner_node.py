@@ -6,7 +6,7 @@ from std_msgs.msg import String
 
 from navigation.route_selector import RouteSelector
 from central_manager.states.node_action_enum import NodeAction
-from navigation.srv import GetNodeAction
+from navigation_interfaces.srv import GetNodeAction
 
 class RoutePlannerNode(Node):
     def __init__(self, route_selector: RouteSelector | None = None):
