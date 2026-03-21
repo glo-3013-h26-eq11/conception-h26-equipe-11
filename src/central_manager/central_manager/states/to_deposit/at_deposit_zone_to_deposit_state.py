@@ -1,0 +1,30 @@
+from yasmin import State
+import rclpy
+from std_msgs.msg import String
+from central_manager.enforcers.wait_at_deposit_enforcer import WaitAtDepositEnforcer
+
+
+class AtDepositZoneToDeposit(State):
+    def __init__(self, node):
+        super().__init__(
+            outcomes=[
+                "deposit_over",
+            ]
+        )
+
+        node.create_subscription(String, "deposit_over", self.deposit_over_callback, 10)
+
+        self.outcome = None
+
+    def deposit_over_callback(self, msg: String):
+        self.outcome = "deposit_over"
+
+    def execute(self, blackboard):
+        self.outcome = None
+
+        blackboard["enforcers"] = [WaitAtDepositEnforcer()]
+
+        while self.outcome is None:
+            rclpy.spin_once(blackboard["node"], timeout_sec=0.1)
+
+        return self.outcome

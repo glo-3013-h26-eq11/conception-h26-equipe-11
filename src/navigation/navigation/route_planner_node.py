@@ -5,7 +5,8 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 from navigation.route_selector import RouteSelector
-
+from central_manager.states.node_action_enum import NodeAction
+from navigation_interfaces.srv import GetNodeAction
 
 class RoutePlannerNode(Node):
     def __init__(self, route_selector: RouteSelector | None = None):
@@ -29,11 +30,17 @@ class RoutePlannerNode(Node):
             String, "route_plan/directions", 10
         )
         self.publisher_nodes = self.create_publisher(String, "route_plan/nodes", 10)
+        
+        self.get_node_action_service = self.create_service(GetNodeAction, "get_node_action", self.handle_get_node_action)
 
         self.current_node: str | None = None
         self.goal_node: str | None = None
         self._current_directions: list | None = None
         self._node_at_last_publish: str | None = None
+
+    def handle_get_node_action(self, request, response):
+        response.action = NodeAction.LEFT_TURN.value
+        return response
 
     def _map_callback(self, msg: String) -> None:
         if self._route_selector is not None:

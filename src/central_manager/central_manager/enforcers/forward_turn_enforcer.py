@@ -1,4 +1,4 @@
-from central_manager.base_enforcer import Enforcer
+from central_manager.enforcers.base_enforcer import Enforcer
 from geometry_msgs.msg import Twist
 import time
 
