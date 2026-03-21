@@ -40,6 +40,6 @@ def test_wall_following_positioning_transitions_to_current_node(rclpy_init):
     thread.join(timeout=2.0)
 
     assert outcome_holder.get("outcome") == "current_node"
-    assert blackboard["enforcers"] == []
+    assert len(blackboard["enforcers"]) == 1
 
     node.destroy_node()

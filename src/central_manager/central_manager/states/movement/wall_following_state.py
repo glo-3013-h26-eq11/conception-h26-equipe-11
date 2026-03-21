@@ -1,6 +1,7 @@
 from yasmin import State
 import rclpy
 from std_msgs.msg import String
+from central_manager.enforcers.stop_enforcer import StopEnforcer
 
 
 class WallFollowingState(State):
@@ -21,7 +22,7 @@ class WallFollowingState(State):
     def execute(self, blackboard):
         self.outcome = None
 
-        blackboard["enforcers"] = []
+        blackboard["enforcers"] = [StopEnforcer()]
 
         while self.outcome is None:
             rclpy.spin_once(blackboard["node"], timeout_sec=0.1)
