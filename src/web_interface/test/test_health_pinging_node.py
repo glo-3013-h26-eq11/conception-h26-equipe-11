@@ -5,6 +5,7 @@ from web_interface.system_health_node import HealthPingingNode
 import time
 import json
 
+
 @pytest.fixture(scope="module", autouse=True)
 def rclpy_context():
     rclpy.init()
@@ -26,22 +27,20 @@ def test_when_ping_then_publish_node_status(health_pinging_node):
         data = json.loads(msg.data)
         received_msgs.append(data)
 
-    health_pinging_node.create_subscription(String, "/health/heartbeat", capture_callback, 10)
-    
+    health_pinging_node.create_subscription(
+        String, "/health/heartbeat", capture_callback, 10
+    )
+
     start = time.time()
     while time.time() - start < 1.1:
         rclpy.spin_once(health_pinging_node, timeout_sec=0.1)
 
-    expected = {
-        "name": "node_name",
-        "system": "package_name",
-        "status" : "ACTIVE"
-    }
+    expected = {"name": "node_name", "system": "package_name", "status": "ACTIVE"}
 
     assert len(received_msgs) == 1
     assert received_msgs[0] == expected
 
-    
+
 def test_when_set_to_loading_ping_then_publish_loading(health_pinging_node):
     received_msgs = []
 
@@ -49,19 +48,17 @@ def test_when_set_to_loading_ping_then_publish_loading(health_pinging_node):
         data = json.loads(msg.data)
         received_msgs.append(data)
 
-    health_pinging_node.create_subscription(String, "/health/heartbeat", capture_callback, 10)
-    
+    health_pinging_node.create_subscription(
+        String, "/health/heartbeat", capture_callback, 10
+    )
+
     health_pinging_node.set_state_loading()
-    
+
     start = time.time()
     while time.time() - start < 1.1:
         rclpy.spin_once(health_pinging_node, timeout_sec=0.1)
 
-    expected = {
-        "name": "node_name",
-        "system": "package_name",
-        "status" : "LOADING"
-    }
+    expected = {"name": "node_name", "system": "package_name", "status": "LOADING"}
 
     assert len(received_msgs) == 1
     assert received_msgs[0] == expected
