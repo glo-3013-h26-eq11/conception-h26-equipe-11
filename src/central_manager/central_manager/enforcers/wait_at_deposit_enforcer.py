@@ -1,11 +1,11 @@
-from central_manager.base_enforcer import Enforcer
+from central_manager.enforcers.base_enforcer import Enforcer
 from geometry_msgs.msg import Twist
 import time
 
-STOP_AFTER_LOAD_DURATION = 1.5  # s
+STOP_AFTER_DEPOSIT_DURATION = 1.5  # s
 
 
-class WaitAtLoadEnforcer(Enforcer):
+class WaitAtDepositEnforcer(Enforcer):
     def __init__(self):
         self.last_real_speed_timer = None
         self.timer = 0
@@ -28,10 +28,10 @@ class WaitAtLoadEnforcer(Enforcer):
         return dt
 
     def enforce_cmd(self, cmd) -> Twist:
-        if self.is_stop_after_load_over():
+        if self.is_stop_after_deposit_over():
             return cmd
         else:
             return Twist()
 
-    def is_stop_after_load_over(self):
-        return self.timer >= STOP_AFTER_LOAD_DURATION
+    def is_stop_after_deposit_over(self):
+        return self.timer >= STOP_AFTER_DEPOSIT_DURATION

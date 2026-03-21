@@ -1,4 +1,4 @@
-from central_manager.base_enforcer import Enforcer
+from central_manager.enforcers.base_enforcer import Enforcer
 from central_manager.state_machine import StateMachineRover
 from rclpy.node import Node
 from geometry_msgs.msg import Twist

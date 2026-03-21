@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
 from rclpy.node import Node
 from yasmin import StateMachine
-from threading import Thread
 
-from central_manager.states.initial_state import InitialState
+from central_manager.central_manager.states.initial.initial_state import InitialState
 
 from central_manager.states.positioning.wall_following_positioning_state import (
     WallFollowingPositioningState,

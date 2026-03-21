@@ -1,7 +1,7 @@
 from yasmin import State
 import rclpy
 from std_msgs.msg import String
-from central_manager.wait_at_deposit_enforcer import WaitAtDepositEnforcer
+from central_manager.enforcers.wait_at_deposit_enforcer import WaitAtDepositEnforcer
 
 
 class AtDepositZoneToDeposit(State):

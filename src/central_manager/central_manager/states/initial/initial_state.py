@@ -1,7 +1,7 @@
 from yasmin import State
 from std_msgs.msg import Bool
 import rclpy
-from central_manager.immobile_enforcer import ImmobileEnforcer
+from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 
 
 class InitialState(State):

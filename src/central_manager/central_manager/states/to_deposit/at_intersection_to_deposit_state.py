@@ -1,5 +1,5 @@
 from yasmin import State
-from central_manager.immobile_enforcer import ImmobileEnforcer
+from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.states.node_action_enum import NodeAction
 
 
