@@ -1,4 +1,4 @@
-""" import json
+import json
 import pytest
 import rclpy
 from std_msgs.msg import String
@@ -31,6 +31,7 @@ def node():
 
     route_planner_node.destroy_node()
 
+
 def test_given_current_only_when_received_then_publishes_nodes(node):
     # Arrange
     received = []
@@ -48,7 +49,8 @@ def test_given_current_only_when_received_then_publishes_nodes(node):
     rclpy.spin_once(node, timeout_sec=0.2)
 
     # Assert
-    assert received and json.loads(received[0]) != []
+    assert received
+    assert json.loads(received[0]) == ["A1", "ZC1"]
 
 
 def test_given_current_only_when_received_then_publishes_directions(node):
@@ -68,7 +70,7 @@ def test_given_current_only_when_received_then_publishes_directions(node):
     rclpy.spin_once(node, timeout_sec=0.2)
 
     # Assert
-    assert received and json.loads(received[0]) != []
+    assert json.loads(received[0]) == ["left"]
 
 
 def test_given_goal_mode_drop_when_current_received_then_publishes_drop_route(node):
@@ -91,7 +93,7 @@ def test_given_goal_mode_drop_when_current_received_then_publishes_drop_route(no
     rclpy.spin_once(node, timeout_sec=0.2)
 
     # Assert
-    assert received and received[0][-1] == "ZD1"
+    assert received[0][-1] == "ZD1"
 
 
 def test_given_load_service_when_path_exists_then_returns_first_direction_action(node):
@@ -105,7 +107,9 @@ def test_given_load_service_when_path_exists_then_returns_first_direction_action
     assert response.action == "left"
 
 
-def test_given_deposit_service_when_path_exists_then_returns_first_direction_action(node):
+def test_given_deposit_service_when_path_exists_then_returns_first_direction_action(
+    node,
+):
     # Arrange
     node.current_node = "A1"
 
@@ -126,4 +130,3 @@ def test_given_load_service_when_at_goal_then_returns_wait_load_action(node):
 
     # Assert
     assert response.action == "load"
- """

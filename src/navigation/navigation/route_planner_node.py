@@ -45,7 +45,8 @@ class RoutePlannerNode(Node):
         )
 
         self.current_node: str | None = None
-        # harcoder pour l'instant je vais utiliser city_interface quand on va être sur que le reste marche
+        # Hardcode temporaire.
+        # On va utiliser city_interface quand le reste sera stable.
         self.available_goals: list[str] = ["ZC1", "ZD1"]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
@@ -86,9 +87,7 @@ class RoutePlannerNode(Node):
 
     def _compute_node_action(self, mode: GoalMode, wait_action: NodeAction) -> str:
         goal_node = self._select_goal_for_mode(mode)
-        result = self._route_selector.compute_path(
-            self.current_node, goal_node
-        )
+        result = self._route_selector.compute_path(self.current_node, goal_node)
         if result is None:
             msg_dirs = String()
             msg_dirs.data = json.dumps([])
