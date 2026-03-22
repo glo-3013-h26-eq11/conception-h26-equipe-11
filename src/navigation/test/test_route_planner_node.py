@@ -16,7 +16,6 @@ def rclpy_context():
 
 @pytest.fixture
 def node():
-    # Arrange: Map format (left, straight, right)
     temp_graph = {
         "A1": {"left": "ZC1", "straight": "A4", "right": "ZD1"},
         "A2": {"left": "A4", "straight": "ZD1", "right": "A2"},
@@ -33,72 +32,7 @@ def node():
     route_planner_node.destroy_node()
 
 
-def _capture_topic_once(node, topic_name: str, timeout_sec: float = 0.2):
-    received = []
-
-    def cb(msg: String):
-        received.append(msg.data)
-
-    node.create_subscription(String, topic_name, cb, 10)
-    rclpy.spin_once(node, timeout_sec=timeout_sec)
-    return received
-
-
-def test_given_goal_only_when_goal_received_then_does_not_publish_nodes(node):
-    # Arrange
-    goal_msg = String()
-    goal_msg.data = "ZC1"
-
-    # Act
-    node.goal_node_callback(goal_msg)
-    received = _capture_topic_once(node, "route_plan/nodes")
-
-    # Assert
-    assert received == []
-
-
-def test_given_current_only_when_current_received_then_does_not_publish_nodes(node):
-    # Arrange
-    current_msg = String()
-    current_msg.data = "A1"
-
-    # Act
-    node.current_node_callback(current_msg)
-    received = _capture_topic_once(node, "route_plan/nodes")
-
-    # Assert
-    assert received == []
-
-
-def test_given_goal_only_when_goal_received_then_does_not_publish_directions(node):
-    # Arrange
-    goal_msg = String()
-    goal_msg.data = "ZC1"
-
-    # Act
-    node.goal_node_callback(goal_msg)
-    received = _capture_topic_once(node, "route_plan/directions")
-
-    # Assert
-    assert received == []
-
-
-def test_given_current_only_when_current_received_then_does_not_publish_directions(
-    node,
-):
-    # Arrange
-    current_msg = String()
-    current_msg.data = "A1"
-
-    # Act
-    node.current_node_callback(current_msg)
-    received = _capture_topic_once(node, "route_plan/directions")
-
-    # Assert
-    assert received == []
-
-
-def test_given_both_nodes_set_when_goal_received_then_publishes_nodes_list(node):
+def test_given_current_only_when_received_then_publishes_nodes(node):
     # Arrange
     received = []
 
@@ -109,19 +43,17 @@ def test_given_both_nodes_set_when_goal_received_then_publishes_nodes_list(node)
 
     current_msg = String()
     current_msg.data = "A1"
-    goal_msg = String()
-    goal_msg.data = "ZC1"
 
     # Act
     node.current_node_callback(current_msg)
-    node.goal_node_callback(goal_msg)
     rclpy.spin_once(node, timeout_sec=0.2)
 
     # Assert
-    assert received and json.loads(received[0]) != []
+    assert received
+    assert json.loads(received[0]) == ["A1", "ZC1"]
 
 
-def test_given_both_nodes_set_when_goal_received_then_publishes_directions_list(node):
+def test_given_current_only_when_received_then_publishes_directions(node):
     # Arrange
     received = []
 
@@ -132,13 +64,69 @@ def test_given_both_nodes_set_when_goal_received_then_publishes_directions_list(
 
     current_msg = String()
     current_msg.data = "A1"
-    goal_msg = String()
-    goal_msg.data = "ZC1"
 
     # Act
     node.current_node_callback(current_msg)
-    node.goal_node_callback(goal_msg)
     rclpy.spin_once(node, timeout_sec=0.2)
 
     # Assert
-    assert received and json.loads(received[0]) != []
+    assert json.loads(received[0]) == ["left"]
+
+
+def test_given_goal_mode_drop_when_current_received_then_publishes_drop_route(node):
+    # Arrange
+    received = []
+
+    def cb(msg: String):
+        received.append(json.loads(msg.data))
+
+    node.create_subscription(String, "route_plan/nodes", cb, 10)
+
+    current_msg = String()
+    current_msg.data = "A1"
+    goal_mode_msg = String()
+    goal_mode_msg.data = "GO_DROP"
+
+    # Act
+    node.goal_mode_callback(goal_mode_msg)
+    node.current_node_callback(current_msg)
+    rclpy.spin_once(node, timeout_sec=0.2)
+
+    # Assert
+    assert received[0][-1] == "ZD1"
+
+
+def test_given_load_service_when_path_exists_then_returns_first_direction_action(node):
+    # Arrange
+    node.current_node = "A1"
+
+    # Act
+    response = node.handle_get_node_action_load(None, type("Resp", (), {})())
+
+    # Assert
+    assert response.action == "left"
+
+
+def test_given_deposit_service_when_path_exists_then_returns_first_direction_action(
+    node,
+):
+    # Arrange
+    node.current_node = "A1"
+
+    # Act
+    response = node.handle_get_node_action_deposit(None, type("Resp", (), {})())
+
+    # Assert
+    assert response.action == "right"
+
+
+def test_given_load_service_when_at_goal_then_returns_wait_load_action(node):
+    # Arrange
+    node.current_node = "ZC1"
+    node.available_goals = ["ZC1", "ZD1"]
+
+    # Act
+    response = node.handle_get_node_action_load(None, type("Resp", (), {})())
+
+    # Assert
+    assert response.action == "load"

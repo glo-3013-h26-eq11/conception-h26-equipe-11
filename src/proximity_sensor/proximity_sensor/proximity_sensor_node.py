@@ -30,12 +30,12 @@ class ProximitySensorNode(HealthPingingNode):
 
     def gpio_from_0_to_1(self, pin=7):
         boolean_msg = Bool()
-        boolean_msg.data = MerchandiseFlag.NOT_DETECTED.value
+        boolean_msg.data = MerchandiseFlag.UNLOADED.value
         self.publisher.publish(boolean_msg)
 
     def gpio_from_1_to_0(self, pin=7):
         boolean_msg = Bool()
-        boolean_msg.data = MerchandiseFlag.IS_DETECTED.value
+        boolean_msg.data = MerchandiseFlag.LOADED.value
         self.publisher.publish(boolean_msg)
 
 

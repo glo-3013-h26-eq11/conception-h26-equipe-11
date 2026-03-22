@@ -1,4 +1,3 @@
-import time
 import rclpy
 from playwright.sync_api import sync_playwright, expect
 from web_interface.static_web_server import PORT
@@ -53,9 +52,7 @@ def test_car_follower_updates_web():
 
         enforcer_manager_node.publish_dangerous_distance()
 
-        start = time.time()
-        while time.time() - start < 2:
-            rclpy.spin_once(enforcer_manager_node, timeout_sec=0.1)
+        page.wait_for_timeout(2000)
 
         expect(rover_chip).to_have_text(TEXT_DANGEROUS_DISTANCE, timeout=5000)
 

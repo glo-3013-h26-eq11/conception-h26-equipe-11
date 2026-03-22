@@ -3,7 +3,6 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool, Float32MultiArray
 import pytest
 import rclpy
-import json
 
 
 @pytest.fixture(scope="module", autouse=True)

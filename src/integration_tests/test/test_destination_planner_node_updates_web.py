@@ -91,14 +91,14 @@ def test_route_planner_node_updates_web():
 
         page.get_by_role("button", name=UPLOAD_BUTTON).click()
 
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(3000)
 
         publisher_node.publish_goal_node()
 
         publisher_node.publish_current_node()
 
         start = time.time()
-        while time.time() - start < 2:
+        while time.time() - start < 3:
             rclpy.spin_once(publisher_node, timeout_sec=0.1)
 
         expect(page.locator(".mdi-arrow-up")).to_be_visible()

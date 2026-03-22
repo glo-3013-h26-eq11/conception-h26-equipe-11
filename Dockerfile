@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-colcon-common-extensions \
     ros-humble-depthai-ros \
+    ros-humble-yasmin \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -18,6 +19,8 @@ RUN apt-get install -y docker.io
 # Install rosbridge-suite for easy websocket connections
 RUN apt-get install -y ros-humble-rosbridge-suite
 
+# Install yasmin
+RUN apt-get install -y ros-$ROS_DISTRO-yasmin ros-$ROS_DISTRO-yasmin-*
 
 WORKDIR /home/ws
 COPY . /home/ws

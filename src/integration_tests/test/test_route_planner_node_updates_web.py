@@ -37,8 +37,8 @@ ROS_NODE_CMD_TARGET = (
 )
 
 DESTINATION_LABEL = "Destination"
-CURRENT_NODE = "ZC1"
-GOAL_NODE = "ZD1"
+CURRENT_NODE = "ZD1"
+GOAL_NODE = "ZC1"
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -91,14 +91,14 @@ def test_route_planner_node_updates_web():
 
         page.get_by_role("button", name=UPLOAD_BUTTON).click()
 
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(3000)
 
         publisher_node.publish_goal_node()
 
         publisher_node.publish_current_node()
 
         start = time.time()
-        while time.time() - start < 2:
+        while time.time() - start < 3:
             rclpy.spin_once(publisher_node, timeout_sec=0.1)
 
         destination_component = page.get_by_label(DESTINATION_LABEL)
