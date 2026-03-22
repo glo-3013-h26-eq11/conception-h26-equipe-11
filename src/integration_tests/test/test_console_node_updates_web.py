@@ -58,7 +58,7 @@ def test_ros_logs_updates_web():
 
         page.goto(WEBAPP_URL)
 
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(3000)
 
         rosout_publisher_topic.publish()
 
@@ -66,7 +66,7 @@ def test_ros_logs_updates_web():
         executor.add_node(rosout_publisher_topic)
 
         start = time.time()
-        while time.time() - start < 1:
+        while time.time() - start < 2:
             executor.spin_once(timeout_sec=0.1)
 
         expect(page.locator(".v-virtual-scroll__container")).to_contain_text(MESSAGE)

@@ -19,7 +19,7 @@ def generate_launch_description():
             Node(
                 package="navigation",
                 executable="current_node_from_aruco_node",
-                name="current_node_from_aruco_node"
-            )
+                name="current_node_from_aruco_node",
+            ),
         ]
     )

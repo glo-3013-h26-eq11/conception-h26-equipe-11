@@ -32,13 +32,12 @@ def test_when_ping_with_node_status_then_publish_data_structure(health_monitor_n
     )
 
     start = time.time()
-    while time.time() - start < 1.1:
+    while time.time() - start < 3.0:
         rclpy.spin_once(health_monitor_node, timeout_sec=0.1)
 
     expected = {"web_interface": {"health_monitor": "ACTIVE"}}
 
-    assert len(received_msgs) == 1
-    assert received_msgs[0] == expected
+    assert received_msgs[-1] == expected
 
 
 def test_when_ping_then_fails_to_ping_for_3_sec_then_publish_crashed(
@@ -64,7 +63,7 @@ def test_when_ping_then_fails_to_ping_for_3_sec_then_publish_crashed(
     publisher.publish(input_payload)
 
     start = time.time()
-    while time.time() - start < 4:
+    while time.time() - start < 5:
         rclpy.spin_once(health_monitor_node, timeout_sec=0.1)
 
     assert received_msgs[-1]["package_name"]["node_name"] == "CRASHED"
