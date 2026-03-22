@@ -2,7 +2,7 @@ from central_manager.enforcers.base_enforcer import Enforcer
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
 from rclpy.node import Publisher
-from proximity_sensor.proximity_sensor.merchandise_flag import MerchandiseFlag
+from proximity_sensor.merchandise_flag import MerchandiseFlag
 
 STOP_AFTER_DEPOSIT_DURATION = 1.5  # s
 
