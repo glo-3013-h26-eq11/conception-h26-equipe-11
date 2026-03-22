@@ -27,15 +27,15 @@ from central_manager.states.to_deposit.at_deposit_zone_to_deposit_state import (
 
 
 class StateMachineRover:
-    def __init__(self, blackboard, node: Node):
+    def __init__(self, node: Node):
         self.node = node
 
         self.states = self.create_states(node)
 
         self.sm = self.create_state_machine()
 
-    def run(self):
-        outcome = self.sm(blackboard=self.blackboard)
+    def run(self, blackboard):
+        outcome = self.sm(blackboard=blackboard)
 
         self.node.get_logger().info(f"FSM finished with outcome: {outcome}")
 

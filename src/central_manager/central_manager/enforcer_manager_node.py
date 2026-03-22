@@ -25,7 +25,7 @@ class EnforcerManagerNode(Node):
 
         self.blackboard["enforcers"] = []
 
-        self.sm = StateMachineRover(self.blackboard, self)
+        self.sm = StateMachineRover(self)
 
         self.start_timer = self.create_timer(0.1, self._start_sm_once)
 
@@ -37,7 +37,7 @@ class EnforcerManagerNode(Node):
 
         self.get_logger().info("Starting the state machine...")
 
-        self.sm.run()
+        self.sm.run(self.blackboard)
 
     def cmd_callback(self, cmd: Twist) -> None:
         for enforcer in self._get_enforcers():
