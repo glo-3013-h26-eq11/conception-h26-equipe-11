@@ -92,7 +92,7 @@ class WallFollowNode(HealthPingingNode):
                 self.last_time = None
 
         if not self._corner_detected:
-            if c > (CORNER_THRESHOLD + 0.3):
+            if c > (CORNER_THRESHOLD):
                 self._corner_detected = True
                 self._corner_time = now
                 self.get_logger().info("Right turn triggered!")
