@@ -90,11 +90,7 @@ class StopSignEnforcer(Enforcer):
                 self._cooldown_start = None
                 self._log("COOLDOWN terminé — retour IDLE")
                 return initial_command
-            # Essayé de faire avancé pendant cooldown
-            out = Twist()
-            out.linear.x = 0.2
-            out.angular.z = 0.0
-            return out
+            return cmd
 
         return cmd
 
