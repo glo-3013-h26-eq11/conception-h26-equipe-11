@@ -44,7 +44,7 @@ status_ros.subscribe((message) => {
       <v-col cols="12">
         <v-card class="pa-3 mb-4">
           <v-card-title>
-            <strong>System Health</strong>
+            <strong>System Health!</strong>
           </v-card-title>
         </v-card>
       </v-col>
