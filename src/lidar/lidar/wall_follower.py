@@ -18,7 +18,7 @@ SPEED = 0.4  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
 CORNER_THRESHOLD = 0.425  # m
-RIGHT_TURN_DURATION = 1.3
+RIGHT_TURN_DURATION = 1.2
 COAST_DURATION = 0.4
 
 
@@ -58,7 +58,7 @@ class WallFollowNode(HealthPingingNode):
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
         theta_a = theta_b + theta
-        theta_c = np.radians(40)
+        theta_c = np.radians(43)
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
         b = angle_to_distance(theta_b, lidar_range_array, angle_min, angle_increment)
