@@ -22,7 +22,7 @@ class InitialState(State):
         if msg.data:
             self.outcome = "system_ready"
 
-    def execute(self, blackboard):        
+    def execute(self, blackboard):
         self.outcome = None
 
         blackboard["enforcers"].clear()
