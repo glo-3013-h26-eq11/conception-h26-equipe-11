@@ -32,8 +32,14 @@ class RoutePlannerNode(Node):
         )
         self.publisher_nodes = self.create_publisher(String, "route_plan/nodes", 10)
 
-        self.get_node_action_service = self.create_service(
-            GetNodeAction, "get_node_action", self.handle_get_node_action
+        self.get_node_action_service_load = self.create_service(
+            GetNodeAction, "get_node_action_load", self.handle_get_node_action_load
+        )
+
+        self.get_node_action_service_deposit = self.create_service(
+            GetNodeAction,
+            "get_node_action_deposit",
+            self.handle_get_node_action_deposit,
         )
 
         self.current_node: str | None = None
@@ -41,7 +47,11 @@ class RoutePlannerNode(Node):
         self._current_directions: list | None = None
         self._node_at_last_publish: str | None = None
 
-    def handle_get_node_action(self, request, response):
+    def handle_get_node_action_load(self, request, response):
+        response.action = NodeAction.LEFT_TURN.value
+        return response
+
+    def handle_get_node_action_deposit(self, request, response):
         response.action = NodeAction.LEFT_TURN.value
         return response
 

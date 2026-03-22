@@ -43,11 +43,13 @@ class AtIntersectionToDepositState(State):
         return self.outcome
 
     def get_current_node_action(self) -> NodeAction:
-        client = self.node.create_client(GetNodeAction, "get_node_action")
+        client = self.node.create_client(GetNodeAction, "get_node_action_deposit")
 
         if not client.wait_for_service(timeout_sec=5.0):
-            self.node.get_logger().error("Service 'get_node_action' not available")
-            raise RuntimeError("Service 'get_node_action' not available")
+            self.node.get_logger().error(
+                "Service 'get_node_action_deposti' not available"
+            )
+            raise RuntimeError("Service 'get_node_action_deposit' not available")
 
         request = GetNodeAction.Request()
         future = client.call_async(request)
