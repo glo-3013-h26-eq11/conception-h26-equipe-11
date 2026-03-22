@@ -16,7 +16,7 @@ class AtLoadZoneToLoad(State):
 
         self.outcome = None
 
-        self.node =node
+        self.node = node
 
     def load_over_callback(self, msg: String):
         self.outcome = "load_over"

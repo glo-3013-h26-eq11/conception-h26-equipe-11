@@ -11,7 +11,7 @@ class WallFollowingState(State):
                 "current_node",
             ]
         )
-        
+
         self.node = node
 
         node.create_subscription(String, "current_node", self.at_aruco_callback, 10)
