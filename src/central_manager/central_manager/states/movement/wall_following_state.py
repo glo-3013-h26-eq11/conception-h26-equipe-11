@@ -11,6 +11,8 @@ class WallFollowingState(State):
                 "current_node",
             ]
         )
+        
+        self.node = node
 
         node.create_subscription(String, "current_node", self.at_aruco_callback, 10)
 
@@ -25,6 +27,6 @@ class WallFollowingState(State):
         blackboard["enforcers"] = [StopEnforcer()]
 
         while self.outcome is None:
-            rclpy.spin_once(blackboard["node"], timeout_sec=0.1)
+            rclpy.spin_once(self.node, timeout_sec=0.1)
 
         return self.outcome

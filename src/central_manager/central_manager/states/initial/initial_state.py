@@ -12,6 +12,8 @@ class InitialState(State):
             ]
         )
 
+        self.node = node
+
         node.create_subscription(Bool, "rover/start", self.rover_start_callback, 10)
 
         self.outcome = None
@@ -26,6 +28,6 @@ class InitialState(State):
         blackboard["enforcers"] = [ImmobileEnforcer()]
 
         while self.outcome is None:
-            rclpy.spin_once(blackboard["node"], timeout_sec=0.1)
+            rclpy.spin_once(self.node, timeout_sec=0.1)
 
         return self.outcome

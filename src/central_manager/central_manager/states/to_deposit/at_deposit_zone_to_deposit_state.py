@@ -16,6 +16,8 @@ class AtDepositZoneToDeposit(State):
 
         self.outcome = None
 
+        self.node = node
+
     def deposit_over_callback(self, msg: String):
         self.outcome = "deposit_over"
 
@@ -25,6 +27,6 @@ class AtDepositZoneToDeposit(State):
         blackboard["enforcers"] = [WaitAtDepositEnforcer()]
 
         while self.outcome is None:
-            rclpy.spin_once(blackboard["node"], timeout_sec=0.1)
+            rclpy.spin_once(self.node, timeout_sec=0.1)
 
         return self.outcome

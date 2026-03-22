@@ -16,6 +16,8 @@ class AtLoadZoneToLoad(State):
 
         self.outcome = None
 
+        self.node =node
+
     def load_over_callback(self, msg: String):
         self.outcome = "load_over"
 
@@ -25,6 +27,6 @@ class AtLoadZoneToLoad(State):
         blackboard["enforcers"] = [WaitAtLoadEnforcer()]
 
         while self.outcome is None:
-            rclpy.spin_once(blackboard["node"], timeout_sec=0.1)
+            rclpy.spin_once(self.node, timeout_sec=0.1)
 
         return self.outcome

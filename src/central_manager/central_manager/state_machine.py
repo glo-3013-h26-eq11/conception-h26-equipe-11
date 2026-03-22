@@ -30,10 +30,6 @@ class StateMachineRover:
     def __init__(self, blackboard, node: Node):
         self.node = node
 
-        self.blackboard = blackboard
-
-        self.blackboard["node"] = node
-
         self.states = self.create_states(node)
 
         self.sm = self.create_state_machine()

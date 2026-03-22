@@ -15,6 +15,8 @@ class TurningForwardState(State):
 
         node.create_subscription(String, "turn_over", self.turn_over_callback, 10)
 
+        self.node = node
+
         self.outcome = None
 
     def turn_over_callback(self, msg: String):
@@ -26,6 +28,6 @@ class TurningForwardState(State):
         blackboard["enforcers"] = [ForwardTurnEnforcer(), StopEnforcer()]
 
         while self.outcome is None:
-            rclpy.spin_once(blackboard["node"], timeout_sec=0.1)
+            rclpy.spin_once(self.node, timeout_sec=0.1)
 
         return self.outcome
