@@ -37,8 +37,8 @@ ROS_NODE_CMD_TARGET = (
 )
 
 DESTINATION_LABEL = "Destination"
-CURRENT_NODE = "ZC1"
-GOAL_NODE = "ZD1"
+CURRENT_NODE = "ZD1"
+GOAL_NODE = "ZC1"
 
 
 @pytest.fixture(scope="module", autouse=True)
