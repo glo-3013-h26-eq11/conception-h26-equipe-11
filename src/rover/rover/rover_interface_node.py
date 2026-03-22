@@ -1,17 +1,18 @@
 import rclpy
-from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 import json
+from web_interface.system_health_node import HealthPingingNode
 
 WHEELBASE = 0.15
 TRACK_WIDTH = 0.15
 MAX_CMD = 1.0
 
 
-class RoverInterfaceNode(Node):
+class RoverInterfaceNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("rover_interface_node")
+        super().__init__("rover_interface_node", "rover")
+
         self.subscription = self.create_subscription(
             Twist, "/cmd_vel", self.listener_command_callback, 10
         )

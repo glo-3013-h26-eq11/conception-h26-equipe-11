@@ -1,16 +1,16 @@
 import json
 
 import rclpy
-from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 from std_msgs.msg import String
 
 from navigation.goal_selector import GoalMode, GoalSelector
 from navigation.route_selector import RouteSelector
 
 
-class GoalSelectorNode(Node):
+class GoalSelectorNode(HealthPingingNode):
     def __init__(self, route_selector: RouteSelector | None = None):
-        super().__init__("goal_selector_node")
+        super().__init__("goal_selector_node", "navigation")
 
         self._route_selector = route_selector
         self._goal_selector = GoalSelector(route_selector) if route_selector else None

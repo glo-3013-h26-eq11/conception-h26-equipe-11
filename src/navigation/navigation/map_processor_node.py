@@ -1,12 +1,12 @@
 import rclpy
-from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 from std_msgs.msg import String
 from navigation.map import Map, MapNode
 
 
-class MapProcessorNode(Node):
+class MapProcessorNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("map_processor_node")
+        super().__init__("map_processor_node", "navigation")
 
         # The node expects a single string containing two CSV sections
         # separated by a '---' delimiter.

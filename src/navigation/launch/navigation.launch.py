@@ -17,7 +17,9 @@ def generate_launch_description():
                 name="goal_selector",
             ),
             Node(
-                package="navigation", executable="route_planner", name="route_planner"
+                package="navigation",
+                executable="route_planner_node",
+                name="route_planner_node",
             ),
         ]
     )

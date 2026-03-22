@@ -1,6 +1,6 @@
 from central_manager.base_enforcer import Enforcer
 from central_manager.merchandise_enforcer import MerchandiseEnforcer
-from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
 from typing import List
@@ -8,9 +8,9 @@ import json
 import rclpy
 
 
-class EnforcerManagerNode(Node):
+class EnforcerManagerNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("enforcer_manager_node")
+        super().__init__("enforcer_manager_node", "central_manager")
 
         self.sub_load_detection = self.create_subscription(
             Bool, "is_there_merchandise", self.load_callback, 10

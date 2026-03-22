@@ -27,5 +27,10 @@ def generate_launch_description():
             launch_ros.actions.Node(
                 package="web_interface", executable="console_node", name="console_node"
             ),
+            launch_ros.actions.Node(
+                package="web_interface",
+                executable="system_health_node",
+                name="system_health_node",
+            ),
         ]
     )
