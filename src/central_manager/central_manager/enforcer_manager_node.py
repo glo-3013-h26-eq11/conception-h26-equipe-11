@@ -5,6 +5,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 from typing import List
 import rclpy
+import threading
 
 
 class EnforcerManagerNode(Node):
@@ -27,14 +28,13 @@ class EnforcerManagerNode(Node):
 
         self.sm = StateMachineRover(self)
 
-        self.start_timer = self.create_timer(0.1, self._start_sm_once)
+        self._sm_thread = threading.Thread(target=self._run_sm, daemon=True)
+        self._sm_thread.start()
 
     def _get_enforcers(self) -> List[Enforcer]:
         return self.blackboard["enforcers"]
 
-    def _start_sm_once(self):
-        self.start_timer.cancel()
-
+    def _run_sm(self):
         self.get_logger().info("Starting the state machine...")
 
         self.sm.run(self.blackboard)
@@ -42,6 +42,8 @@ class EnforcerManagerNode(Node):
     def cmd_callback(self, cmd: Twist) -> None:
         for enforcer in self._get_enforcers():
             cmd = enforcer.enforce_cmd(cmd)
+
+        self.get_logger().info(f"enforcers : { self._get_enforcers()}")
 
         self.pub_cmd_vel_safe.publish(cmd)
 
