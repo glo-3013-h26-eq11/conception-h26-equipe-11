@@ -34,7 +34,7 @@ def is_valid_lidar_scan(scan: float) -> bool:
 
 class WallFollowNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("wall_follow_node")
+        super().__init__("wall_follow_node", "lidar")
         self.declare_parameter("scan_topic", "/scan")
         self.declare_parameter("output_topic", "/cmd_vel_safe")
 
