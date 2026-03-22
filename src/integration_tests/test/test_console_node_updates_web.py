@@ -11,6 +11,7 @@ from integration_tests.integration_helper import (
     build_web_interface,
 )
 from rcl_interfaces.msg import Log
+from rclpy.executors import SingleThreadedExecutor
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
 
@@ -61,9 +62,12 @@ def test_web_updates_start():
 
         rosout_publisher_topic.publish()
 
+        executor = SingleThreadedExecutor()
+        executor.add_node(rosout_publisher_topic)
+
         start = time.time()
-        while time.time() - start < 2:
-            rclpy.spin_once(rosout_publisher_topic, timeout_sec=0.1)
+        while time.time() - start < 1:
+            executor.spin_once(timeout_sec=0.1)
 
         expect(page.locator(".v-virtual-scroll__container")).to_contain_text(MESSAGE)
 
