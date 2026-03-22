@@ -56,7 +56,7 @@ class StateMachineRover:
             "TURNING_LEFT_TO_DEPOSIT": TurningLeftState(node),
             "TURNING_FORWARD_TO_DEPOSIT": TurningForwardState(node),
             "WALL_FOLLOWING_TO_DEPOSIT": WallFollowingState(node),
-            "AT_LOAD_ZONE_TO_DEPOSIT": AtDepositZoneToDeposit(node),
+            "AT_DEPOSIT_ZONE_TO_DEPOSIT": AtDepositZoneToDeposit(node),
         }
 
     def create_state_machine(self):
