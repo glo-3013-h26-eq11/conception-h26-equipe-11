@@ -1,6 +1,7 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from geometry_msgs.msg import Twist
-from rclpy.node import Node
+from rclpy.node import Node, Publisher
+from std_msgs.msg import String
 import rclpy
 import math
 import time
@@ -10,14 +11,16 @@ LEFT_TURN_SPEED = 0.4  # m
 
 
 class LeftTurnEnforcer(Enforcer):
-    def __init__(self):
+    def __init__(self, turn_over_publisher: Publisher):
         self.last_real_speed_timer = None
 
         self.steering_angle_90 = LEFT_TURN_SPEED / ARC_RADIUS
         self.total_distance_to_travel = 2 * math.pi * ARC_RADIUS / 1.5
         self.travel_distance_already_done = 0
 
-    def update_real_speed(self, real_speed_cmd: Twist):
+        self.turn_over_publisher = turn_over_publisher
+
+    def update_with_real_speed(self, real_speed_cmd: Twist):
         dt = self._compute_delta_time()
 
         self.travel_distance_already_done += real_speed_cmd.linear.x * dt
@@ -38,6 +41,7 @@ class LeftTurnEnforcer(Enforcer):
         cmd = Twist()
 
         if self._is_arc_already_done():
+            self.turn_over_publisher.publish(String())
             return cmd
 
         cmd.angular.z = self.steering_angle_90

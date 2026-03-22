@@ -12,3 +12,7 @@ class Enforcer(ABC):
     @abstractmethod
     def enforce_cmd(self, cmd: Twist) -> Twist:
         pass
+
+    @abstractmethod
+    def update_with_real_speed(self, real_cmd: Twist):
+        pass

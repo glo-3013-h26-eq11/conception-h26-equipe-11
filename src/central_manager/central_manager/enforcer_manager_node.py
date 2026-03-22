@@ -44,7 +44,8 @@ class EnforcerManagerNode(Node):
         for enforcer in self._get_enforcers():
             cmd = enforcer.enforce_cmd(cmd)
 
-        self.get_logger().info(f"enforcers : { self._get_enforcers()}")
+        for enforcer in self._get_enforcers():
+            enforcer.update_with_real_speed(cmd)
 
         self.pub_cmd_vel_safe.publish(cmd)
 

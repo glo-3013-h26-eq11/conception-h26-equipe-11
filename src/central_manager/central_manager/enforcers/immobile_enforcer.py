@@ -8,3 +8,6 @@ class ImmobileEnforcer(Enforcer):
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         return Twist()
+
+    def update_with_real_speed(self, real_cmd):
+        pass

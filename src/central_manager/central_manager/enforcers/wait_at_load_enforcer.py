@@ -10,7 +10,7 @@ class WaitAtLoadEnforcer(Enforcer):
         self.last_real_speed_timer = None
         self.timer = 0
 
-    def update_timer(self, real_speed_cmd: Twist):
+    def update_with_real_speed(self, real_speed_cmd: Twist):
         dt = self._compute_delta_time()
 
         self.timer += dt
