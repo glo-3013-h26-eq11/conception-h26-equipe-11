@@ -1,36 +1,57 @@
 <script setup lang="ts">
 import {ref} from "vue";
+import {Ros, Topic} from "roslib";
 
 const roverStarted = ref(false)
 const destination = ref("")
 
-async function startRover() {
-  const res = await fetch("/api/start", {"method": "GET"})
+var ros = new Ros({
+  url: 'ws://localhost:9999'
+});
 
-  if (res.ok) {
-    roverStarted.value = true;
-  }
+ros.on('connection', function () {
+  console.log('Destination and Start connected to ROS');
+});
+
+ros.on('error', (err) => {
+  console.error(err);
+})
+
+ros.on('close', function () {
+  console.log('Websocket closed');
+})
+
+var destinationTopic = new Topic(
+    {
+      ros: ros,
+      name: '/route_plan/nodes',
+      messageType: 'std_msgs/msg/String'
+    }
+)
+
+destinationTopic.subscribe(message => {
+  destination.value = (JSON.parse(message.data) || []).at(-1);
+});
+
+var startTopic = new Topic(
+    {
+      ros: ros,
+      name: '/rover/start',
+      messageType: 'std_msgs/msg/Bool'
+    }
+)
+
+async function startRover() {
+  let message = {data: true}
+  startTopic.publish(message)
+  roverStarted.value = true
 }
 
 async function stopRover() {
-  const res = await fetch("/api/stop", {"method": "GET"})
-
-  if (res.ok) {
-    roverStarted.value = false;
-  }
+  let message = {data: false}
+  startTopic.publish(message)
+  roverStarted.value = false
 }
-
-async function getDestination()
-{
-  const res = await fetch("/api/destination", {"method": "GET"})
-
-  const data = await res.json()
-  if (res.ok) {
-    destination.value = data.destination
-  }
-}
-
-setInterval(getDestination, 500)
 </script>
 
 <template>

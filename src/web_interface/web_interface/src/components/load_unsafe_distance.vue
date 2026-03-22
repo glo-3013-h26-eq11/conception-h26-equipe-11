@@ -1,20 +1,47 @@
 <script setup lang="ts">
 import {ref} from "vue";
+import {Ros, Topic} from "roslib";
 
 const loaded = ref(false);
 const roverTooClose = ref(false);
 
-async function getLoadUnsafe(){
-  const res = await fetch("/api/loadunsafe", {"method": "GET"})
+var ros = new Ros({
+  url: 'ws://localhost:9999'
+});
 
-  const data = await res.json()
-  if (res.ok) {
-    loaded.value = data.loaded
-    roverTooClose.value = data.unsafe
-  }
-}
+ros.on('connection', function () {
+  console.log('Laod and Unsafe distance connected to ROS');
+});
 
-setInterval(getLoadUnsafe, 500)
+ros.on('error', (err) => {
+  console.error(err);
+})
+
+ros.on('close', function () {
+  console.log('Websocket closed');
+})
+
+var is_there_merchandise = new Topic(
+    {
+      ros: ros,
+      name: '/proximity_sensor/merchandise',
+      messageType: 'std_msgs/msg/Bool'
+    }
+)
+
+is_there_merchandise.subscribe(message => {
+  loaded.value = message.data;
+})
+
+var unsafe_distance = new Topic(
+    {ros: ros,
+      name: '/car_follower/dangerous_distance',
+      messageType: 'std_msgs/msg/Bool'}
+)
+
+unsafe_distance.subscribe(message => {
+  roverTooClose.value = message.data;
+})
 </script>
 
 <template>
@@ -22,13 +49,16 @@ setInterval(getLoadUnsafe, 500)
     <v-container>
       <v-row align="center" justify="center">
         <v-col align="center" justify="center">
-          <v-chip prepend-icon="mdi-package" size="x-large" :color="loaded ? 'green':'primary-variant'">Loaded</v-chip>
+          <v-chip prepend-icon="mdi-package" size="x-large" :color="loaded ? 'green' : 'primary-variant'">
+            {{ loaded ? 'Chargé' : 'Pas chargé' }}
+          </v-chip>
         </v-col>
       </v-row>
       <v-row align="center" justify="center">
         <v-col align="center" justify="center">
-          <v-chip prepend-icon="mdi-alert" size="x-large" :color="roverTooClose ? 'error':'primary-variant'">Rover too close
-          </v-chip>
+          <v-chip prepend-icon="mdi-alert" size="x-large" :color="roverTooClose ? 'error' : 'primary-variant'">
+          {{ roverTooClose ? 'Rover trop proche' : 'Rover distance sécuritaire' }}
+        </v-chip>
         </v-col>
       </v-row>
     </v-container>

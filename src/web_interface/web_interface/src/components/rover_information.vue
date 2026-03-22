@@ -1,18 +1,37 @@
 <script setup lang="ts">
 import {ref} from "vue";
+import {Ros, Topic} from "roslib";
 
 const direction = ref("none")
 
-async function getDirection() {
-  const res = await fetch("/api/direction", {"method": "GET"})
+var ros = new Ros({
+  url: 'ws://localhost:9999'
+});
 
-  const data = await res.json()
-  if (res.ok) {
-    direction.value = data.direction
-  }
-}
+ros.on('connection', function () {
+  console.log('Direction connected to ROS');
+});
 
-setInterval(getDirection, 500)
+ros.on('error', (err) => {
+  console.error(err);
+})
+
+ros.on('close', function () {
+  console.log('Websocket closed');
+})
+
+var directionTopic = new Topic(
+    {
+      ros: ros,
+      name: '/route_plan/directions',
+      messageType: 'std_msgs/msg/String'
+    }
+)
+
+directionTopic.subscribe(message => {
+  const parsed = JSON.parse(message.data)
+  direction.value = parsed[0]
+})
 </script>
 
 <template>
@@ -24,7 +43,7 @@ setInterval(getDirection, 500)
           <v-spacer v-show="direction != 'left'"/>
         </v-col>
         <v-col align="center" cols="4">
-          <v-icon size="x-large" icon="mdi-arrow-up" v-show="direction == 'forward'"/>
+          <v-icon size="x-large" icon="mdi-arrow-up" v-show="direction == 'straight'"/>
           <v-spacer v-show="direction != 'forward'"/>
         </v-col>
         <v-col align="center" cols="4">

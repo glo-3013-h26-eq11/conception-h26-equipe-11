@@ -1,4 +1,6 @@
 from setuptools import find_packages, setup
+import os
+from glob import glob
 
 package_name = "navigation"
 
@@ -9,6 +11,7 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
+        (os.path.join("share", package_name, "launch"), glob("launch/*.launch.py")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
@@ -23,11 +26,10 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "route_planner = navigation.route_planner_node:main",
+            "route_planner_node = navigation.route_planner_node:main",
             "map_processor_node = navigation.map_processor_node:main",
             "goal_selector_node = navigation.goal_selector_node:main",
-            "aruco_localizer_node = navigation.aruco_localizer_node:main",
-            "route_executor_node = navigation.route_executor_node:main",
+            "current_node_from_aruco_node = navigation.current_node_from_aruco_node:main",
         ],
     },
 )

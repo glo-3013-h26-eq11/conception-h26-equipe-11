@@ -23,6 +23,11 @@
             <Console/>
           </v-col>
         </v-row>
+        <v-row>
+          <v-col cols="12">
+            <HealthStatus/>
+          </v-col>
+        </v-row>
       </v-container>
     </v-main>
   </v-app>
@@ -34,4 +39,5 @@ import DestinationStart from "@/components/destination_start.vue";
 import RoverInformation from "@/components/rover_information.vue";
 import LoadUnsafeDistance from "@/components/load_unsafe_distance.vue";
 import Console from "@/components/console.vue";
+import HealthStatus from "@/components/health_status.vue"
 </script>

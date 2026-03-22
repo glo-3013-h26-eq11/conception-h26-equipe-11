@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import rclpy
-from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
@@ -32,7 +32,7 @@ def is_valid_lidar_scan(scan: float) -> bool:
     return not math.isinf(scan) and not math.isnan(scan) and scan > 0.0
 
 
-class WallFollowNode(Node):
+class WallFollowNode(HealthPingingNode):
     def __init__(self):
         super().__init__("wall_follow_node")
         self.declare_parameter("scan_topic", "/scan")

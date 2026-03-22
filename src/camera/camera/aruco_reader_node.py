@@ -2,7 +2,7 @@
 
 import json
 import rclpy
-from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
@@ -12,9 +12,9 @@ import cv2
 import numpy as np
 
 
-class ArucoReaderNode(Node):
+class ArucoReaderNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("aruco_reader")
+        super().__init__("aruco_reader", "camera")
 
         self.declare_parameter("image_topic", "/oak/rgb/image_raw")
         self.declare_parameter("detections_topic", "aruco_detections")
