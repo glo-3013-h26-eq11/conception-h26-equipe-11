@@ -1,14 +1,14 @@
 import rclpy
-from rclpy.node import Node
 from std_msgs.msg import String
 import serial
+from web_interface.system_health_node import HealthPingingNode
 
 JETSON_ROVER_PORT = "/dev/ttyACM0"
 
 
-class RoverUsbPortNode(Node):
+class RoverUsbPortNode(HealthPingingNode):
     def __init__(self, serial_port=None):
-        super().__init__("rover_port_usb_node")
+        super().__init__("rover_port_usb_node", "rover")
 
         self.subscription = self.create_subscription(
             String, "/rover/port", self.listener_json_callback, 10

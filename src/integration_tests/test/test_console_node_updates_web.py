@@ -42,7 +42,7 @@ class RosoutPublisherTopic(Node):
         self.publisher.publish(msg)
 
 
-def test_web_updates_start():
+def test_ros_logs_updates_web():
 
     build_web_interface()
 

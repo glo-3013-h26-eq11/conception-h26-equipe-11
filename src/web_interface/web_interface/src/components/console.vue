@@ -28,9 +28,23 @@ var console_ros = new Topic(
     }
 )
 
-console_ros.subscribe(message => {
-  messageList.value.push(message.data)
+console_ros.subscribe((message) => {
+  const newLogs = JSON.parse(message.data)
+
+  const current = messageList.value
+
+  if (!current.length) {
+    messageList.value.push(...newLogs)
+    return
+  }
+
+  for (const log of newLogs) {
+    if (!current.find(l => l === log)) {
+      current.push(log)
+    }
+  }
 })
+
 </script>
 
 <template>
@@ -39,7 +53,9 @@ console_ros.subscribe(message => {
       <v-container>
         <v-virtual-scroll :items="messageList" height="25vh">
           <template v-slot:default="{ item }">
-            {{ item }}
+            <div class="log-line">
+              {{item}}
+            </div>
           </template>
         </v-virtual-scroll>
       </v-container>

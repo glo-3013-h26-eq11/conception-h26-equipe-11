@@ -1,6 +1,6 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from central_manager.state_machine import StateMachineRover
-from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 from typing import List
@@ -9,9 +9,9 @@ import threading
 from yasmin import Blackboard
 
 
-class EnforcerManagerNode(Node):
+class EnforcerManagerNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("enforcer_manager_node")
+        super().__init__("enforcer_manager_node", "central_manager")
 
         self.sub_cmd_vel = self.create_subscription(
             Twist, "/cmd_vel", self.cmd_callback, 10

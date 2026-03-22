@@ -1,15 +1,15 @@
 import rclpy
 from std_msgs.msg import Bool
-from rclpy.node import Node
 import Jetson.GPIO as GPIO
 from proximity_sensor.merchandise_flag import MerchandiseFlag
+from web_interface.system_health_node import HealthPingingNode
 
 GPIO_PIN = 7
 
 
-class ProximitySensorNode(Node):
+class ProximitySensorNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("proximity_sensor")
+        super().__init__("proximity_sensor_node", "proximity_sensor")
         self.publisher = self.create_publisher(
             Bool, "/proximity_sensor/merchandise", 10
         )
