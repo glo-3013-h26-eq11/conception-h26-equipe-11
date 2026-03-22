@@ -58,9 +58,11 @@ class WallFollowNode(HealthPingingNode):
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
         theta_a = theta_b + theta
+        theta_c = np.radians(30)
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
         b = angle_to_distance(theta_b, lidar_range_array, angle_min, angle_increment)
+        c = angle_to_distance(theta_c, lidar_range_array, angle_min, angle_increment)
 
         if not is_valid_lidar_scan(a) or not is_valid_lidar_scan(b):
             self.get_logger().warn("Invalid lidar scan, repeating last command")
@@ -80,10 +82,8 @@ class WallFollowNode(HealthPingingNode):
         # )
         if self._corner_detected:
             elapsed = (now - self._corner_time) * 1e-9
-            if elapsed < COAST_DURATION:
-                self.send_control_command(SPEED, 0.0)
-                return
-            elif elapsed < RIGHT_TURN_DURATION + COAST_DURATION:
+        
+            if elapsed < RIGHT_TURN_DURATION + COAST_DURATION:
                 self.send_control_command(0.2, -MAX_STEERING)
                 return
             else:
@@ -92,7 +92,7 @@ class WallFollowNode(HealthPingingNode):
                 self.last_time = None
 
         if not self._corner_detected:
-            if a > (CORNER_THRESHOLD + 0.3):
+            if c > (CORNER_THRESHOLD + 0.3):
                 self._corner_detected = True
                 self._corner_time = now
                 self.get_logger().info("Right turn triggered!")
