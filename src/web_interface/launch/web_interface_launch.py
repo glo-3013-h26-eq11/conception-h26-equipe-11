@@ -17,7 +17,7 @@ def generate_launch_description():
         [
             IncludeLaunchDescription(
                 FrontendLaunchDescriptionSource(rosbridge_launch),
-                launch_arguments={"port": "9999"}.items(),
+                launch_arguments={"port": "9991"}.items(),
             ),
             launch_ros.actions.Node(
                 package="web_interface",
