@@ -25,8 +25,7 @@ class InitialState(State):
     def execute(self, blackboard):
         self.outcome = None
 
-        blackboard["enforcers"].clear()
-        blackboard["enforcers"].append(ImmobileEnforcer())
+        blackboard["enforcers"] = [ImmobileEnforcer()]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)

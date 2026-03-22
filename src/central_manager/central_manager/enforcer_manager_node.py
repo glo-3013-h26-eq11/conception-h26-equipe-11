@@ -6,6 +6,7 @@ from std_msgs.msg import Bool
 from typing import List
 import rclpy
 import threading
+from yasmin import Blackboard
 
 
 class EnforcerManagerNode(Node):
@@ -22,7 +23,7 @@ class EnforcerManagerNode(Node):
             Bool, "/car_follower/dangerous_distance", 10
         )
 
-        self.blackboard = {}
+        self.blackboard = Blackboard()
 
         self.blackboard["enforcers"] = []
 
