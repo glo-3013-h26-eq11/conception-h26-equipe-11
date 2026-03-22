@@ -2,7 +2,7 @@
 import {ref} from "vue";
 import {Ros, Topic} from "roslib";
 
-const host = window.location.hostname
+const host = "10.241.146.61"
 const status = ref({})
 var ros = new Ros({
   url: `ws://${host}:9999`
