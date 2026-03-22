@@ -58,7 +58,7 @@ class WallFollowNode(HealthPingingNode):
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
         theta_a = theta_b + theta
-        theta_c = np.radians(45)
+        theta_c = np.radians(38)
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
         b = angle_to_distance(theta_b, lidar_range_array, angle_min, angle_increment)
