@@ -4,18 +4,18 @@ from typing import Optional
 from geometry_msgs.msg import Twist
 from central_manager.base_enforcer import Enforcer
 
-BRAKE_START_DIST:    float = 1.0
-STOP_TARGET_DIST:    float = 0.61
-STOP_DURATION:       float = 1.0
-DISTANCE_STALE_SEC:  float = 0.5
+BRAKE_START_DIST: float = 1.0
+STOP_TARGET_DIST: float = 0.61
+STOP_DURATION: float = 1.0
+DISTANCE_STALE_SEC: float = 0.5
 TURN_TIME: float = 1.4
 COOLDOWN_DURATION: float = 2.0
 
 
 class _State(Enum):
-    IDLE     = auto()
-    BRAKING  = auto()
-    STOPPED  = auto()
+    IDLE = auto()
+    BRAKING = auto()
+    STOPPED = auto()
     COOLDOWN = auto()
 
 
@@ -61,7 +61,9 @@ class StopSignEnforcer(Enforcer):
             if d <= STOP_TARGET_DIST:
                 self._state = _State.STOPPED
                 self._stop_start = now
-                self._log(f"ARRÊT — distance {d:.2f} m, pause {self.stop_duration:.1f}s")
+                self._log(
+                    f"ARRÊT — distance {d:.2f} m, pause {self.stop_duration:.1f}s"
+                )
                 return self.stop_robot(cmd)
             factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
             factor = max(0.0, min(1.0, factor))
@@ -92,6 +94,7 @@ class StopSignEnforcer(Enforcer):
             return cmd
 
         return cmd
+
     def _log(self, msg: str) -> None:
         if self._logger is not None:
             self._logger.info(msg)

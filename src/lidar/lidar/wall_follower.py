@@ -17,7 +17,7 @@ MAX_STEERING = 0.9  # radians
 SPEED = 0.4  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-CORNER_THRESHOLD = 0.425 # m
+CORNER_THRESHOLD = 0.425  # m
 RIGHT_TURN_DURATION = 1.4
 COAST_DURATION = 0.4
 
@@ -92,7 +92,7 @@ class WallFollowNode(Node):
                 self.last_time = None
 
         if not self._corner_detected:
-            if  a > (CORNER_THRESHOLD + 0.3):
+            if a > (CORNER_THRESHOLD + 0.3):
                 self._corner_detected = True
                 self._corner_time = now
                 self.get_logger().info("Right turn triggered!")
