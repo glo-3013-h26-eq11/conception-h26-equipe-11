@@ -14,6 +14,8 @@ class AtDepositZoneToDeposit(State):
 
         node.create_subscription(String, "deposit_over", self.deposit_over_callback, 10)
 
+        self.deposit_over_publisher = node.create_publisher(String, "deposit_over", 10)
+
         self.outcome = None
 
         self.node = node
@@ -24,7 +26,7 @@ class AtDepositZoneToDeposit(State):
     def execute(self, blackboard):
         self.outcome = None
 
-        blackboard["enforcers"] = [WaitAtDepositEnforcer()]
+        blackboard["enforcers"] = [WaitAtDepositEnforcer(self.deposit_over_publisher)]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)

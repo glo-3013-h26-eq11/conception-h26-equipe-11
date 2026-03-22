@@ -14,6 +14,8 @@ class AtLoadZoneToLoad(State):
 
         node.create_subscription(String, "load_over", self.load_over_callback, 10)
 
+        self.load_over_publisher = node.create_publisher(String, "load_over", 10)
+
         self.outcome = None
 
         self.node = node
@@ -24,7 +26,7 @@ class AtLoadZoneToLoad(State):
     def execute(self, blackboard):
         self.outcome = None
 
-        blackboard["enforcers"] = [WaitAtLoadEnforcer()]
+        blackboard["enforcers"] = [WaitAtLoadEnforcer(self.load_over_publisher)]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)

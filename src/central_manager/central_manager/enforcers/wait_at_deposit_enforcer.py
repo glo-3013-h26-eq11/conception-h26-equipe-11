@@ -1,14 +1,18 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from geometry_msgs.msg import Twist
 import time
+from std_msgs.msg import String
+from rclpy.node import Publisher
 
 STOP_AFTER_DEPOSIT_DURATION = 1.5  # s
 
 
 class WaitAtDepositEnforcer(Enforcer):
-    def __init__(self):
+    def __init__(self, deposit_over_publisher: Publisher):
         self.last_real_speed_timer = None
         self.timer = 0
+
+        self.deposit_over_publisher = deposit_over_publisher
 
     def update_with_real_speed(self, real_speed_cmd: Twist):
         dt = self._compute_delta_time()
@@ -29,9 +33,9 @@ class WaitAtDepositEnforcer(Enforcer):
 
     def enforce_cmd(self, cmd) -> Twist:
         if self.is_stop_after_deposit_over():
-            return cmd
-        else:
-            return Twist()
+            self.deposit_over_publisher.publish(String())
+
+        return Twist()
 
     def is_stop_after_deposit_over(self):
         return self.timer >= STOP_AFTER_DEPOSIT_DURATION
