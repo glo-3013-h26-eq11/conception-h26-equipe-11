@@ -15,13 +15,11 @@ class WallFollowingState(State):
 
         self.node = node
 
-        node.create_subscription(String, "current_node", self.at_aruco_callback, 10)
-        
-        node.create_subscription(Float32, "distance_to_car", 10)
+        node.create_subscription(String, "current_node", self.at_intersection_callback, 10)
 
         self.outcome = None
 
-    def at_aruco_callback(self, msg: String):
+    def at_intersection_callback(self, msg: String):
         self.outcome = "current_node"
 
     def execute(self, blackboard):
