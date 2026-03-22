@@ -1,4 +1,3 @@
-import time
 import rclpy
 from playwright.sync_api import sync_playwright, expect
 from web_interface.static_web_server import PORT
