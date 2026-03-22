@@ -1,7 +1,8 @@
 from yasmin import State
 import rclpy
-from std_msgs.msg import String
-from central_manager.enforcers.stop_enforcer import StopEnforcer
+from std_msgs.msg import String, Float32
+from central_manager.enforcers.stop_enforcer import StopSignEnforcer
+from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 
 
 class WallFollowingState(State):
@@ -15,6 +16,8 @@ class WallFollowingState(State):
         self.node = node
 
         node.create_subscription(String, "current_node", self.at_aruco_callback, 10)
+        
+        node.create_subscription(Float32, "distance_to_car", 10)
 
         self.outcome = None
 
@@ -24,7 +27,7 @@ class WallFollowingState(State):
     def execute(self, blackboard):
         self.outcome = None
 
-        blackboard["enforcers"] = [StopEnforcer()]
+        blackboard["enforcers"] = [StopSignEnforcer(), CarFollowEnforcer()]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)

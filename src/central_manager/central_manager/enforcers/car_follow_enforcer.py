@@ -1,7 +1,8 @@
 import time
 from typing import Optional
 from geometry_msgs.msg import Twist
-from central_manager.base_enforcer import Enforcer
+from std_msgs.msg import Float32
+from central_manager.enforcers.base_enforcer import Enforcer
 
 VEHICLE_STALE_SEC: float = 0.5
 
@@ -12,9 +13,10 @@ class CarFollowEnforcer(Enforcer):
         self._follow_distance: Optional[float] = None
         self._last_update: float = 0.0
         self._logger = None
+        self.create_subscription(Float32, "distance_to_car", self.update_distance, 10)
 
-    def update_distance(self, distance: Optional[float]) -> None:
-        self._follow_distance = distance
+    def update_distance(self, distance: Float32) -> None:
+        self._follow_distance = distance.data
         self._last_update = time.time()
 
     def enforce_cmd(self, cmd: Twist) -> Twist:

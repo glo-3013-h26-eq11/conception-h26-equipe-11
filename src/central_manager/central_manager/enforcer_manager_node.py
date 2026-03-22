@@ -1,14 +1,13 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from central_manager.state_machine import StateMachineRover
-from central_manager.stopSignEnforcer import StopSignEnforcer
-from central_manager.car_follow_enforcer import CarFollowEnforcer
+from central_manager.central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 from rclpy.node import Node
-from web_interface.system_health_node import HealthPingingNode
+from web_interface.web_interface.system_health_node import HealthPingingNode
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 from typing import List
 from std_msgs.msg import String, Bool
-from typing import List, Optional
+from typing import List
 import json
 import rclpy
 import threading
@@ -74,34 +73,8 @@ class EnforcerManagerNode(HealthPingingNode):
         nodes: List[str] = json.loads(msg.data)
         destination_node: str = nodes[-1]
         self.merchandise_enforcer.destination = destination_node
-
-    def aruco_callback(self, msg: String) -> None:
-        try:
-            payload = json.loads(msg.data)
-            markers_5x5 = payload.get("markers_5x5", [])
-            markers_4x4 = payload.get("markers_4x4", [])
-
-            closest_stop_dist: Optional[float] = None
-            for marker in markers_5x5:
-                d = float(marker.get("depth", 9999))
-                angle = float(marker.get("angle_x_deg", 0))
-                z_fwd = float(marker.get("z_forward", 0))
-                if d <= 1.0 and angle <= 35.0 and z_fwd >= 0.15:
-                    if closest_stop_dist is None or d < closest_stop_dist:
-                        closest_stop_dist = d
-
-            self.stop_sign_enforcer.update_distance(closest_stop_dist)
-
-            closest_vehicle_dist: Optional[float] = None
-            for marker in markers_4x4:
-                d = float(marker.get("depth", 9999))
-                angle = float(marker.get("angle_x_deg", 0))
-                if angle <= 45.0:
-                    if closest_vehicle_dist is None or d < closest_vehicle_dist:
-                        closest_vehicle_dist = d
-            self.car_follow_enforcer.update_distance(closest_vehicle_dist)
-        except Exception:
-            pass
+            
+        
     def publish_dangerous_distance(self):
         dangerous_distance = Bool()
         dangerous_distance.data = True
