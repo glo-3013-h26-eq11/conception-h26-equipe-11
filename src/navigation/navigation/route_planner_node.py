@@ -49,15 +49,13 @@ class RoutePlannerNode(Node):
         self.available_goals: list[str] = ["ZC1", "ZD1"]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
-    def handle_get_node_action_load(self, request, response):
-        del request
+    def handle_get_node_action_load(self, _request, response):
         response.action = self._compute_node_action(
             mode=GoalMode.GO_LOAD, wait_action=NodeAction.WAIT_LOAD_ZONE
         )
         return response
 
-    def handle_get_node_action_deposit(self, request, response):
-        del request
+    def handle_get_node_action_deposit(self, _request, response):
         response.action = self._compute_node_action(
             mode=GoalMode.GO_DROP, wait_action=NodeAction.WAIT_DEPOSIT_ZONE
         )

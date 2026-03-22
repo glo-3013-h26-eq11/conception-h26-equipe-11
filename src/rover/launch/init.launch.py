@@ -37,8 +37,11 @@ def generate_launch_description():
             ),
             Node(
                 package="navigation",
-                executable="route_planner_node",
-                name="route_planner",
+                executable="goal_selector_node",
+                name="goal_selector",
+            ),
+            Node(
+                package="navigation", executable="route_planner", name="route_planner"
             ),
             Node(
                 package="central_manager",
