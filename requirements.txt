@@ -6,3 +6,4 @@ requests
 Jetson.GPIO
 depthai
 pytest-cov
+playwright

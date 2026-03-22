@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import rclpy
-from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
@@ -9,16 +9,17 @@ THETA_DEG = 60
 LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.4  # m
+MIN_FRONT_DISTANCE = 0.375  # m
 KP = 1.5
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 0.9  # radians
-SPEED = 0.5  # m/s
+SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-CORNER_THRESHOLD = 0.425 # m
+CORNER_THRESHOLD = 0.425  # m
 RIGHT_TURN_DURATION = 1.2
+COAST_DURATION = 0.4
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -31,9 +32,9 @@ def is_valid_lidar_scan(scan: float) -> bool:
     return not math.isinf(scan) and not math.isnan(scan) and scan > 0.0
 
 
-class WallFollowNode(Node):
+class WallFollowNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("wall_follow_node")
+        super().__init__("wall_follow_node", "lidar")
         self.declare_parameter("scan_topic", "/scan")
         self.declare_parameter("output_topic", "/cmd_vel_safe")
 
@@ -57,9 +58,11 @@ class WallFollowNode(Node):
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
         theta_a = theta_b + theta
+        theta_c = np.radians(47)
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
         b = angle_to_distance(theta_b, lidar_range_array, angle_min, angle_increment)
+        c = angle_to_distance(theta_c, lidar_range_array, angle_min, angle_increment)
 
         if not is_valid_lidar_scan(a) or not is_valid_lidar_scan(b):
             self.get_logger().warn("Invalid lidar scan, repeating last command")
@@ -79,9 +82,9 @@ class WallFollowNode(Node):
         # )
         if self._corner_detected:
             elapsed = (now - self._corner_time) * 1e-9
-
+        
             if elapsed < RIGHT_TURN_DURATION:
-                self.send_control_command(0.20, -MAX_STEERING)
+                self.send_control_command(0.2, -MAX_STEERING)
                 return
             else:
                 self._corner_detected = False
@@ -89,7 +92,7 @@ class WallFollowNode(Node):
                 self.last_time = None
 
         if not self._corner_detected:
-            if  a > (CORNER_THRESHOLD + 0.2) and b > (DESIRED_DISTANCE_FROM_WALL + 0.2):
+            if c > (CORNER_THRESHOLD):
                 self._corner_detected = True
                 self._corner_time = now
                 self.get_logger().info("Right turn triggered!")
@@ -123,14 +126,13 @@ class WallFollowNode(Node):
 
         if (
             is_valid_lidar_scan(a)
-            and a < CORNER_THRESHOLD - 0.15
+            and a < CORNER_THRESHOLD - 0.125
             and front_distance <= MIN_FRONT_DISTANCE
         ):
             bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
             corner_steering = MAX_STEERING
             speed = max(SPEED * (1 - bias_strength), 0.25)
-            steering = max(steering, corner_steering)
-            steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+            steering = corner_steering
 
             self.get_logger().info(
                 f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"

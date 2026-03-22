@@ -35,7 +35,7 @@ is_there_merchandise.subscribe(message => {
 
 var unsafe_distance = new Topic(
     {ros: ros,
-      name: '/car_distance/dangerous',
+      name: '/car_follower/dangerous_distance',
       messageType: 'std_msgs/msg/Bool'}
 )
 
@@ -49,14 +49,16 @@ unsafe_distance.subscribe(message => {
     <v-container>
       <v-row align="center" justify="center">
         <v-col align="center" justify="center">
-          <v-chip prepend-icon="mdi-package" size="x-large" :color="loaded ? 'green':'primary-variant'">Loaded</v-chip>
+          <v-chip prepend-icon="mdi-package" size="x-large" :color="loaded ? 'green' : 'primary-variant'">
+            {{ loaded ? 'Chargé' : 'Pas chargé' }}
+          </v-chip>
         </v-col>
       </v-row>
       <v-row align="center" justify="center">
         <v-col align="center" justify="center">
-          <v-chip prepend-icon="mdi-alert" size="x-large" :color="roverTooClose ? 'error':'primary-variant'">Rover too
-            close
-          </v-chip>
+          <v-chip prepend-icon="mdi-alert" size="x-large" :color="roverTooClose ? 'error' : 'primary-variant'">
+          {{ roverTooClose ? 'Rover trop proche' : 'Rover distance sécuritaire' }}
+        </v-chip>
         </v-col>
       </v-row>
     </v-container>

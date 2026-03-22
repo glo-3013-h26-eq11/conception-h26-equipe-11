@@ -28,6 +28,10 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": ["static_web_server = web_interface.static_web_server:main"],
+        "console_scripts": [
+            "static_web_server = web_interface.static_web_server:main",
+            "console_node = web_interface.console_node:main",
+            "system_health_node = web_interface.system_health_node:main",
+        ],
     },
 )

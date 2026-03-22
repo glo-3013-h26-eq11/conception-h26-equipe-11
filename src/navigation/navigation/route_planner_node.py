@@ -1,15 +1,13 @@
 import json
-
 import rclpy
-from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 from std_msgs.msg import String
-
 from navigation.route_selector import RouteSelector
 
 
-class RoutePlannerNode(Node):
+class RoutePlannerNode(HealthPingingNode):
     def __init__(self, route_selector: RouteSelector | None = None):
-        super().__init__("route_planner_node")
+        super().__init__("route_planner_node", "navigation")
 
         self._route_selector = route_selector
 

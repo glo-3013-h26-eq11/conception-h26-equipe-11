@@ -3,6 +3,7 @@ from central_manager.merchandise_enforcer import MerchandiseEnforcer
 from central_manager.stopSignEnforcer import StopSignEnforcer
 from central_manager.car_follow_enforcer import CarFollowEnforcer
 from rclpy.node import Node
+from web_interface.system_health_node import HealthPingingNode
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
 from typing import List, Optional
@@ -10,9 +11,9 @@ import json
 import rclpy
 
 
-class EnforcerManagerNode(Node):
+class EnforcerManagerNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("enforcer_manager_node")
+        super().__init__("enforcer_manager_node", "central_manager")
 
         self.sub_load_detection = self.create_subscription(
             Bool, "is_there_merchandise", self.load_callback, 10
@@ -110,6 +111,10 @@ class EnforcerManagerNode(Node):
             self.car_follow_enforcer.update_distance(closest_vehicle_dist)
         except Exception:
             pass
+    def publish_dangerous_distance(self):
+        dangerous_distance = Bool()
+        dangerous_distance.data = True
+        self.pub_dangerous_distance_car_follower.publish(dangerous_distance)
 
 
 def main(args=None):

@@ -1,16 +1,14 @@
-#!/usr/bin/env python3
-
 import json
 from typing import Dict
 
 import rclpy
-from rclpy.node import Node
 from std_msgs.msg import String
+from web_interface.system_health_node import HealthPingingNode
 
 
-class CurrentNodeFromArucoNode(Node):
+class CurrentNodeFromArucoNode(HealthPingingNode):
     def __init__(self):
-        super().__init__("current_node_from_aruco")
+        super().__init__("current_node_from_aruco", "navigation")
 
         self._tag_to_node: Dict[int, str] = {}
 
