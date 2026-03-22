@@ -1,6 +1,6 @@
 from yasmin import State
 import rclpy
-from std_msgs.msg import String
+from std_msgs.msg import String, Bool
 from central_manager.enforcers.wait_at_load_enforcer import WaitAtLoadEnforcer
 
 
@@ -14,19 +14,34 @@ class AtLoadZoneToLoad(State):
 
         node.create_subscription(String, "load_over", self.load_over_callback, 10)
 
+        node.create_subscription(
+            Bool, "/proximity_sensor/merchandise", self.merchandise_callback, 10
+        )
+
         self.load_over_publisher = node.create_publisher(String, "load_over", 10)
 
         self.outcome = None
+
+        self.wait_at_load_enforcer = None
 
         self.node = node
 
     def load_over_callback(self, msg: String):
         self.outcome = "load_over"
 
+    def merchandise_callback(self, msg: Bool):
+        if self.wait_at_load_enforcer:
+            self.wait_at_load_enforcer.merchandise_callback(msg)
+
+        self.node.get_logger().error(
+            "No WaitAtLoadEnforcer ready to process merchandise callback"
+        )
+
     def execute(self, blackboard):
         self.outcome = None
 
-        blackboard["enforcers"] = [WaitAtLoadEnforcer(self.load_over_publisher)]
+        self.wait_at_load_enforcer = WaitAtLoadEnforcer(self.load_over_publisher)
+        blackboard["enforcers"] = [self.wait_at_load_enforcer]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)

@@ -52,7 +52,7 @@ def test_when_transition_up_then_publishes_no_merchandise(fake_gpio):
 
     # Assert
     assert len(received_msgs) == 1
-    assert received_msgs[0] == MerchandiseFlag.NOT_DETECTED
+    assert received_msgs[0] == MerchandiseFlag.UNLOADED
 
     node.destroy_node()
 
@@ -85,7 +85,7 @@ def test_when_transition_down_then_publishes_there_is_merchandise(fake_gpio):
 
     # Assert
     assert len(received_msgs) == 1
-    assert received_msgs[0] == MerchandiseFlag.IS_DETECTED
+    assert received_msgs[0] == MerchandiseFlag.LOADED
 
     node.destroy_node()
 

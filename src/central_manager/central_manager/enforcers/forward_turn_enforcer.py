@@ -1,6 +1,5 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from geometry_msgs.msg import Twist
-import time
 from rclpy.node import Publisher
 from std_msgs.msg import String
 
@@ -10,7 +9,6 @@ FORWARD_TURN_SPEED = 0.4  # m/s
 
 class ForwardTurnEnforcer(Enforcer):
     def __init__(self, turn_over_publisher: Publisher):
-        self.last_real_speed_timer = None
 
         self.travel_distance_already_done = 0
         self.total_distance_to_travel = FORWARD_DISTANCE
@@ -21,18 +19,6 @@ class ForwardTurnEnforcer(Enforcer):
         dt = self._compute_delta_time()
 
         self.travel_distance_already_done += real_speed_cmd.linear.x * dt
-
-    def _compute_delta_time(self):
-        if self.last_real_speed_timer is None:
-            self.last_real_speed_timer = time.time()
-
-        now = time.time()
-
-        dt = now - self.last_real_speed_timer
-
-        self.last_real_speed_timer = now
-
-        return dt
 
     def enforce_cmd(self, cmd) -> Twist:
         cmd = Twist()
