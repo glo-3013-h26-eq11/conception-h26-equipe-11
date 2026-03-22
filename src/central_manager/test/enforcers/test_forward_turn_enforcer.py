@@ -1,11 +1,13 @@
 import pytest
 from central_manager.enforcers.forward_turn_enforcer import ForwardTurnEnforcer
 from geometry_msgs.msg import Twist
+from unittest.mock import Mock
 
 
 @pytest.fixture
 def enforcer():
-    return ForwardTurnEnforcer()
+    mock_pub = Mock()
+    return ForwardTurnEnforcer(mock_pub)
 
 
 def test_given_travel_done_when_enforce_cmd_then_return_empty_twist(enforcer):
@@ -18,6 +20,14 @@ def test_given_travel_done_when_enforce_cmd_then_return_empty_twist(enforcer):
 
     assert resulting_command.linear.x == 0
     assert resulting_command.linear.y == 0
+
+
+def test_given_travel_done_when_enforce_cmd_then_publish_turn_over(enforcer):
+    enforcer.travel_distance_already_done = enforcer.total_distance_to_travel
+
+    enforcer.enforce_cmd(Twist())
+
+    enforcer.turn_over_publisher.publish.assert_called_once()
 
 
 def test_given_travel_not_done_when_enforce_cmd_then_move_forward(enforcer):
@@ -38,6 +48,6 @@ def test_when_update_real_speed_then_distance_already_done_is_updated(enforcer):
 
     enforcer._compute_delta_time = mocked_compute_delta_time
 
-    enforcer.update_real_speed(real_speed_command)
+    enforcer.update_with_real_speed(real_speed_command)
 
     assert enforcer.travel_distance_already_done == pytest.approx(0.2 * 0.4)
