@@ -30,6 +30,8 @@ var status_ros = new Topic(
 status_ros.subscribe((message) => {
     const newStatus = JSON.parse(message.data)
     status.value = newStatus
+
+    console.log(newStatus)
 })
 
 </script>
