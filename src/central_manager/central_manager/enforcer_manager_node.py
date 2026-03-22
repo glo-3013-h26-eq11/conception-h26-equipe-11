@@ -49,6 +49,8 @@ class EnforcerManagerNode(HealthPingingNode):
 
         for enforcer in self._get_enforcers():
             enforcer.update_with_real_speed(cmd)
+            
+        print(cmd)
 
         self.pub_cmd_vel_safe.publish(cmd)
 
