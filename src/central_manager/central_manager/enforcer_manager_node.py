@@ -1,14 +1,8 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from central_manager.state_machine import StateMachineRover
-from central_manager.central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
-from rclpy.node import Node
-from web_interface.web_interface.system_health_node import HealthPingingNode
+from web_interface.system_health_node import HealthPingingNode
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Bool
 from typing import List
-from std_msgs.msg import String, Bool
-from typing import List
-import json
 import rclpy
 import threading
 from yasmin import Blackboard

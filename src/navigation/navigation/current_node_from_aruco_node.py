@@ -3,7 +3,7 @@ from typing import Dict, Optional
 
 import rclpy
 from std_msgs.msg import String, Float32
-from web_interface.web_interface.system_health_node import HealthPingingNode
+from web_interface.system_health_node import HealthPingingNode
 
 
 class CurrentNodeFromArucoNode(HealthPingingNode):
