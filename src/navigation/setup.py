@@ -28,7 +28,6 @@ setup(
         "console_scripts": [
             "route_planner_node = navigation.route_planner_node:main",
             "map_processor_node = navigation.map_processor_node:main",
-            "goal_selector_node = navigation.goal_selector_node:main",
             "current_node_from_aruco_node = navigation.current_node_from_aruco_node:main",
         ],
     },

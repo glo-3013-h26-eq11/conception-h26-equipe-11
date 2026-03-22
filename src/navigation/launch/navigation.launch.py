@@ -13,13 +13,13 @@ def generate_launch_description():
             ),
             Node(
                 package="navigation",
-                executable="goal_selector_node",
-                name="goal_selector",
-            ),
-            Node(
-                package="navigation",
                 executable="route_planner_node",
                 name="route_planner_node",
             ),
+            Node(
+                package="navigation",
+                executable="current_node_from_aruco_node",
+                name="current_node_from_aruco_node"
+            )
         ]
     )
