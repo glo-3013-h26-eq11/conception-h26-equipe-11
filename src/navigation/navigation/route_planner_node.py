@@ -86,6 +86,11 @@ class RoutePlannerNode(Node):
         self._try_compute_route()
 
     def _compute_node_action(self, mode: GoalMode, wait_action: NodeAction) -> str:
+        if self._route_selector is None:
+            return wait_action.value
+        if self.current_node is None or not self.current_node:
+            return wait_action.value
+
         goal_node = self._select_goal_for_mode(mode)
         result = self._route_selector.compute_path(self.current_node, goal_node)
         if result is None:
@@ -120,6 +125,9 @@ class RoutePlannerNode(Node):
         return direction_to_action.get(next_direction, wait_action.value)
 
     def _select_goal_for_mode(self, mode: GoalMode) -> str:
+        if self._route_selector is None:
+            return self.current_node
+
         if self._goal_selector is None:
             self._goal_selector = GoalSelector(self._route_selector)
 
