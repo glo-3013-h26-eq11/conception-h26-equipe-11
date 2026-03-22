@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from navigation.goal_selector import GoalMode, GoalSelector
 from navigation.route_selector import RouteSelector
 from central_manager.states.node_action_enum import NodeAction
 from navigation_interfaces.srv import GetNodeAction
@@ -14,12 +15,13 @@ class RoutePlannerNode(Node):
         super().__init__("route_planner_node")
 
         self._route_selector = route_selector
+        self._goal_selector = GoalSelector(route_selector) if route_selector else None
 
         self.subscription_current = self.create_subscription(
             String, "current_node", self.current_node_callback, 10
         )
-        self.subscription_goal = self.create_subscription(
-            String, "goal_node", self.goal_node_callback, 10
+        self.subscription_goal_mode = self.create_subscription(
+            String, "goal_mode", self.goal_mode_callback, 10
         )
 
         if route_selector is None:
@@ -43,16 +45,22 @@ class RoutePlannerNode(Node):
         )
 
         self.current_node: str | None = None
-        self.goal_node: str | None = None
-        self._current_directions: list | None = None
-        self._node_at_last_publish: str | None = None
+        # harcoder pour l'instant je vais utiliser city_interface quand on va être sur que le reste marche
+        self.available_goals: list[str] = ["ZC1", "ZD1"]
+        self.goal_mode: str = GoalMode.GO_LOAD.value
 
     def handle_get_node_action_load(self, request, response):
-        response.action = NodeAction.LEFT_TURN.value
+        del request
+        response.action = self._compute_node_action(
+            mode=GoalMode.GO_LOAD, wait_action=NodeAction.WAIT_LOAD_ZONE
+        )
         return response
 
     def handle_get_node_action_deposit(self, request, response):
-        response.action = NodeAction.LEFT_TURN.value
+        del request
+        response.action = self._compute_node_action(
+            mode=GoalMode.GO_DROP, wait_action=NodeAction.WAIT_DEPOSIT_ZONE
+        )
         return response
 
     def _map_callback(self, msg: String) -> None:
@@ -62,6 +70,7 @@ class RoutePlannerNode(Node):
         try:
             map_dict = json.loads(msg.data)
             self._route_selector = RouteSelector(graph=map_dict)
+            self._goal_selector = GoalSelector(self._route_selector)
             self.get_logger().info("Map received, route selector initialized.")
 
             self._try_compute_route()
@@ -73,48 +82,26 @@ class RoutePlannerNode(Node):
         self.current_node = msg.data.strip()
         self._try_compute_route()
 
-    def goal_node_callback(self, msg: String) -> None:
-        self.goal_node = msg.data.strip()
-        self._current_directions = None
-        self._node_at_last_publish = None
+    def goal_mode_callback(self, msg: String) -> None:
+        self.goal_mode = msg.data.strip()
         self._try_compute_route()
 
-    def _try_compute_route(self) -> None:
-        if self._route_selector is None:
-            return
-        if self.current_node is None or not self.current_node:
-            return
-        if self.goal_node is None or not self.goal_node:
-            return
-
-        if (
-            self._current_directions is None
-            or self.current_node != self._node_at_last_publish
-        ):
-            self._publish_full_route()
-            return
-
-        if self._current_directions:
-            self._republish_directions()
-
-    def _publish_full_route(self) -> None:
-        try:
-            result = self._route_selector.compute_path(
-                self.current_node, self.goal_node
-            )
-        except ValueError as e:
-            self.get_logger().error(f"Route computation failed: {e}")
-            return
-
+    def _compute_node_action(self, mode: GoalMode, wait_action: NodeAction) -> str:
+        goal_node = self._select_goal_for_mode(mode)
+        result = self._route_selector.compute_path(
+            self.current_node, goal_node
+        )
         if result is None:
-            nodes_path, directions_path = [], []
-            self.get_logger().warning(
-                f"No path found from '{self.current_node}' to '{self.goal_node}'."
-            )
-        else:
-            nodes_path, directions_path = result
+            msg_dirs = String()
+            msg_dirs.data = json.dumps([])
+            self.publisher_directions.publish(msg_dirs)
 
-        self._current_directions = list(directions_path)
+            msg_nodes = String()
+            msg_nodes.data = json.dumps([])
+            self.publisher_nodes.publish(msg_nodes)
+            return wait_action.value
+
+        nodes_path, directions_path = result
 
         msg_dirs = String()
         msg_dirs.data = json.dumps(directions_path)
@@ -123,24 +110,46 @@ class RoutePlannerNode(Node):
         msg_nodes = String()
         msg_nodes.data = json.dumps(nodes_path)
         self.publisher_nodes.publish(msg_nodes)
-        self._node_at_last_publish = self.current_node
 
-    def _republish_directions(self) -> None:
-        msg_dirs = String()
-        msg_dirs.data = json.dumps(self._current_directions)
-        self.publisher_directions.publish(msg_dirs)
+        if not directions_path:
+            return wait_action.value
 
-    def _publish_remaining_route(self) -> None:
-        self._current_directions.pop(0)
-        remaining = self._current_directions
+        direction_to_action = {
+            "left": NodeAction.LEFT_TURN.value,
+            "straight": NodeAction.FORWARD_TURN.value,
+            "right": NodeAction.RIGHT_TURN.value,
+        }
+        next_direction = directions_path[0]
+        return direction_to_action.get(next_direction, wait_action.value)
 
-        if not remaining:
-            self._current_directions = []
+    def _select_goal_for_mode(self, mode: GoalMode) -> str:
+        if self._goal_selector is None:
+            self._goal_selector = GoalSelector(self._route_selector)
 
-        msg_dirs = String()
-        msg_dirs.data = json.dumps(remaining)
-        self.publisher_directions.publish(msg_dirs)
-        self._node_at_last_publish = self.current_node
+        selected = self._goal_selector.select_goal(
+            current_node=self.current_node,
+            available_goals=self.available_goals,
+            mode=mode,
+        )
+        if selected is None:
+            return self.current_node
+        return selected
+
+    def _try_compute_route(self) -> None:
+        if self._route_selector is None:
+            return
+        if self.current_node is None or not self.current_node:
+            return
+        if not self.available_goals:
+            return
+
+        current_mode = GoalMode(self.goal_mode)
+        wait_action = (
+            NodeAction.WAIT_LOAD_ZONE
+            if current_mode == GoalMode.GO_LOAD
+            else NodeAction.WAIT_DEPOSIT_ZONE
+        )
+        self._compute_node_action(mode=current_mode, wait_action=wait_action)
 
 
 def main(args=None):
