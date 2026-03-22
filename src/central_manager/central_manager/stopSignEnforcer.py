@@ -90,8 +90,11 @@ class StopSignEnforcer(Enforcer):
                 self._cooldown_start = None
                 self._log("COOLDOWN terminé — retour IDLE")
                 return initial_command
-            # during cooldown, release command to wall follower / upstream controller
-            return cmd
+            # Essayé de faire avancé pendant cooldown
+            out = Twist()
+            out.linear.x = 0.2
+            out.angular.z = 0.0
+            return out
 
         return cmd
 
