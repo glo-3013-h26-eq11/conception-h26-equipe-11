@@ -5,13 +5,14 @@ from std_msgs.msg import String
 import rclpy
 import math
 
-ARC_RADIUS = 0.27  # m
+ARC_RADIUS = 0.24  # m
 LEFT_TURN_SPEED = 0.4  # m
 
 
 class LeftTurnEnforcer(Enforcer):
     def __init__(self, turn_over_publisher: Publisher):
-
+        super().__init__()
+        
         self.steering_angle_90 = LEFT_TURN_SPEED / ARC_RADIUS
         self.total_distance_to_travel = 2 * math.pi * ARC_RADIUS / 1.5
         self.travel_distance_already_done = 0
