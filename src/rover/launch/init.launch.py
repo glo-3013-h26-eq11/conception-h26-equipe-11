@@ -25,6 +25,10 @@ def generate_launch_description():
         get_package_share_directory("navigation"), "launch", "navigation.launch.py"
     )
 
+    lidar_launch = os.path.join(
+        get_package_share_directory("lidar"), "launch", "lidar_system.launch.py"
+    )
+
     return LaunchDescription(
         [
             IncludeLaunchDescription(

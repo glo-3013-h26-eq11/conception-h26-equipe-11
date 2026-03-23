@@ -2,7 +2,7 @@
 import {ref} from "vue";
 import {Ros, Topic} from "roslib";
 
-const host = "10.241.146.61"
+const host = window.location.hostname
 const status = ref({})
 var ros = new Ros({
   url: `ws://${host}:9999`
@@ -32,8 +32,6 @@ var status_ros = new Topic(
 status_ros.subscribe((message) => {
     const newStatus = JSON.parse(message.data)
     status.value = newStatus
-
-    console.log(newStatus)
 })
 
 </script>

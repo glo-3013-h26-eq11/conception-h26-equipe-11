@@ -16,6 +16,10 @@ class AtDepositZoneToDeposit(State):
 
         self.deposit_over_publisher = node.create_publisher(String, "deposit_over", 10)
 
+        node.create_subscription(
+            Bool, "/proximity_sensor/merchandise", self.merchandise_callback, 10
+        )
+
         self.outcome = None
 
         self.wait_at_deposit_enforcer = None
