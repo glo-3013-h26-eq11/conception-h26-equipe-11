@@ -42,7 +42,7 @@ def generate_launch_description():
             ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(lidar_launch)
-            )
+            ),
             IncludeLaunchDescription(PythonLaunchDescriptionSource(navigation_launch)),
             Node(
                 package="proximity_sensor",
