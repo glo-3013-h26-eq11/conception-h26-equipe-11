@@ -4,6 +4,7 @@ import Jetson.GPIO as GPIO
 from proximity_sensor.merchandise_flag import MerchandiseFlag
 from web_interface.system_health_node import HealthPingingNode
 import time
+
 GPIO_PIN = 7
 
 
@@ -41,7 +42,6 @@ class ProximitySensorNode(HealthPingingNode):
         boolean_msg.data = MerchandiseFlag.LOADED.value
         self.publisher.publish(boolean_msg)
         self.get_logger().info("Merchandise : LOADED")
-
 
 
 def main(args=None):
