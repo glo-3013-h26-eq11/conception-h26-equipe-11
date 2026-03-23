@@ -1,11 +1,7 @@
 from yasmin import State
 import rclpy
-<<<<<<< HEAD
 from std_msgs.msg import String, Float32, Bool
-=======
 import json
-from std_msgs.msg import String, Float32
->>>>>>> feat/stopSign-Test
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 
@@ -57,7 +53,7 @@ class WallFollowingState(State):
 
         self.stop_sign_enforcer = StopSignEnforcer()
 
-        blackboard["enforcers"] = [StopSignEnforcer(), self.car_follower_enforcer]
+        blackboard["enforcers"] = [self.stop_sign_enforcer, self.car_follower_enforcer]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)
