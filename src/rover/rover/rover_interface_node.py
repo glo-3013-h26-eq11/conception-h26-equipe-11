@@ -14,7 +14,7 @@ class RoverInterfaceNode(HealthPingingNode):
         super().__init__("rover_interface_node", "rover")
 
         self.subscription = self.create_subscription(
-            Twist, "/cmd_vel", self.listener_command_callback, 10
+            Twist, "/cmd_vel_safe", self.listener_command_callback, 10
         )
         self.publisher = self.create_publisher(String, "/rover/port", 10)
 

@@ -16,6 +16,9 @@ class AtIntersectionToDepositState(State):
         self.outcome = None
 
     def execute(self, blackboard):
+        self.outcome = None
+
+        self.node.get_logger().info("AT_INTERSECTION_TO_DEPOSIT state")
 
         blackboard["enforcers"] = [ImmobileEnforcer()]
 

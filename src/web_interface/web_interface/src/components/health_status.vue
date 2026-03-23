@@ -2,10 +2,12 @@
 import {ref} from "vue";
 import {Ros, Topic} from "roslib";
 
+const host = window.location.hostname
 const status = ref({})
 var ros = new Ros({
-  url: 'ws://localhost:9999'
+  url: `ws://${host}:9999`
 });
+
 
 ros.on('connection', function () {
   console.log('System Health connected to ROS');
@@ -40,7 +42,7 @@ status_ros.subscribe((message) => {
       <v-col cols="12">
         <v-card class="pa-3 mb-4">
           <v-card-title>
-            <strong>System Health</strong>
+            <strong>System Health!</strong>
           </v-card-title>
         </v-card>
       </v-col>

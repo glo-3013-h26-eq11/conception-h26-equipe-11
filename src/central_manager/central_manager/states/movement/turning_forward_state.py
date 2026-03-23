@@ -27,6 +27,8 @@ class TurningForwardState(State):
     def execute(self, blackboard):
         self.outcome = None
 
+        self.node.get_logger().info("TURNING_FORWARD state")
+
         blackboard["enforcers"] = [
             ForwardTurnEnforcer(self.turn_over_publisher),
             StopEnforcer(),

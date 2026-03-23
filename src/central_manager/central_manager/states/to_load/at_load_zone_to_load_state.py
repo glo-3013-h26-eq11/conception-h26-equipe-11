@@ -40,6 +40,8 @@ class AtLoadZoneToLoad(State):
     def execute(self, blackboard):
         self.outcome = None
 
+        self.node.get_logger().info("WAIT_AT_LOAD_ZONE state")
+
         self.wait_at_load_enforcer = WaitAtLoadEnforcer(self.load_over_publisher)
         blackboard["enforcers"] = [self.wait_at_load_enforcer]
 

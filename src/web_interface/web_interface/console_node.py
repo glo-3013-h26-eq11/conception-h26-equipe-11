@@ -6,12 +6,13 @@ import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from web_interface.system_health_node import HealthPingingNode
+import os
 
 LEVEL_NAMES = {10: "DEBUG", 20: "INFO", 30: "WARN", 40: "ERROR", 50: "FATAL"}
 
 MESSAGES_STACK_SIZE = 100
 
-FILTERS = ["rosbridge"]
+FILTERS = ["rosbridge", "wall_follower_node"]
 
 
 class ConsoleNode(HealthPingingNode):
@@ -33,7 +34,7 @@ class ConsoleNode(HealthPingingNode):
         entry = (
             f"[{self.format_log_stamp_et(log)}] -- "
             f"[{LEVEL_NAMES.get(log.level)}] -- "
-            f"{log.file} -- "
+            f"{os.path.basename(log.file)} -- "
             f"[{log.name}] -- "
             f"{log.msg}"
         )
