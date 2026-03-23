@@ -27,6 +27,8 @@ class TurningLeftState(State):
     def execute(self, blackboard):
         self.outcome = None
 
+        self.node.get_logger().info("TURNING_LEFT state")
+
         blackboard["enforcers"] = [
             LeftTurnEnforcer(self.turn_over_publisher),
             StopSignEnforcer(),

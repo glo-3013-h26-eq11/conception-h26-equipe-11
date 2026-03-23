@@ -27,6 +27,8 @@ class WallFollowingState(State):
     def execute(self, blackboard):
         self.outcome = None
 
+        self.node.get_logger().info("WALL_FOLLOWING_STATE state")
+
         blackboard["enforcers"] = [StopSignEnforcer(), CarFollowEnforcer()]
 
         while self.outcome is None:

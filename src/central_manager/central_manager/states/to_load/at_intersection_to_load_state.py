@@ -19,6 +19,8 @@ class AtIntersectionToLoadState(State):
     def execute(self, blackboard):
         self.outcome = None
 
+        self.node.get_logger().info("AT_INTERSECTION_TO_LOAD state")
+
         blackboard["enforcers"] = [ImmobileEnforcer()]
 
         node_action = self.get_current_node_action()

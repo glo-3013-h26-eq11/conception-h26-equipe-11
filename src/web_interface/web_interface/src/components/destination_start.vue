@@ -5,8 +5,9 @@ import {Ros, Topic} from "roslib";
 const roverStarted = ref(false)
 const destination = ref("")
 
+const host = window.location.hostname
 var ros = new Ros({
-  url: 'ws://localhost:9999'
+  url: `ws://${host}:9999`
 });
 
 ros.on('connection', function () {

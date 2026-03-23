@@ -25,6 +25,8 @@ class InitialState(State):
     def execute(self, blackboard):
         self.outcome = None
 
+        self.node.get_logger().info("INITIAL state")
+
         blackboard["enforcers"] = [ImmobileEnforcer()]
 
         while self.outcome is None:

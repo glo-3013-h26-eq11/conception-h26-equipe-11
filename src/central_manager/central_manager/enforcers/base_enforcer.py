@@ -23,12 +23,10 @@ class Enforcer(ABC):
 
     def _compute_delta_time(self):
         if self.last_real_speed_timer is None:
-            self.last_real_speed_timer = time.time()
+            self.last_real_speed_timer = time.perf_counter()
 
-        now = time.time()
-
+        now = time.perf_counter()
         dt = now - self.last_real_speed_timer
-
         self.last_real_speed_timer = now
 
         return dt

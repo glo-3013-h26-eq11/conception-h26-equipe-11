@@ -23,7 +23,10 @@ RUN apt-get install -y ros-humble-rosbridge-suite
 RUN apt-get install -y ros-$ROS_DISTRO-yasmin ros-$ROS_DISTRO-yasmin-*
 
 WORKDIR /home/ws
-COPY . /home/ws
+
+# WARNING SHOULDN'T COPY THE OLD BUILD FILE
+COPY . /home/ws 
+
 
 
 ENV PATH="/root/.local/bin:${PATH}"
