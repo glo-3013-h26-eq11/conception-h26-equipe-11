@@ -8,12 +8,7 @@ from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 
 class TurningLeftState(State):
     def __init__(self, node):
-        super().__init__(
-            outcomes=[
-                "turn_over",
-                "back_to_init"
-            ]
-        )
+        super().__init__(outcomes=["turn_over", "back_to_init"])
 
         self.node = node
 
@@ -37,8 +32,8 @@ class TurningLeftState(State):
 
     def turn_over_callback(self, msg: String):
         self.outcome = "turn_over"
-        
-    def rover_stop_callback(self, msg:Bool):
+
+    def rover_stop_callback(self, msg: Bool):
         if not msg.data:
             self.outcome = "back_to_init"
 

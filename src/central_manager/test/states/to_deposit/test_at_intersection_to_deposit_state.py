@@ -9,18 +9,11 @@ from central_manager.states.node_action_enum import NodeAction
 
 @pytest.fixture
 def blackboard_mock():
-    class FakeLogger:
-        def info(self, msg):
-            pass
+    logger_mock = MagicMock()
+    node_mock = MagicMock()
+    node_mock.get_logger.return_value = logger_mock
 
-        def error(self, msg):
-            pass
-
-    class FakeNode:
-        def __init__(self):
-            self.get_logger = lambda: FakeLogger()
-
-    return {"node": FakeNode(), "enforcers": []}
+    return {"node": node_mock, "enforcers": []}
 
 
 @pytest.mark.parametrize(

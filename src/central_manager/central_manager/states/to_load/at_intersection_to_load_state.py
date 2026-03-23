@@ -10,7 +10,13 @@ from std_msgs.msg import Bool
 class AtIntersectionToLoadState(State):
     def __init__(self, node: Node):
         super().__init__(
-            outcomes=["left_turn", "forward_turn", "right_turn", "wait_load_zone", "back_to_init"]
+            outcomes=[
+                "left_turn",
+                "forward_turn",
+                "right_turn",
+                "wait_load_zone",
+                "back_to_init",
+            ]
         )
 
         self.node = node
@@ -19,7 +25,7 @@ class AtIntersectionToLoadState(State):
 
         self.outcome = None
 
-    def rover_stop_callback(self, msg:Bool):
+    def rover_stop_callback(self, msg: Bool):
         if not msg.data:
             self.outcome = "back_to_init"
 

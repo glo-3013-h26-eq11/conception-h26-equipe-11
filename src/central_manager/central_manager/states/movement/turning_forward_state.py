@@ -8,12 +8,7 @@ from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 
 class TurningForwardState(State):
     def __init__(self, node):
-        super().__init__(
-            outcomes=[
-                "turn_over",
-                "back_to_init"
-            ]
-        )
+        super().__init__(outcomes=["turn_over", "back_to_init"])
 
         node.create_subscription(String, "turn_over", self.turn_over_callback, 10)
 
@@ -37,8 +32,8 @@ class TurningForwardState(State):
     def distance_to_car_callback(self, msg: Float32):
         if self.car_follower_enforcer:
             self.car_follower_enforcer.update_distance(msg.data)
-            
-    def rover_stop_callback(self, msg:Bool):
+
+    def rover_stop_callback(self, msg: Bool):
         if not msg.data:
             self.outcome = "back_to_init"
 

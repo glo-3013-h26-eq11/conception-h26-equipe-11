@@ -7,12 +7,7 @@ from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 
 class WallFollowingState(State):
     def __init__(self, node):
-        super().__init__(
-            outcomes=[
-                "current_node",
-                "back_to_init"
-            ]
-        )
+        super().__init__(outcomes=["current_node", "back_to_init"])
 
         self.node = node
 
@@ -36,8 +31,8 @@ class WallFollowingState(State):
 
     def at_intersection_callback(self, msg: String):
         self.outcome = "current_node"
-        
-    def rover_stop_callback(self, msg:Bool):
+
+    def rover_stop_callback(self, msg: Bool):
         if not msg.data:
             self.outcome = "back_to_init"
 
