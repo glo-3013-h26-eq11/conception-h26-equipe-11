@@ -55,7 +55,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
                     if closest_stop_dist is None or d < closest_stop_dist:
                         closest_stop_dist = d
                         out = String()
-                        out.data = marker_id + String(closest_stop_dist)
+                        out.data = json.dumps({"id": str(marker_id), "distance": str(closest_stop_dist)})
                         self._current_node_pub.publish(out)
                         return
 

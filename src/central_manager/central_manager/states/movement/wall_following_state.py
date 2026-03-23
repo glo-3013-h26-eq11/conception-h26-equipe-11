@@ -1,6 +1,11 @@
 from yasmin import State
 import rclpy
+<<<<<<< HEAD
 from std_msgs.msg import String, Float32, Bool
+=======
+import json
+from std_msgs.msg import String, Float32
+>>>>>>> feat/stopSign-Test
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 
@@ -22,6 +27,8 @@ class WallFollowingState(State):
         self.car_follower_enforcer: CarFollowEnforcer = None
 
         node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
+        
+        self.stop_sign_enforcer: StopSignEnforcer = None
 
         self.outcome = None
 
@@ -30,7 +37,12 @@ class WallFollowingState(State):
             self.car_follower_enforcer.update_distance(msg.data)
 
     def at_intersection_callback(self, msg: String):
-        self.outcome = "current_node"
+        data = json.loads(msg.data)
+        distance = data.get("distance")
+        if self.stop_sign_enforcer:
+            self.stop_sign_enforcer.update_distance(distance)
+        if self.stop_sign_enforcer.is_done():
+            self.outcome = "current_node"
 
     def rover_stop_callback(self, msg: Bool):
         if not msg.data:
@@ -42,6 +54,8 @@ class WallFollowingState(State):
         self.node.get_logger().info("WALL_FOLLOWING_STATE state")
 
         self.car_follower_enforcer = CarFollowEnforcer()
+
+        self.stop_sign_enforcer = StopSignEnforcer()
 
         blackboard["enforcers"] = [StopSignEnforcer(), self.car_follower_enforcer]
 

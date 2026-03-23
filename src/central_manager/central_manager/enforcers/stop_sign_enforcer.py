@@ -21,6 +21,7 @@ class _State(Enum):
 
 class StopSignEnforcer(Enforcer):
     def __init__(self, stop_duration: float = STOP_DURATION) -> None:
+        super().__init__()
         self._state: _State = _State.IDLE
         self._stop_start: Optional[float] = None
         self._cooldown_start: Optional[float] = None
@@ -34,6 +35,12 @@ class StopSignEnforcer(Enforcer):
 
         self._has_triggered: bool = False
 
+    def is_done(self):
+        if self._state = _State.IDLE or self._state = _State.COOLDOWN:
+            return True
+        else:
+            return False
+
     def update_distance(self, distance: Optional[float]) -> None:
         self._distance = distance
         self._last_update = time.time()
@@ -41,7 +48,7 @@ class StopSignEnforcer(Enforcer):
     def update_with_real_speed(self, real_speed_cmd: Twist):
         dt = self._compute_delta_time()
 
-        self.timer += dt
+        self.last_real_speed_timer += dt
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         now = time.time()

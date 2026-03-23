@@ -76,7 +76,8 @@ class RoutePlannerNode(HealthPingingNode):
             self.get_logger().error(f"Failed to parse map: {e}")
 
     def current_node_callback(self, msg: String) -> None:
-        self.current_node = msg.data.strip()
+        data = json.loads(msg.data)
+        self.current_node = str(data.get("id"))
         self._try_compute_route()
 
     def goal_mode_callback(self, msg: String) -> None:
