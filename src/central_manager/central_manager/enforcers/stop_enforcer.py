@@ -37,7 +37,7 @@ class StopSignEnforcer(Enforcer):
     def update_distance(self, distance: Optional[float]) -> None:
         self._distance = distance
         self._last_update = time.time()
-        
+
     def update_with_real_speed(self, real_speed_cmd: Twist):
         dt = self._compute_delta_time()
 

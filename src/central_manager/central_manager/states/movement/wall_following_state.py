@@ -15,7 +15,9 @@ class WallFollowingState(State):
 
         self.node = node
 
-        node.create_subscription(String, "current_node", self.at_intersection_callback, 10)
+        node.create_subscription(
+            String, "current_node", self.at_intersection_callback, 10
+        )
 
         self.outcome = None
 

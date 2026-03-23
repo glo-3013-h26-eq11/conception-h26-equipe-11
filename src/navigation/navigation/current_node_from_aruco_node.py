@@ -25,7 +25,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             10,
         )
         self._current_node_pub = self.create_publisher(String, "current_node", 10)
-        
+
         self._following_car_pub = self.create_publisher(Float32, "distance_to_car", 10)
 
     def _map_callback(self, msg: String) -> None:
@@ -58,7 +58,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
                         out.data = marker_id + String(closest_stop_dist)
                         self._current_node_pub.publish(out)
                         return
-                    
+
             closest_vehicle_dist: Optional[float] = None
             for marker in markers_4x4:
                 d = float(marker.get("depth", 9999))
@@ -71,7 +71,6 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
                         self._following_car_pub.publish(distance)
                         return
 
-                
         except Exception:
             pass
 

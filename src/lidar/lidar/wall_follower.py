@@ -82,7 +82,7 @@ class WallFollowNode(HealthPingingNode):
         # )
         if self._corner_detected:
             elapsed = (now - self._corner_time) * 1e-9
-        
+
             if elapsed < RIGHT_TURN_DURATION:
                 self.send_control_command(0.2, -MAX_STEERING)
                 return

@@ -12,13 +12,11 @@ class EnforcerManagerNode(HealthPingingNode):
     def __init__(self):
         super().__init__("enforcer_manager_node", "central_manager")
 
-
         self.sub_cmd_vel = self.create_subscription(
             Twist, "/cmd_vel", self.cmd_callback, 10
         )
 
         self.pub_cmd_vel_safe = self.create_publisher(Twist, "/cmd_vel_safe", 10)
-
 
         self.blackboard = Blackboard()
 
@@ -43,7 +41,7 @@ class EnforcerManagerNode(HealthPingingNode):
 
         for enforcer in self._get_enforcers():
             enforcer.update_with_real_speed(cmd)
-            
+
         print(cmd)
 
         self.pub_cmd_vel_safe.publish(cmd)
