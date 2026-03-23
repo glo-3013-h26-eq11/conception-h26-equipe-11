@@ -9,6 +9,7 @@ from rclpy.node import Node
 from central_manager.states.movement.wall_following_state import (
     WallFollowingState,
 )
+import json
 
 
 @pytest.fixture(scope="module")
@@ -34,7 +35,8 @@ def test_wall_following_positioning_transitions_to_current_node(rclpy_init):
     time.sleep(0.2)
 
     pub = node.create_publisher(String, "current_node", 10)
-    msg = String(data="aruco_12")
+    data = {"distance": 5}
+    msg = String(data=json.dumps(data))
     pub.publish(msg)
 
     thread.join(timeout=2.0)

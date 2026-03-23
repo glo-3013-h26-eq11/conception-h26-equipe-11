@@ -9,7 +9,6 @@ from lidar.wall_follower import (
     SPEED,
     WHEELBASE,
 )
-import time
 
 
 @pytest.fixture(scope="module", autouse=True)
