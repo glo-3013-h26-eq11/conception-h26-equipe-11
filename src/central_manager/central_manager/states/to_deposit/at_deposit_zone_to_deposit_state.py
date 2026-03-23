@@ -40,6 +40,8 @@ class AtDepositZoneToDeposit(State):
     def execute(self, blackboard):
         self.outcome = None
 
+        self.node.get_logger().info("WAIT_AT_DEPOSIT_ZONE state")
+
         self.wait_at_deposit_enforcer = WaitAtDepositEnforcer(
             self.deposit_over_publisher
         )
