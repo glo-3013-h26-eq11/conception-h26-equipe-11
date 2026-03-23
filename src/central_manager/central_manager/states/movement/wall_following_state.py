@@ -23,7 +23,7 @@ class WallFollowingState(State):
         self.car_follower_enforcer: CarFollowEnforcer = None
 
         node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
-        
+
         self.stop_sign_enforcer: StopSignEnforcer = None
 
         self.outcome = None
