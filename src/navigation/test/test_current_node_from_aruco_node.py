@@ -38,7 +38,7 @@ def test_given_map_and_detection_when_marker_in_map_then_publishes_current_node(
         "A1": {"id": "A1", "tag": 1, "left": "ZC1", "straight": None, "right": None},
         "A2": {"id": "A2", "tag": 2, "left": None, "straight": "A1", "right": None},
     }
-    detections_payload = {"ids_5x5": [2]}
+    detections_payload = {"markers_5x5": [2]}
 
     node._map_callback(String(data=json.dumps(map_payload)))
     node._detections_callback(String(data=json.dumps(detections_payload)))
