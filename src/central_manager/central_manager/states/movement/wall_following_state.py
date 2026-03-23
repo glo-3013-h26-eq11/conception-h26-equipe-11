@@ -51,7 +51,7 @@ class WallFollowingState(State):
 
         self.stop_sign_enforcer = StopSignEnforcer()
 
-        blackboard["enforcers"] = [StopSignEnforcer(), self.car_follower_enforcer]
+        blackboard["enforcers"] = [self.stop_sign_enforcer, self.car_follower_enforcer]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)
