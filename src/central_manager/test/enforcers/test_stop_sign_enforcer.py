@@ -1,7 +1,7 @@
 import time
 import pytest
 from geometry_msgs.msg import Twist
-from central_manager.stopSignEnforcer import StopSignEnforcer, _State
+from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer, _State
 
 
 @pytest.fixture

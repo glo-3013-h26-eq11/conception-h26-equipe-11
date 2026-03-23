@@ -13,11 +13,13 @@ class CarFollowEnforcer(Enforcer):
         self._follow_distance: Optional[float] = None
         self._last_update: float = 0.0
         self._logger = None
-        self.create_subscription(Float32, "distance_to_car", self.update_distance, 10)
 
     def update_distance(self, distance: Float32) -> None:
         self._follow_distance = distance.data
         self._last_update = time.time()
+
+    def update_with_real_speed(self, real_cmd):
+        pass
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         stale = (time.time() - self._last_update) > VEHICLE_STALE_SEC
