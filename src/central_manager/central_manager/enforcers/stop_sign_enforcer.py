@@ -36,7 +36,7 @@ class StopSignEnforcer(Enforcer):
         self._has_triggered: bool = False
 
     def is_done(self):
-        if self._state = _State.IDLE or self._state = _State.COOLDOWN:
+        if self._state == _State.IDLE or self._state == _State.COOLDOWN:
             return True
         else:
             return False
