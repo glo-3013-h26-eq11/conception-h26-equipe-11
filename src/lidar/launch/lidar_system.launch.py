@@ -16,7 +16,7 @@ def generate_launch_description():
 
     return launch.LaunchDescription(
         [
-            DeclareLaunchArgument("output_topic", default_value="/cmd_vel_safe"),
+            DeclareLaunchArgument("output_topic", default_value="/cmd_vel"),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     os.path.join(ldlidar_launch_dir, "stl19p.launch.py")

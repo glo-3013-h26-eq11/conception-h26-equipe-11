@@ -16,6 +16,8 @@ class AtIntersectionToLoadState(State):
 
         self.outcome = None
 
+        self.client = self.node.create_client(GetNodeAction, "get_node_action_load")
+
     def execute(self, blackboard):
         self.outcome = None
 
@@ -47,20 +49,23 @@ class AtIntersectionToLoadState(State):
         return self.outcome
 
     def get_current_node_action(self) -> NodeAction:
-        client = self.node.create_client(GetNodeAction, "get_node_action_load")
-
-        if not client.wait_for_service(timeout_sec=5.0):
+        if not self.client.wait_for_service(timeout_sec=5.0):
             self.node.get_logger().error("Service 'get_node_action_load' not available")
             raise RuntimeError("Service 'get_node_action_load' not available")
-
+        
         request = GetNodeAction.Request()
         future = client.call_async(request)
 
-        rclpy.spin_until_future_complete(self.node, future)
+        executor = rclpy.executors.SingleThreadedExecutor()
+        executor.add_node(self.node)
+        try:
+            executor.spin_until_future_complete(future)
+        finally:
+            executor.remove_node(self.node)
 
         if future.result() is not None:
             action_str = future.result().action
             return NodeAction(action_str)
-
+        
         self.node.get_logger().error("Failed to get node action from service")
         raise RuntimeError("Failed to get node action from service")

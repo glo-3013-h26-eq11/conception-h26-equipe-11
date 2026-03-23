@@ -12,7 +12,7 @@ LEVEL_NAMES = {10: "DEBUG", 20: "INFO", 30: "WARN", 40: "ERROR", 50: "FATAL"}
 
 MESSAGES_STACK_SIZE = 100
 
-FILTERS = ["rosbridge", "wall_follower_node"]
+FILTERS = ["rosbridge", "wall_follower_node", "rover_interface"]
 
 
 class ConsoleNode(HealthPingingNode):
