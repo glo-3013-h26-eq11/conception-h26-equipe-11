@@ -1,6 +1,6 @@
 from yasmin import State
 import rclpy
-from std_msgs.msg import String, Float32
+from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 
@@ -10,6 +10,7 @@ class WallFollowingState(State):
         super().__init__(
             outcomes=[
                 "current_node",
+                "back_to_init"
             ]
         )
 
@@ -25,6 +26,8 @@ class WallFollowingState(State):
 
         self.car_follower_enforcer: CarFollowEnforcer = None
 
+        node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
+
         self.outcome = None
 
     def distance_to_car_callback(self, msg: Float32):
@@ -33,6 +36,10 @@ class WallFollowingState(State):
 
     def at_intersection_callback(self, msg: String):
         self.outcome = "current_node"
+        
+    def rover_stop_callback(self, msg:Bool):
+        if not msg.data:
+            self.outcome = "back_to_init"
 
     def execute(self, blackboard):
         self.outcome = None
