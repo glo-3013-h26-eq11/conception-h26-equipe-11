@@ -99,17 +99,12 @@ class ArucoReaderNode(HealthPingingNode):
 
                     detections_4x4.append(
                         {
-                            "id": int(marker_id),
+                            "tag": int(marker_id),
                             "depth": float(depth),
                             "angle_x_deg": float(angle),
                             "z_forward": float(z_fwd),
                         }
                     )
-
-                    # self.get_logger().info(
-                    #     f"4x4 Marker {marker_id}: {depth:.3f} m"
-                    #     f"angle={angle:.1f}deg  Z={z_fwd:.3f}m"
-                    # )
 
             if ids_5x5 is not None:
                 for i, marker_id in enumerate(ids_5x5.flatten()):
@@ -119,17 +114,12 @@ class ArucoReaderNode(HealthPingingNode):
 
                     detections_5x5.append(
                         {
-                            "id": int(marker_id),
+                            "tag": int(marker_id),
                             "depth": float(depth),
                             "angle_x_deg": float(angle),
                             "z_forward": float(z_fwd),
                         }
                     )
-
-                    # self.get_logger().info(
-                    #     f"5x5 Marker {marker_id}: {depth:.3f} m"
-                    #     f"angle={angle:.1f}deg  Z={z_fwd:.3f}m"
-                    # )
 
             if not detections_4x4 and not detections_5x5:
                 return
@@ -140,8 +130,8 @@ class ArucoReaderNode(HealthPingingNode):
                     "sec": int(rgb_msg.header.stamp.sec),
                     "nanosec": int(rgb_msg.header.stamp.nanosec),
                 },
-                "ids_4x4": [d["id"] for d in detections_4x4],
-                "ids_5x5": [d["id"] for d in detections_5x5],
+                "ids_4x4": [d["tag"] for d in detections_4x4],
+                "ids_5x5": [d["tag"] for d in detections_5x5],
                 "markers_4x4": detections_4x4,
                 "markers_5x5": detections_5x5,
             }

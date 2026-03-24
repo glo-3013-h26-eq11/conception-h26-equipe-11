@@ -9,3 +9,5 @@ class NodeAction(Enum):
 
     WAIT_DEPOSIT_ZONE = "deposit"
     WAIT_LOAD_ZONE = "load"
+
+    BACK_TO_INIT = "back_to_init"

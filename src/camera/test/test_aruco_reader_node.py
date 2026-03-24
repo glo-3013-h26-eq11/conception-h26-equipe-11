@@ -143,12 +143,12 @@ def test_publishes_ids_when_detected(monkeypatch):
     assert payload["stamp"]["sec"] == 123
     assert payload["stamp"]["nanosec"] == 456
     assert payload["markers_4x4"] == [
-        {"id": 1, "depth": 0.5, "angle_x_deg": pytest.approx(0), "z_forward": 0.5},
-        {"id": 2, "depth": 0.5, "angle_x_deg": pytest.approx(0), "z_forward": 0.5},
+        {"tag": 1, "depth": 0.5, "angle_x_deg": pytest.approx(0), "z_forward": 0.5},
+        {"tag": 2, "depth": 0.5, "angle_x_deg": pytest.approx(0), "z_forward": 0.5},
     ]
     assert payload["markers_5x5"] == [
         {
-            "id": 10,
+            "tag": 10,
             "depth": 0.5,
             "angle_x_deg": pytest.approx(0.0),
             "z_forward": pytest.approx(0.5),

@@ -54,10 +54,11 @@ class AtIntersectionToDepositState(State):
         elif node_action == NodeAction.WAIT_DEPOSIT_ZONE:
             self.outcome = "wait_deposit_zone"
 
+        elif node_action == NodeAction.BACK_TO_INIT:
+            self.outcome = "back_to_init"
+
         else:
-            self.node.get_logger().error(
-                f"INVALID node action : {self.outcome}"
-            )
+            self.node.get_logger().error(f"INVALID node action : {self.outcome}")
 
         self.node.get_logger().info(f"Node action : {self.outcome}")
 

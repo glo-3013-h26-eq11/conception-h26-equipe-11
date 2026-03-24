@@ -44,11 +44,11 @@ def test_given_load_goals_when_select_goal_with_go_load_then_returns_closest_loa
     assert result == "ZC1"
 
 
-def test_given_drop_goals_when_select_goal_with_go_drop_then_returns_closest_drop_goal(
+def test_given_drop_goals_when_select_goal_with_GO_DEPOSIT_then_returns_closest_drop_goal(
     goal_selector,
 ):
     # Act
-    result = goal_selector.select_goal("A1", ["ZD1", "ZD2"], mode=GoalMode.GO_DROP)
+    result = goal_selector.select_goal("A1", ["ZD1", "ZD2"], mode=GoalMode.GO_DEPOSIT)
 
     # Assert
     assert result == "ZD1"
@@ -64,11 +64,11 @@ def test_given_mixed_goals_when_select_goal_with_go_load_then_returns_only_load_
     assert result == "ZC1"
 
 
-def test_given_mixed_goals_when_select_goal_with_go_drop_then_returns_only_drop_goal(
+def test_given_mixed_goals_when_select_goal_with_GO_DEPOSIT_then_returns_only_drop_goal(
     goal_selector,
 ):
     # Act
-    result = goal_selector.select_goal("A1", ["ZC1", "ZD1"], mode=GoalMode.GO_DROP)
+    result = goal_selector.select_goal("A1", ["ZC1", "ZD1"], mode=GoalMode.GO_DEPOSIT)
 
     # Assert
     assert result == "ZD1"

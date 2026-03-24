@@ -23,9 +23,9 @@ class RouteSelector:
             if raw.get(direction)
         }
 
-    def tag_to_id(self, tag):
+    def tag_to_id(self, tag: int):
         if not self.graph:
-            raise ValueError(f"Graph not loaded yet")
+            raise ValueError("Graph not loaded yet")
 
         tag_to_id = {v["tag"]: v["id"] for v in self.graph.values()}
 

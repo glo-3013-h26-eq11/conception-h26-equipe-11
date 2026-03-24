@@ -55,6 +55,9 @@ class AtIntersectionToLoadState(State):
         elif node_action == NodeAction.WAIT_LOAD_ZONE:
             self.outcome = "wait_load_zone"
 
+        elif node_action == NodeAction.BACK_TO_INIT:
+            self.outcome = "back_to_init"
+
         else:
             blackboard["node"].get_logger().error(
                 f"INVALID node action : {self.outcome}"
@@ -66,9 +69,7 @@ class AtIntersectionToLoadState(State):
 
     def get_current_node_action(self) -> NodeAction:
         if not self.client.wait_for_service(timeout_sec=5.0):
-            self.node.get_logger().error(
-                "Service 'get_node_action_load' not available"
-            )
+            self.node.get_logger().error("Service 'get_node_action_load' not available")
             raise RuntimeError("Service 'get_node_action_load' not available")
 
         request = GetNodeAction.Request()

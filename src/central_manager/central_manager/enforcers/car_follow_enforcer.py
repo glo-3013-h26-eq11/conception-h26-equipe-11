@@ -1,7 +1,6 @@
 import time
 from typing import Optional
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float32
 from central_manager.enforcers.base_enforcer import Enforcer
 
 VEHICLE_STALE_SEC: float = 0.5

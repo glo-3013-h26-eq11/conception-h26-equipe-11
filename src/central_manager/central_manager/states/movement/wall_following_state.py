@@ -6,8 +6,8 @@ from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 import time
 
-
 COOLDOWN_TIME = 2.0
+
 
 class WallFollowingState(State):
     def __init__(self, node):
@@ -40,7 +40,7 @@ class WallFollowingState(State):
     def at_intersection_callback(self, msg: String):
         data = json.loads(msg.data)
         distance = float(data.get("distance"))
-        
+
         if self.stop_sign_enforcer:
             self.stop_sign_enforcer.update_distance(distance)
 
@@ -57,10 +57,7 @@ class WallFollowingState(State):
         self.cooldown = time.monotonic()
 
     def is_cooldown_over(self):
-        return (
-            self.cooldown is None
-            or time.monotonic() - self.cooldown > COOLDOWN_TIME
-        )
+        return self.cooldown is None or time.monotonic() - self.cooldown > COOLDOWN_TIME
 
     def execute(self, blackboard):
         self.outcome = None

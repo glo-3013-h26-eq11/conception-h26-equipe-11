@@ -3,7 +3,6 @@ from enum import Enum, auto
 from typing import Optional
 from geometry_msgs.msg import Twist
 from central_manager.enforcers.base_enforcer import Enforcer
-import time
 
 BRAKE_START_DIST: float = 1.0
 STOP_TARGET_DIST: float = 0.61
