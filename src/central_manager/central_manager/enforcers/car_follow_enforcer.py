@@ -2,13 +2,14 @@ import time
 from typing import Optional
 from geometry_msgs.msg import Twist
 from central_manager.enforcers.base_enforcer import Enforcer
+from navigation.current_node_from_aruco_node import SAFE_DISTANCE_TO_CAR
 
 VEHICLE_STALE_SEC: float = 0.5
 
 
 class CarFollowEnforcer(Enforcer):
     def __init__(self):
-        self.min_follow_distance: float = 0.25
+        self.min_follow_distance: float = SAFE_DISTANCE_TO_CAR
         self._follow_distance: Optional[float] = None
         self._last_update: float = 0.0
         self._logger = None

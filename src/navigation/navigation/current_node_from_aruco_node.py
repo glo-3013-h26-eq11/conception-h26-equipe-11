@@ -2,9 +2,12 @@ import json
 from typing import Optional
 
 import rclpy
-from std_msgs.msg import String, Float32
+from std_msgs.msg import String, Float32, Bool
 from web_interface.system_health_node import HealthPingingNode
 
+
+SAFE_DISTANCE_TO_CAR = 0.25 # m
+CAR_DETECTION_REFRESH = 0.5
 
 class CurrentNodeFromArucoNode(HealthPingingNode):
     def __init__(self):
@@ -20,6 +23,12 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
         self._current_node_pub = self.create_publisher(String, "current_node", 10)
 
         self._following_car_pub = self.create_publisher(Float32, "distance_to_car", 10)
+        
+        self._dangerous_distance_publisher = self.create_publisher(Bool, "/car_follower/dangerous_distance", 10)
+        
+        self.create_timer(CAR_DETECTION_REFRESH, self._publish_distance)
+        
+        self.is_car_at_dangerous_distance = False
 
     def _detections_callback(self, msg: String) -> None:
         try:
@@ -74,7 +83,16 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
                     distance.data = closest_vehicle_dist
 
                     self._following_car_pub.publish(distance)
+                    
+                    if d <= SAFE_DISTANCE_TO_CAR:
+                        self.is_car_at_dangerous_distance = True
 
+    def _publish_distance(self):
+        out = Bool()
+        out.data = self.is_car_at_dangerous_distance
+        self._dangerous_distance_publisher.publish(out)
+        
+        self.is_car_at_dangerous_distance = False
 
 def main(args=None):
     rclpy.init(args=args)
