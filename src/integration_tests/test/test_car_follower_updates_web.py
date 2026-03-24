@@ -9,6 +9,7 @@ from integration_tests.integration_helper import (
 )
 import pytest
 from central_manager.enforcer_manager_node import EnforcerManagerNode
+from std_msgs.msg import Bool
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
 
@@ -50,7 +51,13 @@ def test_car_follower_updates_web():
 
         expect(rover_chip).to_have_text(TEXT_SAFE_DISTANCE, timeout=5000)
 
-        enforcer_manager_node.publish_dangerous_distance()
+        publisher = enforcer_manager_node.create_publisher(
+            Bool, "/car_follower/dangerous_distance", 10
+        )
+
+        data = Bool()
+        data.data = True
+        publisher.publish(data)
 
         page.wait_for_timeout(2000)
 

@@ -1,27 +1,19 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from central_manager.states.to_load.at_intersection_to_load_state import (
     AtIntersectionToLoadState,
 )
 from central_manager.states.node_action_enum import NodeAction
-from unittest.mock import MagicMock
 
 
 @pytest.fixture
 def blackboard_mock():
-    class FakeLogger:
-        def info(self, msg):
-            pass
+    logger_mock = MagicMock()
+    node_mock = MagicMock()
+    node_mock.get_logger.return_value = logger_mock
 
-        def error(self, msg):
-            pass
-
-    class FakeNode:
-        def __init__(self):
-            self.get_logger = lambda: FakeLogger()
-
-    return {"node": FakeNode(), "enforcers": []}
+    return {"node": node_mock, "enforcers": []}
 
 
 @pytest.mark.parametrize(
@@ -67,20 +59,14 @@ class FakeFuture:
         return r
 
 
-@patch("rclpy.spin_until_future_complete", return_value=None)
 def test_left_turn_transition(blackboard_mock):
-    fake_node = MagicMock()
+    state = AtIntersectionToLoadState(blackboard_mock["node"])
 
-    fake_client = MagicMock()
-    fake_client.wait_for_service.return_value = True
-    fake_client.call_async.return_value = FakeFuture(NodeAction.LEFT_TURN.value)
-
-    fake_node.create_client.return_value = fake_client
-
-    state = AtIntersectionToLoadState(fake_node)
-
-    blackboard = {"node": fake_node}
-
-    outcome = state.execute(blackboard)
+    with patch.object(
+        state,
+        "get_current_node_action",
+        return_value=NodeAction.LEFT_TURN,
+    ):
+        outcome = state.execute(blackboard_mock)
 
     assert outcome == "left_turn"

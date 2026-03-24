@@ -107,7 +107,8 @@ class ArucoReaderNode(HealthPingingNode):
                     )
 
                     self.get_logger().info(
-                        f"4x4 Marker {marker_id}: {depth:.3f} m  angle={angle:.1f}deg  Z={z_fwd:.3f}m"
+                        f"4x4 Marker {marker_id}: {depth:.3f} m"
+                        f"angle={angle:.1f}deg  Z={z_fwd:.3f}m"
                     )
 
             if ids_5x5 is not None:
@@ -126,7 +127,8 @@ class ArucoReaderNode(HealthPingingNode):
                     )
 
                     self.get_logger().info(
-                        f"5x5 Marker {marker_id}: {depth:.3f} m  angle={angle:.1f}deg  Z={z_fwd:.3f}m"
+                        f"5x5 Marker {marker_id}: {depth:.3f} m"
+                        f"angle={angle:.1f}deg  Z={z_fwd:.3f}m"
                     )
 
             if not detections_4x4 and not detections_5x5:

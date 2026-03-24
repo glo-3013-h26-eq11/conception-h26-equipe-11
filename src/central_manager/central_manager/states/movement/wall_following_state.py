@@ -1,18 +1,14 @@
 from yasmin import State
 import rclpy
+from std_msgs.msg import String, Float32, Bool
 import json
-from std_msgs.msg import String, Float32
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 
 
 class WallFollowingState(State):
     def __init__(self, node):
-        super().__init__(
-            outcomes=[
-                "current_node",
-            ]
-        )
+        super().__init__(outcomes=["current_node", "back_to_init"])
 
         self.node = node
 
@@ -25,6 +21,8 @@ class WallFollowingState(State):
         )
 
         self.car_follower_enforcer: CarFollowEnforcer = None
+
+        node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
 
         self.stop_sign_enforcer: StopSignEnforcer = None
 
@@ -41,6 +39,10 @@ class WallFollowingState(State):
             self.stop_sign_enforcer.update_distance(distance)
         if self.stop_sign_enforcer.is_done():
             self.outcome = "current_node"
+
+    def rover_stop_callback(self, msg: Bool):
+        if not msg.data:
+            self.outcome = "back_to_init"
 
     def execute(self, blackboard):
         self.outcome = None

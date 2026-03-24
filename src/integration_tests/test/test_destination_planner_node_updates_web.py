@@ -13,6 +13,7 @@ from integration_tests.integration_helper import (
 import pytest
 from rclpy.node import Node
 from std_msgs.msg import String
+import json
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
 
@@ -57,7 +58,8 @@ class TopicPublisher(Node):
 
     def publish_current_node(self):
         msg = String()
-        msg.data = CURRENT_NODE
+        data = {"id": CURRENT_NODE}
+        msg.data = json.dumps(data)
         self.publisher_current_node.publish(msg)
 
     def publish_goal_node(self):
