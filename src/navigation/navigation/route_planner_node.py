@@ -76,8 +76,16 @@ class RoutePlannerNode(HealthPingingNode):
             self.get_logger().error(f"Failed to parse map: {e}")
 
     def current_node_callback(self, msg: String) -> None:
+
+        if self._route_selector is None:
+            return
+
         data = json.loads(msg.data)
-        self.current_node = str(data.get("id"))
+        
+        tag = int(data.get("id"))
+
+        self.current_node = self._route_selector.tag_to_id(tag)
+
         self._try_compute_route()
 
     def goal_mode_callback(self, msg: String) -> None:
@@ -85,6 +93,7 @@ class RoutePlannerNode(HealthPingingNode):
         self._try_compute_route()
 
     def _compute_node_action(self, mode: GoalMode, wait_action: NodeAction) -> str:
+
         if self._route_selector is None:
             return wait_action.value
         if self.current_node is None or not self.current_node:
@@ -92,6 +101,7 @@ class RoutePlannerNode(HealthPingingNode):
 
         goal_node = self._select_goal_for_mode(mode)
         result = self._route_selector.compute_path(self.current_node, goal_node)
+
         if result is None:
             msg_dirs = String()
             msg_dirs.data = json.dumps([])
@@ -103,6 +113,10 @@ class RoutePlannerNode(HealthPingingNode):
             return wait_action.value
 
         nodes_path, directions_path = result
+
+        # self.get_logger().info(f"Route directions : {directions_path}")
+        # self.get_logger().info(f"Current node : {self.current_node}")
+        # self.get_logger().info(f"All nodes : {nodes_path}")
 
         msg_dirs = String()
         msg_dirs.data = json.dumps(directions_path)
@@ -121,6 +135,11 @@ class RoutePlannerNode(HealthPingingNode):
             "right": NodeAction.RIGHT_TURN.value,
         }
         next_direction = directions_path[0]
+
+        # For points depots/chargement
+        if "Z" in self.current_node:
+            return NodeAction.WALL_FOLLOW.value
+
         return direction_to_action.get(next_direction, wait_action.value)
 
     def _select_goal_for_mode(self, mode: GoalMode) -> str:

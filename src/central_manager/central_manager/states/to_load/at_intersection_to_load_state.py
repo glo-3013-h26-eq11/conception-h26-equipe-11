@@ -49,6 +49,9 @@ class AtIntersectionToLoadState(State):
         elif node_action == NodeAction.RIGHT_TURN:
             self.outcome = "right_turn"
 
+        elif node_action == NodeAction.WALL_FOLLOW:
+            self.outcome = "right_turn"
+
         elif node_action == NodeAction.WAIT_LOAD_ZONE:
             self.outcome = "wait_load_zone"
 
@@ -57,28 +60,26 @@ class AtIntersectionToLoadState(State):
                 f"INVALID node action : {self.outcome}"
             )
 
-        blackboard["node"].get_logger().info(f"Node action : {self.outcome}")
+        self.node.get_logger().info(f"Node action : {self.outcome}")
 
         return self.outcome
 
     def get_current_node_action(self) -> NodeAction:
         if not self.client.wait_for_service(timeout_sec=5.0):
-            self.node.get_logger().error("Service 'get_node_action_load' not available")
+            self.node.get_logger().error(
+                "Service 'get_node_action_load' not available"
+            )
             raise RuntimeError("Service 'get_node_action_load' not available")
 
         request = GetNodeAction.Request()
         future = self.client.call_async(request)
 
-        executor = rclpy.executors.SingleThreadedExecutor()
-        executor.add_node(self.node)
-        try:
-            executor.spin_until_future_complete(future)
-        finally:
-            executor.remove_node(self.node)
+        while not future.done():
+            rclpy.spin_once(self.node, timeout_sec=0.1)
 
-        if future.result() is not None:
-            action_str = future.result().action
-            return NodeAction(action_str)
+        result = future.result()
+        if result is not None:
+            return NodeAction(result.action)
 
         self.node.get_logger().error("Failed to get node action from service")
         raise RuntimeError("Failed to get node action from service")

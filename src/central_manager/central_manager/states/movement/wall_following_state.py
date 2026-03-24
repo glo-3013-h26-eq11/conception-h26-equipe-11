@@ -4,7 +4,10 @@ from std_msgs.msg import String, Float32, Bool
 import json
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
+import time
 
+
+COOLDOWN_TIME = 2.0
 
 class WallFollowingState(State):
     def __init__(self, node):
@@ -28,21 +31,36 @@ class WallFollowingState(State):
 
         self.outcome = None
 
+        self.cooldown = None
+
     def distance_to_car_callback(self, msg: Float32):
         if self.car_follower_enforcer:
             self.car_follower_enforcer.update_distance(msg.data)
 
     def at_intersection_callback(self, msg: String):
         data = json.loads(msg.data)
-        distance = data.get("distance")
+        distance = float(data.get("distance"))
+        
         if self.stop_sign_enforcer:
             self.stop_sign_enforcer.update_distance(distance)
-        if self.stop_sign_enforcer.is_done():
-            self.outcome = "current_node"
+
+        if self.stop_sign_enforcer:
+            if self.stop_sign_enforcer.is_done() and self.is_cooldown_over():
+                self.update_cooldown()
+                self.outcome = "current_node"
 
     def rover_stop_callback(self, msg: Bool):
         if not msg.data:
             self.outcome = "back_to_init"
+
+    def update_cooldown(self):
+        self.cooldown = time.monotonic()
+
+    def is_cooldown_over(self):
+        return (
+            self.cooldown is None
+            or time.monotonic() - self.cooldown > COOLDOWN_TIME
+        )
 
     def execute(self, blackboard):
         self.outcome = None

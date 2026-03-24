@@ -14,8 +14,8 @@ class CarFollowEnforcer(Enforcer):
         self._last_update: float = 0.0
         self._logger = None
 
-    def update_distance(self, distance: Float32) -> None:
-        self._follow_distance = distance.data
+    def update_distance(self, distance: float) -> None:
+        self._follow_distance = distance
         self._last_update = time.time()
 
     def update_with_real_speed(self, real_cmd):
