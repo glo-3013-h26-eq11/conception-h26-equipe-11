@@ -1,4 +1,6 @@
 import rclpy
+from rclpy.executors import SingleThreadedExecutor
+import time
 from playwright.sync_api import sync_playwright, expect
 from web_interface.static_web_server import PORT
 from integration_tests.integration_helper import (
@@ -60,6 +62,13 @@ def test_car_follower_updates_web():
         publisher.publish(data)
 
         page.wait_for_timeout(3000)
+
+        executor = SingleThreadedExecutor()
+        executor.add_node(publisher)
+
+        start = time.time()
+        while time.time() - start < 4:
+            executor.spin_once(timeout_sec=0.1)
 
         expect(rover_chip).to_have_text(TEXT_DANGEROUS_DISTANCE, timeout=5000)
 
