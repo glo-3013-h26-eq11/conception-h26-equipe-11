@@ -112,7 +112,7 @@ class ArucoReaderNode(HealthPingingNode):
                         corners_5x5[i], marker_size=0.075
                     )
 
-                    if np.abs(tag_angle >= 20.0):
+                    if np.abs(tag_angle >= 30.0):
                         self.get_logger().info(f"Tag skipped : {marker_id}")
                         continue
 
@@ -180,7 +180,7 @@ class ArucoReaderNode(HealthPingingNode):
         # Z: forward distance to marker. If Z is very small the rover is
         # already passing under the marker — must not trigger stop.
         z_forward = float(tvec[2])
-        return dist_xz, angle_x_deg, z_forward, np.degrees(rvec[2])
+        return dist_xz, angle_x_deg, z_forward, float(np.degrees(rvec[2]))
 
 
 def main(args=None):

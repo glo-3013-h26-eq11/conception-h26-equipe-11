@@ -18,7 +18,7 @@ MAX_STEERING = 0.9  # radians
 SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-CORNER_THRESHOLD = 0.20  # m
+CORNER_THRESHOLD = 0.25  # m
 RIGHT_TURN_DURATION = 1.1
 COAST_DURATION = 0.4
 
@@ -140,9 +140,9 @@ class WallFollowNode(HealthPingingNode):
             speed = max(SPEED * (1 - bias_strength), 0.2)
             steering = corner_steering
 
-            # self.get_logger().info(
-            #     f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
-            # )
+            self.get_logger().info(
+                f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
+            )
 
         # self.get_logger().info(
         #     f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
@@ -156,7 +156,7 @@ class WallFollowNode(HealthPingingNode):
 
         twist = Twist()
         twist.linear.x = speed * (0.35 if self._corner_detected else 1.0)
-        twist.angular.z = angular_z * (1.2 if self._corner_detected else 1.0)
+        twist.angular.z = angular_z * (1.1 if self._corner_detected else 1.0)
         self.drive_pub.publish(twist)
 
 
