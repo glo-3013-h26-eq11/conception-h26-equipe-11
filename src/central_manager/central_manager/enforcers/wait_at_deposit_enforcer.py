@@ -5,8 +5,7 @@ from rclpy.node import Publisher
 from proximity_sensor.merchandise_flag import MerchandiseFlag
 import time
 
-STOP_AFTER_DEPOSIT_DURATION = 1.5  # s
-STABLE_UNLOAD_DURATION = 1.0
+STOP_AFTER_DEPOSIT_DURATION = 1.5
 
 
 class WaitAtDepositEnforcer(Enforcer):
