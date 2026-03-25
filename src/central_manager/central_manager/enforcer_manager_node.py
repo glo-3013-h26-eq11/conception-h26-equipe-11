@@ -61,6 +61,7 @@ class EnforcerManagerNode(HealthPingingNode):
             self.blackboard["current_node_distance"] = float(data.get("distance", 0.0))
             for enforcer in self._get_enforcers():
                 if isinstance(enforcer, StopSignEnforcer):
+                    enforcer.set_current_node_id(self.blackboard["current_node_id"])
                     enforcer.update_distance(self.blackboard["current_node_distance"])
         except (json.JSONDecodeError, TypeError, ValueError) as e:
             self.get_logger().error(f"current_node parse error: {e}")

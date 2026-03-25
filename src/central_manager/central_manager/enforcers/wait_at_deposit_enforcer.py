@@ -6,6 +6,8 @@ from proximity_sensor.merchandise_flag import MerchandiseFlag
 import time
 
 STOP_AFTER_DEPOSIT_DURATION = 1.5
+STABLE_UNLOAD_DURATION = 1.0  # s
+UNLOAD_CONFIRM_WINDOW = 0.3  # s — ignore LOADED noise after UNLOADED confirmed this long
 
 
 class WaitAtDepositEnforcer(Enforcer):
@@ -40,4 +42,8 @@ class WaitAtDepositEnforcer(Enforcer):
             if self._unloaded_time is None:
                 self._unloaded_time = time.time()
         elif transition == MerchandiseFlag.LOADED:
-            self._unloaded_time = None
+            # Only reset if UNLOADED was very recent (< UNLOAD_CONFIRM_WINDOW).
+            # After that threshold, treat LOADED as sensor noise — the
+            # merchandise is considered gone and the rover must leave.
+            if self._unloaded_time is not None and time.time() - self._unloaded_time < UNLOAD_CONFIRM_WINDOW:
+                self._unloaded_time = None

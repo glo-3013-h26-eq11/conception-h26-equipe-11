@@ -9,9 +9,8 @@ class Enforcer(ABC):
 
     @staticmethod
     def stop_robot(cmd: Twist) -> Twist:
-        cmd.linear.x = 0.0
-        cmd.angular.z = 0.0
-        return cmd
+        out = Twist()
+        return out
 
     @abstractmethod
     def enforce_cmd(self, cmd: Twist) -> Twist:

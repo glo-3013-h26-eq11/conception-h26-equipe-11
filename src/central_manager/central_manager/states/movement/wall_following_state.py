@@ -11,7 +11,8 @@ class WallFollowingState(BaseState):
     def execute(self, blackboard):
         self.node.get_logger().info("WALL_FOLLOWING_STATE state")
 
-        stop_sign_enforcer = StopSignEnforcer()
+        last_stopped_node_id = self._bb_get(blackboard, "_last_stopped_node_id")
+        stop_sign_enforcer = StopSignEnforcer(last_processed_node_id=last_stopped_node_id)
         stop_sign_enforcer._logger = self.node.get_logger()
         car_follow_enforcer = CarFollowEnforcer()
         car_follow_enforcer._logger = self.node.get_logger()
@@ -28,6 +29,7 @@ class WallFollowingState(BaseState):
         # Transition only after the stop actually completed (entered COOLDOWN)
         # This ensures the rover has stopped for the full STOP_DURATION at 0.61 m
         if stop_enforcer.has_completed_stop():
+            blackboard["_last_stopped_node_id"] = self._bb_get(blackboard, "current_node_id")
             immobile = ImmobileEnforcer()
             immobile._logger = self.node.get_logger()
             blackboard["enforcers"] = [immobile]

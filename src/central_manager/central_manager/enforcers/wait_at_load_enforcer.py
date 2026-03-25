@@ -6,7 +6,8 @@ from proximity_sensor.merchandise_flag import MerchandiseFlag
 import time
 
 STOP_AFTER_LOAD_DURATION = 1.5  # s
-STABLE_LOAD_DURATION = 1.0  # s 
+STABLE_LOAD_DURATION = 1.0  # s
+LOAD_CONFIRM_WINDOW = 0.3  # s — ignore UNLOADED noise after LOADED confirmed this long
 
 
 class WaitAtLoadEnforcer(Enforcer):
@@ -41,4 +42,8 @@ class WaitAtLoadEnforcer(Enforcer):
             if self._loaded_time is None:
                 self._loaded_time = time.time()
         elif transition == MerchandiseFlag.UNLOADED:
-            self._loaded_time = None
+            # Only reset if LOADED was very recent (< LOAD_CONFIRM_WINDOW).
+            # After that threshold, treat UNLOADED as sensor noise — the
+            # merchandise is considered confirmed and the rover must leave.
+            if self._loaded_time is not None and time.time() - self._loaded_time < LOAD_CONFIRM_WINDOW:
+                self._loaded_time = None

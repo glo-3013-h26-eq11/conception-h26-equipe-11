@@ -19,7 +19,11 @@ class _State(Enum):
 
 
 class StopSignEnforcer(Enforcer):
-    def __init__(self, stop_duration: float = STOP_DURATION) -> None:
+    def __init__(
+        self,
+        stop_duration: float = STOP_DURATION,
+        last_processed_node_id: Optional[str] = None,
+    ) -> None:
         super().__init__()
         self._state: _State = _State.IDLE
         self._stop_start: Optional[float] = None
@@ -29,9 +33,25 @@ class StopSignEnforcer(Enforcer):
         self._last_update: float = 0.0
         self._logger = None
         self._has_triggered: bool = False
+        self._current_node_id: Optional[str] = None
+        self._last_processed_node_id: Optional[str] = last_processed_node_id
+
+    @property
+    def _is_current_node_processed(self) -> bool:
+        return (
+            self._current_node_id is not None
+            and self._current_node_id == self._last_processed_node_id
+        )
+
+    def set_current_node_id(self, node_id: Optional[str]) -> None:
+        self._current_node_id = node_id
 
     def is_done(self) -> bool:
-        return self._state == _State.IDLE or self._state == _State.COOLDOWN
+        if self._state == _State.COOLDOWN:
+            return True
+        if self._is_current_node_processed:
+            return True
+        return self._state == _State.IDLE and self._current_node_id is None
 
     def has_completed_stop(self) -> bool:
         """True once the full stop duration has elapsed and the enforcer entered COOLDOWN."""
@@ -55,7 +75,7 @@ class StopSignEnforcer(Enforcer):
             self._cooldown_start = None
 
         if self._state == _State.IDLE and not self._has_triggered:
-            if d is not None and d <= BRAKE_START_DIST:
+            if d is not None and d <= BRAKE_START_DIST and not self._is_current_node_processed:
                 self._state = _State.BRAKING
                 self._has_triggered = True
                 self._log(f"STOP détecté à {d:.2f} m — freinage")
@@ -80,8 +100,9 @@ class StopSignEnforcer(Enforcer):
             if elapsed >= self.stop_duration:
                 self._state = _State.COOLDOWN
                 self._cooldown_start = now
+                self._last_processed_node_id = self._current_node_id
                 self._log("FIN STOP — mode COOLDOWN")
-                return cmd
+                return self.stop_robot(cmd)  # freeze one extra cycle so SM thread has time to swap enforcers
             return self.stop_robot(cmd)
 
         if self._state == _State.COOLDOWN:
