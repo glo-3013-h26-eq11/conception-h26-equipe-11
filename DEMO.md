@@ -25,12 +25,12 @@
 - Arrêter le rover
 
 ### Partie 3
-- Placer le rover en face du A1
+- Placer le rover en face du A2 (À VÉRIFIER SELON LA LOGIQUE)
 - Démarrer le rover -> il devrait faire son tour **à gauche**
 - Arrêter le rover
 
 ### Partie 4
-- Placer le rover en face du A4
+- Placer le rover en face du A4 (À VÉRIFIER SELON LA LOGIQUE)
 - Démarrer le rover -> il devrait faire un tour **tout droit**
 - Arrêter le rover
 
