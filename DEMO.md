@@ -15,6 +15,7 @@
 - Loader les csv puis téléchargez
 - Démarrer le rover
 - Montrer une séquence complète : load -> deposit
+- Faire une deuxième séquence
 - Arrêter le rover
 
 ### Partie 2
