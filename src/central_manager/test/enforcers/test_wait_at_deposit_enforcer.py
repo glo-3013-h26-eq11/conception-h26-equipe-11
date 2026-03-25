@@ -33,6 +33,10 @@ def test_given_merchandise_unloaded_when_update_then_stop_timer_counts(enforcer)
     merchandise_unloaded.data = MerchandiseFlag.UNLOADED.value
     enforcer.merchandise_callback(merchandise_unloaded)
 
+    # Wait for stability
+    time.sleep(1.1)
+    enforcer.merchandise_callback(merchandise_unloaded)
+
     for _ in range(5):
         enforcer.update_with_real_speed(cmd_input)
         time.sleep(0.1)
@@ -48,19 +52,24 @@ def test_given_merchandise_unloaded_when_wait_to_full_stop_then_publishes_deposi
     merchandise_unloaded.data = MerchandiseFlag.UNLOADED.value
     enforcer.merchandise_callback(merchandise_unloaded)
 
-    increments = int(STOP_AFTER_DEPOSIT_DURATION / 0.1 + 1)
-    for _ in range(increments):
-        enforcer.update_with_real_speed(cmd_input)
-        time.sleep(0.1)
+    # With stability check, need to wait 1 second
+    time.sleep(1.1)
+    enforcer.merchandise_callback(merchandise_unloaded)
+
     enforcer.enforce_cmd(cmd_input)
 
     enforcer.deposit_over_publisher.publish.assert_called()
 
 
-def test_given_merchandise_still_loaded_when_enforce_then_publisher_never_called(
+def test_given_merchandise_still_loaded_when_enforce_then_publisher_still_called_after_timeout(
     enforcer,
 ):
     cmd_input = Twist()
+
+    # Send LOADED - should not trigger
+    merchandise_loaded = Bool()
+    merchandise_loaded.data = MerchandiseFlag.LOADED.value
+    enforcer.merchandise_callback(merchandise_loaded)
 
     for _ in range(5):
         enforcer.enforce_cmd(cmd_input)
@@ -71,6 +80,11 @@ def test_given_merchandise_still_loaded_when_enforce_then_publisher_never_called
 
 def test_given_merchandise_still_loaded_when_update_then_stop_timer_is_zero(enforcer):
     cmd_input = Twist()
+
+    # Send LOADED - timer should not start
+    merchandise_loaded = Bool()
+    merchandise_loaded.data = MerchandiseFlag.LOADED.value
+    enforcer.merchandise_callback(merchandise_loaded)
 
     for _ in range(5):
         enforcer.update_with_real_speed(cmd_input)

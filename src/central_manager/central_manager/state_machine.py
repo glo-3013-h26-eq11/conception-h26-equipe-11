@@ -37,42 +37,46 @@ class StateMachineRover:
     def run(self, blackboard):
         outcome = self.sm(blackboard=blackboard)
 
+        if outcome == "back_to_init":
+            self.node.get_logger().info("Resetting to initial state due to back_to_init")
+            return
+
         self.node.get_logger().info(f"FSM finished with outcome: {outcome}")
 
     def create_states(self, node):
         return {
             "INITIAL": InitialState(node),
-            "WALL_FOLLOWING_POSITIONING": WallFollowingState(node),
+            "WALL_FOLLOWING": WallFollowingState(node),
             "AT_INTERSECTION_TO_LOAD": AtIntersectionToLoadState(node),
             "TURNING_LEFT_TO_LOAD": TurningLeftState(node),
             "TURNING_FORWARD_TO_LOAD": TurningForwardState(node),
-            "WALL_FOLLOWING_TO_LOAD": WallFollowingState(node),
             "AT_LOAD_ZONE_TO_LOAD": AtLoadZoneToLoad(node),
             "AT_INTERSECTION_TO_DEPOSIT": AtIntersectionToDepositState(node),
             "TURNING_LEFT_TO_DEPOSIT": TurningLeftState(node),
             "TURNING_FORWARD_TO_DEPOSIT": TurningForwardState(node),
-            "WALL_FOLLOWING_TO_DEPOSIT": WallFollowingState(node),
             "AT_DEPOSIT_ZONE_TO_DEPOSIT": AtDepositZoneToDeposit(node),
         }
 
     def create_state_machine(self):
-        sm = StateMachine(outcomes=["mission_complete", "error"])
+        sm = StateMachine(outcomes=["mission_complete", "error", "back_to_init"])
 
         # Initial state
         sm.add_state(
             "INITIAL",
             self.states["INITIAL"],
             transitions={
-                "system_ready": "WALL_FOLLOWING_POSITIONING",
+                "system_ready": "WALL_FOLLOWING",
+                "back_to_init": "INITIAL",
             },
         )
 
-        # Positioning state
+        # Wall_following state
         sm.add_state(
-            "WALL_FOLLOWING_POSITIONING",
-            self.states["WALL_FOLLOWING_POSITIONING"],
+            "WALL_FOLLOWING",
+            self.states["WALL_FOLLOWING"],
             transitions={
-                "current_node": "AT_INTERSECTION_TO_LOAD",
+                "current_node_load": "AT_INTERSECTION_TO_LOAD",
+                "current_node_deposit": "AT_INTERSECTION_TO_DEPOSIT",
                 "back_to_init": "INITIAL",
             },
         )
@@ -84,7 +88,7 @@ class StateMachineRover:
             transitions={
                 "left_turn": "TURNING_LEFT_TO_LOAD",
                 "forward_turn": "TURNING_FORWARD_TO_LOAD",
-                "right_turn": "WALL_FOLLOWING_TO_LOAD",
+                "right_turn": "WALL_FOLLOWING",
                 "wait_load_zone": "AT_LOAD_ZONE_TO_LOAD",
                 "back_to_init": "INITIAL",
             },
@@ -94,7 +98,7 @@ class StateMachineRover:
             "TURNING_LEFT_TO_LOAD",
             self.states["TURNING_LEFT_TO_LOAD"],
             transitions={
-                "turn_over": "WALL_FOLLOWING_TO_LOAD",
+                "turn_over": "WALL_FOLLOWING",
                 "back_to_init": "INITIAL",
             },
         )
@@ -103,16 +107,7 @@ class StateMachineRover:
             "TURNING_FORWARD_TO_LOAD",
             self.states["TURNING_FORWARD_TO_LOAD"],
             transitions={
-                "turn_over": "WALL_FOLLOWING_TO_LOAD",
-                "back_to_init": "INITIAL",
-            },
-        )
-
-        sm.add_state(
-            "WALL_FOLLOWING_TO_LOAD",
-            self.states["WALL_FOLLOWING_TO_LOAD"],
-            transitions={
-                "current_node": "AT_INTERSECTION_TO_LOAD",
+                "turn_over": "WALL_FOLLOWING",
                 "back_to_init": "INITIAL",
             },
         )
@@ -121,7 +116,7 @@ class StateMachineRover:
             "AT_LOAD_ZONE_TO_LOAD",
             self.states["AT_LOAD_ZONE_TO_LOAD"],
             transitions={
-                "load_over": "AT_INTERSECTION_TO_DEPOSIT",
+                "load_over": "WALL_FOLLOWING",
                 "back_to_init": "INITIAL",
             },
         )
@@ -133,7 +128,7 @@ class StateMachineRover:
             transitions={
                 "left_turn": "TURNING_LEFT_TO_DEPOSIT",
                 "forward_turn": "TURNING_FORWARD_TO_DEPOSIT",
-                "right_turn": "WALL_FOLLOWING_TO_DEPOSIT",
+                "right_turn": "WALL_FOLLOWING",
                 "wait_deposit_zone": "AT_DEPOSIT_ZONE_TO_DEPOSIT",
                 "back_to_init": "INITIAL",
             },
@@ -143,7 +138,7 @@ class StateMachineRover:
             "TURNING_LEFT_TO_DEPOSIT",
             self.states["TURNING_LEFT_TO_DEPOSIT"],
             transitions={
-                "turn_over": "WALL_FOLLOWING_TO_DEPOSIT",
+                "turn_over": "WALL_FOLLOWING",
                 "back_to_init": "INITIAL",
             },
         )
@@ -152,16 +147,7 @@ class StateMachineRover:
             "TURNING_FORWARD_TO_DEPOSIT",
             self.states["TURNING_FORWARD_TO_DEPOSIT"],
             transitions={
-                "turn_over": "WALL_FOLLOWING_TO_DEPOSIT",
-                "back_to_init": "INITIAL",
-            },
-        )
-
-        sm.add_state(
-            "WALL_FOLLOWING_TO_DEPOSIT",
-            self.states["WALL_FOLLOWING_TO_DEPOSIT"],
-            transitions={
-                "current_node": "AT_INTERSECTION_TO_DEPOSIT",
+                "turn_over": "WALL_FOLLOWING",
                 "back_to_init": "INITIAL",
             },
         )
@@ -170,7 +156,7 @@ class StateMachineRover:
             "AT_DEPOSIT_ZONE_TO_DEPOSIT",
             self.states["AT_DEPOSIT_ZONE_TO_DEPOSIT"],
             transitions={
-                "deposit_over": "AT_INTERSECTION_TO_LOAD",
+                "deposit_over": "WALL_FOLLOWING",
                 "back_to_init": "INITIAL",
             },
         )

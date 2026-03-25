@@ -86,3 +86,34 @@ def test_given_enforcer_in_cooldown_when_cooldown_elapsed_then_state_is_idle(enf
     enforcer.enforce_cmd(cmd)
 
     assert enforcer._state == _State.IDLE
+
+
+def test_given_processed_node_then_is_done_but_doesnt_brake(enforcer):
+    cmd = make_cmd()
+
+    enforcer._last_processed_node_id = "X"
+    enforcer.set_current_node_id("X")
+
+    assert enforcer._is_current_node_processed
+    assert enforcer.is_done()
+
+    enforcer.update_distance(0.5)
+    out = enforcer.enforce_cmd(cmd)
+
+    assert out.linear.x == cmd.linear.x
+
+
+def test_node_change_resets_state_before_new_stop_candidate(enforcer):
+    cmd = make_cmd()
+
+    enforcer._last_processed_node_id = "A"
+    enforcer.set_current_node_id("A")
+    assert enforcer.is_done()
+
+    enforcer.set_current_node_id("B")
+    assert not enforcer.is_done()
+
+    enforcer.update_distance(0.9)
+    enforcer.enforce_cmd(cmd)
+    assert enforcer._state == _State.BRAKING
+

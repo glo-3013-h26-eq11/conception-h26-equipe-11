@@ -3,40 +3,42 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Bool
 from rclpy.node import Publisher
 from proximity_sensor.merchandise_flag import MerchandiseFlag
+import time
 
 STOP_AFTER_DEPOSIT_DURATION = 1.5  # s
+STABLE_UNLOAD_DURATION = 1.0
 
 
 class WaitAtDepositEnforcer(Enforcer):
     def __init__(self, deposit_over_publisher: Publisher):
         super().__init__()
-
-        self.timer = 0
-
+        self.timer = 0.0
         self.merchandise_unloaded = False
-
         self.deposit_over_publisher = deposit_over_publisher
+        self._published = False
+        self._unloaded_time = None
+        self._logger = None
 
-    def update_with_real_speed(self, real_speed_cmd: Twist):
-
+    def update_with_real_speed(self, real_speed_cmd: Twist) -> None:
         if not self.merchandise_unloaded:
             return
-
         dt = self._compute_delta_time()
-
         self.timer += dt
 
-    def enforce_cmd(self, cmd) -> Twist:
-        if self.is_stop_after_deposit_over():
+    def enforce_cmd(self, cmd: Twist) -> Twist:
+        if self._unloaded_time is not None and time.time() - self._unloaded_time > STABLE_UNLOAD_DURATION and not self._published:
             self.deposit_over_publisher.publish(String())
-
-        return Twist()
-
-    def is_stop_after_deposit_over(self):
-        return self.timer >= STOP_AFTER_DEPOSIT_DURATION
-
-    def merchandise_callback(self, msg: Bool):
-        transition = MerchandiseFlag(msg.data)
-
-        if transition == MerchandiseFlag.UNLOADED:
+            self._published = True
             self.merchandise_unloaded = True
+        enforced = Twist()
+        if self._logger:
+            self._logger.info(f"WaitAtDepositEnforcer: enforced cmd linear={enforced.linear.x:.2f}, angular={enforced.angular.z:.2f}")
+        return enforced
+
+    def merchandise_callback(self, msg: Bool) -> None:
+        transition = MerchandiseFlag(msg.data)
+        if transition == MerchandiseFlag.UNLOADED:
+            if self._unloaded_time is None:
+                self._unloaded_time = time.time()
+        elif transition == MerchandiseFlag.LOADED:
+            self._unloaded_time = None

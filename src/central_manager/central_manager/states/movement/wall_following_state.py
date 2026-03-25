@@ -1,79 +1,49 @@
-from yasmin import State
-import rclpy
-from std_msgs.msg import String, Float32, Bool
-import json
+from central_manager.states.base_state import BaseState
+from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
-import time
 
 
-COOLDOWN_TIME = 2.0
-
-class WallFollowingState(State):
+class WallFollowingState(BaseState):
     def __init__(self, node):
-        super().__init__(outcomes=["current_node", "back_to_init"])
-
-        self.node = node
-
-        node.create_subscription(
-            String, "current_node", self.at_intersection_callback, 10
-        )
-
-        node.create_subscription(
-            Float32, "distance_to_car", self.distance_to_car_callback, 10
-        )
-
-        self.car_follower_enforcer: CarFollowEnforcer = None
-
-        node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
-
-        self.stop_sign_enforcer: StopSignEnforcer = None
-
-        self.outcome = None
-
-        self.cooldown = None
-
-    def distance_to_car_callback(self, msg: Float32):
-        if self.car_follower_enforcer:
-            self.car_follower_enforcer.update_distance(msg.data)
-
-    def at_intersection_callback(self, msg: String):
-        data = json.loads(msg.data)
-        distance = float(data.get("distance"))
-        
-        if self.stop_sign_enforcer:
-            self.stop_sign_enforcer.update_distance(distance)
-
-        if self.stop_sign_enforcer:
-            if self.stop_sign_enforcer.is_done() and self.is_cooldown_over():
-                self.update_cooldown()
-                self.outcome = "current_node"
-
-    def rover_stop_callback(self, msg: Bool):
-        if not msg.data:
-            self.outcome = "back_to_init"
-
-    def update_cooldown(self):
-        self.cooldown = time.monotonic()
-
-    def is_cooldown_over(self):
-        return (
-            self.cooldown is None
-            or time.monotonic() - self.cooldown > COOLDOWN_TIME
-        )
+        super().__init__(node, outcomes=["current_node_load", "current_node_deposit"])
 
     def execute(self, blackboard):
-        self.outcome = None
-
         self.node.get_logger().info("WALL_FOLLOWING_STATE state")
 
-        self.car_follower_enforcer = CarFollowEnforcer()
+        stop_sign_enforcer = StopSignEnforcer()
+        stop_sign_enforcer._logger = self.node.get_logger()
 
-        self.stop_sign_enforcer = StopSignEnforcer()
+        # Preserve stop history across runs in WALL_FOLLOWING
+        current_node_id = self._bb_get(blackboard, "current_node_id", None)
+        last_stop_node_id = self._bb_get(blackboard, "_last_stop_node_id", None)
+        stop_sign_enforcer._last_processed_node_id = last_stop_node_id
+        stop_sign_enforcer.set_current_node_id(current_node_id)
 
-        blackboard["enforcers"] = [self.stop_sign_enforcer, self.car_follower_enforcer]
+        car_follow_enforcer = CarFollowEnforcer()
+        car_follow_enforcer._logger = self.node.get_logger()
 
-        while self.outcome is None:
-            rclpy.spin_once(self.node, timeout_sec=0.1)
+        blackboard["enforcers"] = [stop_sign_enforcer, car_follow_enforcer]
+        blackboard["_wf_stop_enforcer"] = stop_sign_enforcer
 
-        return self.outcome
+        return self.spin_until_done(blackboard)
+
+    def get_outcome(self, blackboard):
+        stop_enforcer: StopSignEnforcer = self._bb_get(blackboard, "_wf_stop_enforcer")
+        current_node_id = self._bb_get(blackboard, "current_node_id")
+        last_node = self._bb_get(blackboard, "_wf_last_node")
+
+        if stop_enforcer and stop_enforcer.is_done() and current_node_id != last_node:
+            blackboard["_wf_last_node"] = current_node_id
+            blackboard["_last_stop_node_id"] = current_node_id
+
+            immobile = ImmobileEnforcer()
+            immobile._logger = self.node.get_logger()
+            blackboard["enforcers"] = [immobile]
+
+            route_mode = self._bb_get(blackboard, "route_mode", "load")
+            if route_mode == "deposit":
+                return "current_node_deposit"
+            return "current_node_load"
+
+        return None

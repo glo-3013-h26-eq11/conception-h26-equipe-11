@@ -1,7 +1,6 @@
 import time
 from typing import Optional
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float32
 from central_manager.enforcers.base_enforcer import Enforcer
 
 VEHICLE_STALE_SEC: float = 0.5
@@ -9,6 +8,7 @@ VEHICLE_STALE_SEC: float = 0.5
 
 class CarFollowEnforcer(Enforcer):
     def __init__(self):
+        super().__init__()  # was missing
         self.min_follow_distance: float = 0.25
         self._follow_distance: Optional[float] = None
         self._last_update: float = 0.0
@@ -18,13 +18,15 @@ class CarFollowEnforcer(Enforcer):
         self._follow_distance = distance
         self._last_update = time.time()
 
-    def update_with_real_speed(self, real_cmd):
+    def update_with_real_speed(self, real_cmd: Twist) -> None:
         pass
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         stale = (time.time() - self._last_update) > VEHICLE_STALE_SEC
         d = None if stale else self._follow_distance
         if d is None:
+            if self._logger:
+                self._logger.info(f"CarFollowEnforcer: enforced cmd linear={cmd.linear.x:.2f}, angular={cmd.angular.z:.2f}")
             return cmd
         factor = (d - self.min_follow_distance) / self.min_follow_distance
         factor = max(0.0, min(1.0, factor))
@@ -33,4 +35,6 @@ class CarFollowEnforcer(Enforcer):
         out = Twist()
         out.linear.x = cmd.linear.x * factor
         out.angular.z = cmd.angular.z * factor
+        if self._logger:
+            self._logger.info(f"CarFollowEnforcer: enforced cmd linear={out.linear.x:.2f}, angular={out.angular.z:.2f}")
         return out
