@@ -23,6 +23,7 @@ def blackboard_mock():
         (NodeAction.FORWARD_TURN, "forward_turn"),
         (NodeAction.RIGHT_TURN, "right_turn"),
         (NodeAction.WAIT_LOAD_ZONE, "wait_load_zone"),
+        (NodeAction.WALL_FOLLOW, "right_turn"),
     ],
 )
 def test_at_intersection_to_load_state_outcomes(

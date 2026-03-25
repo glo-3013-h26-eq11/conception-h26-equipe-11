@@ -4,7 +4,10 @@ import pytest
 import rclpy
 from std_msgs.msg import String, Float32, Bool
 
-from navigation.current_node_from_aruco_node import CurrentNodeFromArucoNode, SAFE_DISTANCE_TO_CAR
+from navigation.current_node_from_aruco_node import (
+    CurrentNodeFromArucoNode,
+    SAFE_DISTANCE_TO_CAR,
+)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -38,6 +41,7 @@ class FloatSubscriber:
     def cb(self, msg: Float32):
         self.received.append(msg.data)
 
+
 class BoolSubscriber:
     def __init__(self, node, topic_name):
         self.sub = node.create_subscription(Bool, topic_name, self.cb, 10)
@@ -45,6 +49,7 @@ class BoolSubscriber:
 
     def cb(self, msg: Bool):
         self.received.append(msg.data)
+
 
 class StringPublisher:
     def __init__(self, node, topic_name):
@@ -166,9 +171,13 @@ def test_when_detect_aruco_4x4_bigger_45_deg_no_publish(node):
 
     assert len(subscriber.received) == 0
 
-    
-def test_when_detect_aruco_4x4_lesser_45_deg_less_safe_distance_publish_dangerous_distance(node):
-    payload = {"markers_4x4": [{"depth": SAFE_DISTANCE_TO_CAR - 0.1, "angle_x_deg": 7.0}]}
+
+def test_when_detect_aruco_4x4_lesser_45_deg_less_safe_distance_publish_dangerous_distance(
+    node,
+):
+    payload = {
+        "markers_4x4": [{"depth": SAFE_DISTANCE_TO_CAR - 0.1, "angle_x_deg": 7.0}]
+    }
 
     subscriber = BoolSubscriber(node, "/car_follower/dangerous_distance")
 
@@ -184,9 +193,14 @@ def test_when_detect_aruco_4x4_lesser_45_deg_less_safe_distance_publish_dangerou
 
     assert len(subscriber.received) == 1
     assert subscriber.received[0] == True
-    
-def test_when_detect_aruco_4x4_lesser_45_deg_less_safe_distance_publish_dangerous_distance_than_safe_distance(node):
-    payload = {"markers_4x4": [{"depth": SAFE_DISTANCE_TO_CAR - 0.1, "angle_x_deg": 7.0}]}
+
+
+def test_when_detect_aruco_4x4_lesser_45_deg_less_safe_distance_publish_dangerous_distance_than_safe_distance(
+    node,
+):
+    payload = {
+        "markers_4x4": [{"depth": SAFE_DISTANCE_TO_CAR - 0.1, "angle_x_deg": 7.0}]
+    }
 
     subscriber = BoolSubscriber(node, "/car_follower/dangerous_distance")
 

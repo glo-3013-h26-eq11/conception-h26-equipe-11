@@ -3,7 +3,6 @@ from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.states.node_action_enum import NodeAction
 import rclpy
 from navigation_interfaces.srv import GetNodeAction
-from std_msgs.msg import Bool
 
 
 class AtIntersectionToDepositState(State):
@@ -20,15 +19,9 @@ class AtIntersectionToDepositState(State):
 
         self.node = node
 
-        node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
-
         self.client = self.node.create_client(GetNodeAction, "get_node_action_deposit")
 
         self.outcome = None
-
-    def rover_stop_callback(self, msg: Bool):
-        if not msg.data:
-            self.outcome = "back_to_init"
 
     def execute(self, blackboard):
         self.outcome = None

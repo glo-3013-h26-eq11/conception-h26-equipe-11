@@ -4,7 +4,6 @@ from central_manager.states.node_action_enum import NodeAction
 from rclpy.node import Node
 from navigation_interfaces.srv import GetNodeAction
 import rclpy
-from std_msgs.msg import Bool
 
 
 class AtIntersectionToLoadState(State):
@@ -21,15 +20,9 @@ class AtIntersectionToLoadState(State):
 
         self.node = node
 
-        node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
-
         self.client = self.node.create_client(GetNodeAction, "get_node_action_load")
 
         self.outcome = None
-
-    def rover_stop_callback(self, msg: Bool):
-        if not msg.data:
-            self.outcome = "back_to_init"
 
     def execute(self, blackboard):
         self.outcome = None

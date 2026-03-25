@@ -23,6 +23,7 @@ def blackboard_mock():
         (NodeAction.FORWARD_TURN, "forward_turn"),
         (NodeAction.RIGHT_TURN, "right_turn"),
         (NodeAction.WAIT_DEPOSIT_ZONE, "wait_deposit_zone"),
+        (NodeAction.WALL_FOLLOW, "right_turn"),
     ],
 )
 def test_at_intersection_to_deposit_state_outcomes(
