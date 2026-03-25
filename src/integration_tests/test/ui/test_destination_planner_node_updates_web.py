@@ -38,8 +38,7 @@ ROS_NODE_CMD_TARGET = (
 )
 
 DESTINATION_LABEL = "Destination"
-CURRENT_NODE = "ZD1"
-GOAL_NODE = "ZC1"
+CURRENT_NODE = 5  # ZD1
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -54,18 +53,12 @@ class TopicPublisher(Node):
         super().__init__("topic_publisher")
 
         self.publisher_current_node = self.create_publisher(String, "current_node", 10)
-        self.publisher_goal_node = self.create_publisher(String, "goal_node", 10)
 
     def publish_current_node(self):
         msg = String()
-        data = {"id": CURRENT_NODE}
+        data = {"tag": CURRENT_NODE}
         msg.data = json.dumps(data)
         self.publisher_current_node.publish(msg)
-
-    def publish_goal_node(self):
-        msg = String()
-        msg.data = GOAL_NODE
-        self.publisher_goal_node.publish(msg)
 
 
 def test_route_planner_node_updates_web():
@@ -94,8 +87,6 @@ def test_route_planner_node_updates_web():
         page.get_by_role("button", name=UPLOAD_BUTTON).click()
 
         page.wait_for_timeout(3000)
-
-        publisher_node.publish_goal_node()
 
         publisher_node.publish_current_node()
 

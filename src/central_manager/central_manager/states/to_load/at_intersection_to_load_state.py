@@ -62,6 +62,7 @@ class AtIntersectionToLoadState(BaseState):
     def _get_current_node_action(self) -> NodeAction:
         if not self.client.wait_for_service(timeout_sec=5.0):
             self.node.get_logger().error("Service 'get_node_action_load' not available")
+            self.node.get_logger().error("Service 'get_node_action_load' not available")
             raise RuntimeError("Service 'get_node_action_load' not available")
 
         request = GetNodeAction.Request()

@@ -58,20 +58,14 @@ class FakeFuture:
         return r
 
 
-@patch("rclpy.spin_until_future_complete", return_value=None)
 def test_left_turn_transition(blackboard_mock):
-    fake_node = MagicMock()
+    state = AtIntersectionToDepositState(blackboard_mock["node"])
 
-    fake_client = MagicMock()
-    fake_client.wait_for_service.return_value = True
-    fake_client.call_async.return_value = FakeFuture(NodeAction.LEFT_TURN.value)
-
-    fake_node.create_client.return_value = fake_client
-
-    state = AtIntersectionToDepositState(fake_node)
-
-    blackboard = {"node": fake_node}
-
-    outcome = state.execute(blackboard)
+    with patch.object(
+        state,
+        "get_current_node_action",
+        return_value=NodeAction.LEFT_TURN,
+    ):
+        outcome = state.execute(blackboard_mock)
 
     assert outcome == "left_turn"

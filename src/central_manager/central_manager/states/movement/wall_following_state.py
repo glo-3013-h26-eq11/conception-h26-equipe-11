@@ -14,7 +14,6 @@ class WallFollowingState(BaseState):
         stop_sign_enforcer = StopSignEnforcer()
         stop_sign_enforcer._logger = self.node.get_logger()
 
-        # Preserve stop history across runs in WALL_FOLLOWING
         current_node_id = self._bb_get(blackboard, "current_node_id", None)
         last_stop_node_id = self._bb_get(blackboard, "_last_stop_node_id", None)
         stop_sign_enforcer._last_processed_node_id = last_stop_node_id

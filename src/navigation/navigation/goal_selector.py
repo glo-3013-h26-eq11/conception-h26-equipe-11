@@ -6,7 +6,7 @@ from navigation.route_selector import RouteSelector
 
 class GoalMode(str, Enum):
     GO_LOAD = "GO_LOAD"
-    GO_DROP = "GO_DROP"
+    GO_DEPOSIT = "GO_DEPOSIT"
 
 
 class GoalSelector:
@@ -16,7 +16,7 @@ class GoalSelector:
 
         self._goal_filters: Dict[GoalMode, Callable[[List[str]], List[str]]] = {
             GoalMode.GO_LOAD: lambda goals: [g for g in goals if g.startswith("ZC")],
-            GoalMode.GO_DROP: lambda goals: [g for g in goals if g.startswith("ZD")],
+            GoalMode.GO_DEPOSIT: lambda goals: [g for g in goals if g.startswith("ZD")],
         }
 
     def select_goal(
