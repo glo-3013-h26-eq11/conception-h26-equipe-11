@@ -16,7 +16,6 @@ class EnforcerManagerNode(HealthPingingNode):
     def __init__(self):
         super().__init__("enforcer_manager_node", "central_manager")
 
-        # Velocity I/O
         self.create_subscription(Twist, "/cmd_vel", self.cmd_callback, 10)
         self.pub_cmd_vel_safe = self.create_publisher(Twist, "/cmd_vel_safe", 10)
 
@@ -25,7 +24,7 @@ class EnforcerManagerNode(HealthPingingNode):
         self.deposit_over_publisher = self.create_publisher(String, "deposit_over", 10)
         self.turn_over_publisher = self.create_publisher(String, "turn_over", 10)
 
-        # All topic subscriptions live here — one place, no duplication
+        # All topic subscriptions
         self.create_subscription(String, "current_node", self._current_node_callback, 10)
         self.create_subscription(Float32, "distance_to_car", self._distance_to_car_callback, 10)
         self.create_subscription(Bool, "rover/start", self._rover_start_callback, 10)
@@ -41,7 +40,7 @@ class EnforcerManagerNode(HealthPingingNode):
         self.blackboard["current_node_id"] = None
         self.blackboard["current_node_distance"] = None
         self.blackboard["rover_running"] = False
-        self.blackboard["route_mode"] = "load"  # load / deposit
+        self.blackboard["route_mode"] = "load"
         self.blackboard["turn_over"] = False
         self.blackboard["load_over"] = False
         self.blackboard["deposit_over"] = False
@@ -52,7 +51,7 @@ class EnforcerManagerNode(HealthPingingNode):
         self._sm_thread = threading.Thread(target=self._run_sm, daemon=True)
         self._sm_thread.start()
 
-    # ---------- Subscription callbacks (single source of truth) ----------
+    # ---------- Subscription callbacks ----------
 
     def _current_node_callback(self, msg: String) -> None:
         try:

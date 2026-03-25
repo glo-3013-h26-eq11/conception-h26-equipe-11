@@ -6,8 +6,8 @@ from std_msgs.msg import String, Float32, Bool
 from web_interface.system_health_node import HealthPingingNode
 
 
-SAFE_DISTANCE_TO_CAR = 0.25 # m
-CAR_DETECTION_REFRESH = 0.5
+SAFE_DISTANCE_TO_CAR = 0.35
+CAR_DETECTION_REFRESH = 0.25
 
 class CurrentNodeFromArucoNode(HealthPingingNode):
     def __init__(self):
@@ -51,7 +51,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             z_fwd = float(marker.get("z_forward", 0))
             marker_id = marker.get("tag")
 
-            if d <= 1.0 and angle <= 15.0 and z_fwd >= 0.15:
+            if d <= 1.0 and angle <= 12.5 and z_fwd >= 0.15:
 
                 if closest_stop_dist is None or d < closest_stop_dist:
 
@@ -74,18 +74,18 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             d = float(marker.get("depth", 9999))
             angle = float(marker.get("angle_x_deg", 0))
 
-            if angle <= 45.0:
-                if closest_vehicle_dist is None or d < closest_vehicle_dist:
+            if closest_vehicle_dist is None or d < closest_vehicle_dist:
 
-                    closest_vehicle_dist = d
+                closest_vehicle_dist = d
 
-                    distance = Float32()
-                    distance.data = closest_vehicle_dist
+                distance = Float32()
+                distance.data = closest_vehicle_dist
 
-                    self._following_car_pub.publish(distance)
-                    
-                    if d <= SAFE_DISTANCE_TO_CAR:
-                        self.is_car_at_dangerous_distance = True
+                self._following_car_pub.publish(distance)
+                self.get_logger().info(f"Vehicle at {closest_vehicle_dist:.2f}m")
+                
+                if d <= SAFE_DISTANCE_TO_CAR:
+                    self.is_car_at_dangerous_distance = True
 
     def _publish_distance(self):
         out = Bool()
