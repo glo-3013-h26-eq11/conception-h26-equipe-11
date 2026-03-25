@@ -6,8 +6,12 @@ from lidar.wall_follower import (
     WallFollowNode,
     angle_to_distance,
     is_valid_lidar_scan,
+    filter_intersections,
     SPEED,
     WHEELBASE,
+    AFTER_CORNER_THRESHOLD, 
+    THETA_DEG,
+    MAX_STEERING
 )
 
 
@@ -164,3 +168,45 @@ def test_when_invalid_wall_measurements_then_repeats_last_command(
     assert len(commands) == 1
     assert commands[0][0] == pytest.approx(SPEED)
     assert commands[0][1] == pytest.approx(0.3)
+
+def test_when_big_b_then_steering_right_max():
+    b = AFTER_CORNER_THRESHOLD + 0.1
+    a = 0.5
+    
+    initial_speed = 0.2
+    initial_steering = 0.0
+    theta_rad = math.radians(THETA_DEG)
+    
+    result_speed, result_steering = filter_intersections(a, b, theta_rad, initial_speed, initial_steering)
+    
+    assert result_speed == initial_speed
+    assert result_steering == -MAX_STEERING
+    
+def test_when_small_b_big_a_then_steering_filtered():
+    b = 0.2
+    a = 0.5
+    theta_rad = math.radians(THETA_DEG)
+    
+    initial_speed = 0.2
+    initial_steering = 5.0
+    
+    result_speed, result_steering = filter_intersections(a, b, theta_rad, initial_speed, initial_steering)
+    
+    assert result_speed == initial_speed
+    assert result_steering == 0.0
+
+def test_when_b_a_then_nothing_filtered():
+    b = 0.15
+    a = 0.12
+    theta_rad = math.radians(THETA_DEG)
+    
+    initial_speed = 0.2
+    initial_steering = 5.0
+    
+    result_speed, result_steering = filter_intersections(a, b, theta_rad, initial_speed, initial_steering)
+    
+    assert result_speed == initial_speed
+    assert result_steering == initial_steering
+
+
+

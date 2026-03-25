@@ -9,17 +9,15 @@ THETA_DEG = 60
 LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 20
-MIN_FRONT_DISTANCE = 0.375  # m
 KP = 1.5
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 0.9  # radians
-SPEED = 0.6  # m/s
-LIDAR_OFFSET = math.pi / 2
+SPEED = 0.2  # m/s
 WHEELBASE = 0.1  # m
-CORNER_THRESHOLD = 0.425  # m
-RIGHT_TURN_DURATION = 1.2
-COAST_DURATION = 0.4
+
+OBTUSE_ANGLE_THRESHOLD = 95 # degrees
+AFTER_CORNER_THRESHOLD = 0.5 # m
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -75,28 +73,18 @@ class WallFollowNode(HealthPingingNode):
 
         error = DESIRED_DISTANCE_FROM_WALL - D_tp1
 
+        error_integral, error_diff = self.update_pid_and_get_error_integral_diff(error, self.last_steering)
+
+        steering = error * KP + error_integral * KI + error_diff * KD
+        steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
+
+        speed, steering = self.filter_intersections(a, b, theta, speed, steering)
+
+        self.send_control_command(speed, steering)
+
+
+    def update_pid_and_get_error_integral_diff(self, error, steering):
         now = self.get_clock().now().nanoseconds
-
-        # self.get_logger().info(
-        #     f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
-        # )
-        if self._corner_detected:
-            elapsed = (now - self._corner_time) * 1e-9
-
-            if elapsed < RIGHT_TURN_DURATION:
-                self.send_control_command(0.2, -MAX_STEERING)
-                return
-            else:
-                self._corner_detected = False
-                self.last_errors_window = np.array([])
-                self.last_time = None
-
-        if not self._corner_detected:
-            if c > (CORNER_THRESHOLD):
-                self._corner_detected = True
-                self._corner_time = now
-                self.get_logger().info("Right turn triggered!")
-                return
 
         if self.last_time is None or len(self.last_errors_window) == 0:
             error_diff = 0.0
@@ -108,9 +96,6 @@ class WallFollowNode(HealthPingingNode):
             error_diff = max(min(error_diff, 5.0), -5.0)
             error_integral = np.sum(self.last_errors_window) * dt
 
-        steering = error * KP + error_integral * KI + error_diff * KD
-        steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
-
         self.last_steering = steering
         self.last_time = now
 
@@ -119,30 +104,8 @@ class WallFollowNode(HealthPingingNode):
             self.last_errors_window[-1] = error
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
-
-        front_distance = angle_to_distance(
-            LIDAR_OFFSET, lidar_range_array, angle_min, angle_increment
-        )
-
-        if (
-            is_valid_lidar_scan(a)
-            and a < CORNER_THRESHOLD - 0.125
-            and front_distance <= MIN_FRONT_DISTANCE
-        ):
-            bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
-            corner_steering = MAX_STEERING
-            speed = max(SPEED * (1 - bias_strength), 0.25)
-            steering = corner_steering
-
-            self.get_logger().info(
-                f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
-            )
-
-        # self.get_logger().info(
-        #     f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
-        # )
-
-        self.send_control_command(speed, steering)
+            
+        return error_integral, error_diff
 
     def send_control_command(self, speed: float, steering: float):
 
@@ -152,7 +115,25 @@ class WallFollowNode(HealthPingingNode):
         twist.linear.x = speed
         twist.angular.z = angular_z
         self.drive_pub.publish(twist)
+        
+def filter_intersections(a, b, theta, initial_speed, initial_steering):
+    c = math.sqrt( a**2 + b**2 - (2 * a * b * math.cos(theta)))
+    
+    print(f"c value : {c}")
+    
+    A_rad = math.acos( (b**2 + c**2 - a**2) / (2 * b * c) )
+    
+    A = math.degrees(A_rad)
+    
+    print(f"A value : {A}")
+    
+    if b > AFTER_CORNER_THRESHOLD:
+        return SPEED, -MAX_STEERING
+        
+    if A > OBTUSE_ANGLE_THRESHOLD:
+        return SPEED, 0
 
+    return initial_speed, initial_steering
 
 def main(args=None):
     rclpy.init(args=args)
