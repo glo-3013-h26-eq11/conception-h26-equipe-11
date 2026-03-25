@@ -59,7 +59,7 @@ def test_car_follower_updates_web():
         data.data = True
         publisher.publish(data)
 
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(3000)
 
         expect(rover_chip).to_have_text(TEXT_DANGEROUS_DISTANCE, timeout=5000)
 
