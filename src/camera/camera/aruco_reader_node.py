@@ -93,7 +93,7 @@ class ArucoReaderNode(HealthPingingNode):
 
             if ids_4x4 is not None:
                 for i, marker_id in enumerate(ids_4x4.flatten()):
-                    depth, angle, z_fwd = self.calculate_marker_depth(
+                    depth, angle, z_fwd, tag_angle = self.calculate_marker_depth(
                         corners_4x4[i], marker_size=0.02
                     )
 
@@ -108,9 +108,13 @@ class ArucoReaderNode(HealthPingingNode):
 
             if ids_5x5 is not None:
                 for i, marker_id in enumerate(ids_5x5.flatten()):
-                    depth, angle, z_fwd = self.calculate_marker_depth(
+                    depth, angle, z_fwd, tag_angle = self.calculate_marker_depth(
                         corners_5x5[i], marker_size=0.075
                     )
+
+                    if np.abs(tag_angle >= 20.0):
+                        self.get_logger().info(f"Tag skipped : {marker_id}")
+                        continue
 
                     detections_5x5.append(
                         {
@@ -149,6 +153,7 @@ class ArucoReaderNode(HealthPingingNode):
             rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
                 [corner], marker_size, self.mtx, self.dist
             )
+            rvec = rvecs[0][0]
             tvec = tvecs[0][0]
         else:
             half = marker_size / 2.0
@@ -175,7 +180,7 @@ class ArucoReaderNode(HealthPingingNode):
         # Z: forward distance to marker. If Z is very small the rover is
         # already passing under the marker — must not trigger stop.
         z_forward = float(tvec[2])
-        return dist_xz, angle_x_deg, z_forward
+        return dist_xz, angle_x_deg, z_forward, np.degrees(rvec[2])
 
 
 def main(args=None):

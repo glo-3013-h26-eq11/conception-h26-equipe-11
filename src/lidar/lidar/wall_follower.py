@@ -6,6 +6,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
+THETA_CORNER = 20
 LOOKAHEAD = 0.8  # m
 DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 20
@@ -17,7 +18,7 @@ MAX_STEERING = 0.9  # radians
 SPEED = 0.6  # m/s
 LIDAR_OFFSET = math.pi / 2
 WHEELBASE = 0.1  # m
-CORNER_THRESHOLD = 0.425  # m
+CORNER_THRESHOLD = 0.20  # m
 RIGHT_TURN_DURATION = 1.1
 COAST_DURATION = 0.4
 
@@ -58,7 +59,7 @@ class WallFollowNode(HealthPingingNode):
         theta = np.radians(THETA_DEG)
         theta_b = 0.0
         theta_a = theta_b + theta
-        theta_c = np.radians(47)
+        theta_c = np.radians(THETA_CORNER)
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
         b = angle_to_distance(theta_b, lidar_range_array, angle_min, angle_increment)
@@ -80,23 +81,28 @@ class WallFollowNode(HealthPingingNode):
         # self.get_logger().info(
         #     f"a: {a:.3f}m, b: {b:.3f}m, alpha: {math.degrees(alpha):.1f}deg, D_t: {D_t:.3f}m"
         # )
-        if self._corner_detected:
-            elapsed = (now - self._corner_time) * 1e-9
+        # if self._corner_detected:
+        #     elapsed = (now - self._corner_time) * 1e-9
 
-            if elapsed < RIGHT_TURN_DURATION:
-                self.send_control_command(0.2, -MAX_STEERING)
-                return
-            else:
-                self._corner_detected = False
-                self.last_errors_window = np.array([])
-                self.last_time = None
+        #     if elapsed < RIGHT_TURN_DURATION:
+        #         self.send_control_command(0.3, -MAX_STEERING)
+        #         return
+        #     else:
+        #         self._corner_detected = False
+        #         self.last_errors_window = np.array([])
+        #         self.last_time = None
 
         if not self._corner_detected:
             if c > (CORNER_THRESHOLD):
                 self._corner_detected = True
                 self._corner_time = now
-                self.get_logger().info("Right turn triggered!")
-                return
+                # return
+        else:
+            if c < (CORNER_THRESHOLD):
+                self._corner_detected = False
+                self._corner_time = now
+                # return
+
 
         if self.last_time is None or len(self.last_errors_window) == 0:
             error_diff = 0.0
@@ -126,17 +132,17 @@ class WallFollowNode(HealthPingingNode):
 
         if (
             is_valid_lidar_scan(a)
-            and a < CORNER_THRESHOLD - 0.125
+            # and a < CORNER_THRESHOLD - 0.125
             and front_distance <= MIN_FRONT_DISTANCE
         ):
-            bias_strength = (CORNER_THRESHOLD - a) / CORNER_THRESHOLD
+            bias_strength = (MIN_FRONT_DISTANCE - a) / MIN_FRONT_DISTANCE
             corner_steering = MAX_STEERING
-            speed = max(SPEED * (1 - bias_strength), 0.25)
+            speed = max(SPEED * (1 - bias_strength), 0.2)
             steering = corner_steering
 
-            self.get_logger().info(
-                f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
-            )
+            # self.get_logger().info(
+            #     f"Left turn at {a:.2f}m, steering: {math.degrees(steering):.1f}deg"
+            # )
 
         # self.get_logger().info(
         #     f"error: {error:.3f}, steering: {math.degrees(steering):.1f}deg"
@@ -149,8 +155,8 @@ class WallFollowNode(HealthPingingNode):
         angular_z = speed * math.tan(steering) / WHEELBASE
 
         twist = Twist()
-        twist.linear.x = speed
-        twist.angular.z = angular_z
+        twist.linear.x = speed * (0.35 if self._corner_detected else 1.0)
+        twist.angular.z = angular_z * (1.2 if self._corner_detected else 1.0)
         self.drive_pub.publish(twist)
 
 

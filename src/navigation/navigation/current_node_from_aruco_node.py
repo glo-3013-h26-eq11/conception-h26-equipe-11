@@ -50,8 +50,9 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             angle = float(marker.get("angle_x_deg", 0))
             z_fwd = float(marker.get("z_forward", 0))
             marker_id = marker.get("tag")
+            self.get_logger().info(f"angle aruco : {angle:.2f} z_fwd : {z_fwd:.2f} depth : {d:.2f}")
 
-            if d <= 1.0 and angle <= 12.5 and z_fwd >= 0.15:
+            if d <= 1.0 and angle <= 10 and z_fwd >= 0.25:
 
                 if closest_stop_dist is None or d < closest_stop_dist:
 
