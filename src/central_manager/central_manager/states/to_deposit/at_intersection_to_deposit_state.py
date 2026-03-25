@@ -1,7 +1,6 @@
 import time
 
 from central_manager.states.base_state import BaseState
-from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.states.node_action_enum import NodeAction
 from navigation_interfaces.srv import GetNodeAction
@@ -17,28 +16,8 @@ class AtIntersectionToDepositState(BaseState):
     def execute(self, blackboard):
         self.node.get_logger().info("AT_INTERSECTION_TO_DEPOSIT state")
 
-        stop_enforcer = StopSignEnforcer()
-        stop_enforcer._logger = self.node.get_logger()
         immobile_enforcer = ImmobileEnforcer()
         immobile_enforcer._logger = self.node.get_logger()
-
-        current_node_id = self._bb_get(blackboard, "current_node_id", None)
-        last_stop_node_id = self._bb_get(blackboard, "_last_stop_node_id", None)
-        stop_enforcer._last_processed_node_id = last_stop_node_id
-        stop_enforcer.set_current_node_id(current_node_id)
-
-        # Keep immobile as final stage during stop-handling and route decision wait
-        blackboard["enforcers"] = [stop_enforcer, immobile_enforcer]
-
-        while not stop_enforcer.is_done():
-            rclpy.spin_once(self.node, timeout_sec=0.1)
-            if not self._bb_get(blackboard, "rover_running", True):
-                return "back_to_init"
-
-        if stop_enforcer._has_triggered:
-            blackboard["_last_stop_node_id"] = current_node_id
-
-        # Keep the rover immobilized while we get the node action
         blackboard["enforcers"] = [immobile_enforcer]
 
         node_action = self._get_current_node_action()

@@ -1,5 +1,7 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from central_manager.state_machine import StateMachineRover
+from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
+from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 from web_interface.system_health_node import HealthPingingNode
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String, Float32, Bool
@@ -55,19 +57,17 @@ class EnforcerManagerNode(HealthPingingNode):
     def _current_node_callback(self, msg: String) -> None:
         try:
             data = json.loads(msg.data)
-            self.blackboard["current_node_id"] = str(data.get("id"))
+            self.blackboard["current_node_id"] = str(data.get("tag"))
             self.blackboard["current_node_distance"] = float(data.get("distance", 0.0))
-
-            # Forward distance to the stop sign enforcer if one is active
             for enforcer in self._get_enforcers():
-                if hasattr(enforcer, "update_distance"):
+                if isinstance(enforcer, StopSignEnforcer):
                     enforcer.update_distance(self.blackboard["current_node_distance"])
         except (json.JSONDecodeError, TypeError, ValueError) as e:
             self.get_logger().error(f"current_node parse error: {e}")
 
     def _distance_to_car_callback(self, msg: Float32) -> None:
         for enforcer in self._get_enforcers():
-            if hasattr(enforcer, "update_distance") and enforcer.__class__.__name__ == "CarFollowEnforcer":
+            if isinstance(enforcer, CarFollowEnforcer):
                 enforcer.update_distance(msg.data)
 
     def _rover_start_callback(self, msg: Bool) -> None:
