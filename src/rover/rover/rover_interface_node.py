@@ -22,6 +22,9 @@ class RoverInterfaceNode(HealthPingingNode):
         linear_x = msg.linear.x
 
         angular_z = msg.angular.z
+        # self.get_logger().info(
+        #     f"Received cmd_vel_safe: linear_x={linear_x:.2f}, angular_z={angular_z:.2f}"
+        # )
 
         command = self.create_movement_dictionnary(linear_x, angular_z)
 

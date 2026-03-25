@@ -11,9 +11,9 @@ class RouteSelector:
 
     def _validate_start_goal(self, start: str, goal: str) -> None:
         if start not in self.graph:
-            raise ValueError(f"Unknown start node: {start}")
+            raise ValueError(f"Unknown start node: {start}, from graph : {self.graph}")
         if goal not in self.graph:
-            raise ValueError(f"Unknown goal node: {goal}")
+            raise ValueError(f"Unknown goal node: {goal}, from graph : {self.graph}")
 
     def _get_neighbors(self, node: str) -> Dict[str, str]:
         raw = self.graph.get(node, {})
@@ -22,6 +22,16 @@ class RouteSelector:
             for direction in DIRECTION_KEYS
             if raw.get(direction)
         }
+
+    def tag_to_id(self, tag: int):
+        if not self.graph:
+            raise ValueError("Graph not loaded yet")
+
+        tag_to_id = {v["tag"]: v["id"] for v in self.graph.values()}
+
+        result_id = tag_to_id.get(tag)
+
+        return result_id
 
     def compute_path(
         self, start: str, goal: str

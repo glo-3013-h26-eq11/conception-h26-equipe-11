@@ -2,7 +2,6 @@ from central_manager.enforcers.base_enforcer import Enforcer
 from central_manager.state_machine import StateMachineRover
 from web_interface.system_health_node import HealthPingingNode
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Bool
 from typing import List
 import rclpy
 import threading
@@ -17,11 +16,7 @@ class EnforcerManagerNode(HealthPingingNode):
             Twist, "/cmd_vel", self.cmd_callback, 10
         )
 
-        self.pub_cmd_vel_safe = self.create_publisher(Twist, "cmd_vel_safe", 10)
-
-        self.pub_dangerous_distance_car_follower = self.create_publisher(
-            Bool, "/car_follower/dangerous_distance", 10
-        )
+        self.pub_cmd_vel_safe = self.create_publisher(Twist, "/cmd_vel_safe", 10)
 
         self.blackboard = Blackboard()
 
@@ -48,11 +43,6 @@ class EnforcerManagerNode(HealthPingingNode):
             enforcer.update_with_real_speed(cmd)
 
         self.pub_cmd_vel_safe.publish(cmd)
-
-    def publish_dangerous_distance(self):
-        dangerous_distance = Bool()
-        dangerous_distance.data = True
-        self.pub_dangerous_distance_car_follower.publish(dangerous_distance)
 
 
 def main(args=None):

@@ -6,11 +6,7 @@ from central_manager.enforcers.wait_at_load_enforcer import WaitAtLoadEnforcer
 
 class AtLoadZoneToLoad(State):
     def __init__(self, node):
-        super().__init__(
-            outcomes=[
-                "load_over",
-            ]
-        )
+        super().__init__(outcomes=["load_over", "back_to_init"])
 
         node.create_subscription(String, "load_over", self.load_over_callback, 10)
 
@@ -24,6 +20,8 @@ class AtLoadZoneToLoad(State):
 
         self.wait_at_load_enforcer = None
 
+        node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
+
         self.node = node
 
     def load_over_callback(self, msg: String):
@@ -33,9 +31,9 @@ class AtLoadZoneToLoad(State):
         if self.wait_at_load_enforcer:
             self.wait_at_load_enforcer.merchandise_callback(msg)
 
-        self.node.get_logger().error(
-            "No WaitAtLoadEnforcer ready to process merchandise callback"
-        )
+    def rover_stop_callback(self, msg: Bool):
+        if not msg.data:
+            self.outcome = "back_to_init"
 
     def execute(self, blackboard):
         self.outcome = None

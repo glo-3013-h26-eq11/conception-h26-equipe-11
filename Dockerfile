@@ -36,6 +36,7 @@ RUN python3 -m playwright install
 RUN python3 -m playwright install-deps chromium
 
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash"
+RUN rm -rf build/ install/ log/
 
 RUN cd src/web_interface/web_interface && \
     npm install && \
