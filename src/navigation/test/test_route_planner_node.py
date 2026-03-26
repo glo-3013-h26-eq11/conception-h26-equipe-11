@@ -310,3 +310,27 @@ def test_given_current_node_load_when_handle_get_node_action_load_then_nodes_not
     rclpy.spin_once(node, timeout_sec=2.0)
 
     assert len(received) == 0
+
+
+def test_when_handle_get_node_action_deposit_then_current_then_nodes_published_(node):
+    node.current_node = "ZC1"
+    node.available_goals = ["ZC1", "ZD1"]
+
+    received = []
+
+    def cb(msg: String):
+        received.append(json.loads(msg.data))
+
+    node.create_subscription(String, "route_plan/nodes", cb, 10)
+
+    node.handle_get_node_action_deposit(None, type("Resp", (), {})())
+
+    current_msg = create_current_node_id_distance()
+    node.current_node_id_distance_callback(current_msg)
+
+    rclpy.spin_once(node, timeout_sec=2.0)
+
+    rclpy.spin_once(node, timeout_sec=2.0)
+
+    assert len(received) == 2
+    assert received[-1][-1] == "ZD1"

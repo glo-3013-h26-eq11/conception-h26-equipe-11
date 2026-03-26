@@ -1,5 +1,6 @@
 import time
 import rclpy
+from rclpy.executors import SingleThreadedExecutor
 from playwright.sync_api import sync_playwright, expect
 from web_interface.static_web_server import PORT
 from integration_tests.integration_helper import (
@@ -58,9 +59,12 @@ def test_web_updates_map_manager():
 
         proximity_sensor_node.gpio_from_1_to_0()
 
+        executor = SingleThreadedExecutor()
+        executor.add_node(proximity_sensor_node)
+
         start = time.time()
         while time.time() - start < 4:
-            rclpy.spin_once(proximity_sensor_node, timeout_sec=0.1)
+            executor.spin_once(timeout_sec=0.1)
 
         expect(rover_chip).to_have_text(TEXT_LOADED, timeout=5000)
 

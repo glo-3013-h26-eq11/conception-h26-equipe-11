@@ -2,6 +2,7 @@ import os
 import time
 from pathlib import Path
 import rclpy
+from rclpy.executors import SingleThreadedExecutor
 from playwright.sync_api import sync_playwright
 from web_interface.static_web_server import PORT
 from integration_tests.integration_helper import (
@@ -66,9 +67,12 @@ def test_web_updates_map_manager():
 
         browser.close()
 
+    executor = SingleThreadedExecutor()
+    executor.add_node(listener)
+
     start = time.time()
-    while time.time() - start < 2:
-        rclpy.spin_once(listener, timeout_sec=0.1)
+    while time.time() - start < 4:
+        executor.spin_once(timeout_sec=0.1)
 
     listener.destroy_node()
 
