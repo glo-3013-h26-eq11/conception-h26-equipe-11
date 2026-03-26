@@ -19,6 +19,10 @@ class RoutePlannerNode(HealthPingingNode):
             String, "current_node", self.current_node_id_distance_callback, 10
         )
 
+        self.home_deposit_sub = self.create_subscription(
+                String, "home_deposit_zone", self.set_home_deposit_callback, 10
+            )
+
         if route_selector is None:
             self.subscription_map = self.create_subscription(
                 String, "map_manager/parsed_map_topic", self._map_callback, 10
@@ -72,6 +76,9 @@ class RoutePlannerNode(HealthPingingNode):
 
         except (json.JSONDecodeError, ValueError, TypeError) as e:
             self.get_logger().error(f"Failed to parse map: {e}")
+
+    def set_home_deposit_callback(self, msg):
+        self.available_goals.append[msg]
 
     def current_node_id_distance_callback(self, msg: String) -> None:
 
