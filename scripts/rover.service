@@ -6,9 +6,9 @@ Requires=docker.service
 [Service]
 Type=oneshot
 User=norlab
-WorkingDirectory=/home/norlab/repos/louis/conception-h26-equipe-11
+WorkingDirectory=/home/norlab/repos/louis2/conception-h26-equipe-11
 Environment="ROS_DOMAIN_ID=11"
-ExecStart=/home/norlab/repos/louis/conception-h26-equipe-11/scripts/run_rover_docker2.sh
+ExecStart=/home/norlab/repos/louis2/conception-h26-equipe-11/scripts/run_rover_docker2.sh
 RemainAfterExit=yes
 
 StandardOutput=journal
