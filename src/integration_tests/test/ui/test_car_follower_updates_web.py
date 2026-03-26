@@ -32,11 +32,13 @@ def ros_context():
     yield
     rclpy.shutdown()
 
+
 @pytest.fixture()
 def node():
-    node : Node = EnforcerManagerNode()
+    node: Node = EnforcerManagerNode()
     yield node
     node.destroy_node()
+
 
 def test_car_follower_updates_web(node):
     build_web_interface()
@@ -57,9 +59,7 @@ def test_car_follower_updates_web(node):
 
         expect(rover_chip).to_have_text(TEXT_SAFE_DISTANCE, timeout=5000)
 
-        publisher = node.create_publisher(
-            Bool, "/car_follower/dangerous_distance", 10
-        )
+        publisher = node.create_publisher(Bool, "/car_follower/dangerous_distance", 10)
 
         data = Bool()
         data.data = True

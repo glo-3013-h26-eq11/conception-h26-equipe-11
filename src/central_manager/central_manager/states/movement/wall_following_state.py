@@ -23,9 +23,7 @@ class WallFollowingState(State):
             Float32, "distance_to_car", self.distance_to_car_callback, 10
         )
 
-        node.create_subscription(
-            Bool, "stop_over", self.stop_over, 10
-        )
+        node.create_subscription(Bool, "stop_over", self.stop_over, 10)
 
         self.stop_over_publisher = node.create_publisher(Bool, "stop_over", 10)
 
@@ -83,7 +81,9 @@ class WallFollowingState(State):
 
         self.car_follower_enforcer = CarFollowEnforcer()
 
-        self.stop_sign_enforcer = StopSignEnforcer(self.stop_over_publisher, logger=self.node.get_logger())
+        self.stop_sign_enforcer = StopSignEnforcer(
+            self.stop_over_publisher, logger=self.node.get_logger()
+        )
 
         blackboard["enforcers"] = [self.stop_sign_enforcer, self.car_follower_enforcer]
 

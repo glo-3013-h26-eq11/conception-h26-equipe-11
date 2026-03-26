@@ -19,7 +19,9 @@ class _State(Enum):
 
 
 class StopSignEnforcer(Enforcer):
-    def __init__(self, stop_over_publisher, stop_duration: float = STOP_DURATION, logger = None) -> None:
+    def __init__(
+        self, stop_over_publisher, stop_duration: float = STOP_DURATION, logger=None
+    ) -> None:
         super().__init__()
         self._state: _State = _State.IDLE
         self._stop_start: Optional[float] = None
@@ -98,7 +100,7 @@ class StopSignEnforcer(Enforcer):
                 data.data = True
 
                 self.stop_over_publisher.publish(data)
-                
+
                 return cmd
             return self.stop_robot(cmd)
 

@@ -16,8 +16,8 @@ MAX_STEERING = 1.1  # radians
 SPEED = 0.2  # m/s
 WHEELBASE = 0.1  # m
 
-OBTUSE_ANGLE_THRESHOLD = 110 # degrees
-AFTER_CORNER_THRESHOLD = 0.5 # m
+OBTUSE_ANGLE_THRESHOLD = 110  # degrees
+AFTER_CORNER_THRESHOLD = 0.5  # m
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -65,20 +65,21 @@ class WallFollowNode(HealthPingingNode):
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
         b = angle_to_distance(theta_b, lidar_range_array, angle_min, angle_increment)
         c = angle_to_distance(theta_c, lidar_range_array, angle_min, angle_increment)
-        
+
         A_a = self.get_A_angle_deg(a, b, theta)
         A_c = self.get_A_angle_deg(c, b, theta_c)
-        
+
         a_for_wall_follow = a
         theta_for_wall_follow = theta
 
-        front = angle_to_distance(theta_front, lidar_range_array, angle_min, angle_increment)
-
+        front = angle_to_distance(
+            theta_front, lidar_range_array, angle_min, angle_increment
+        )
 
         if A_c > A_a:
             theta_for_wall_follow = theta_c
             a_for_wall_follow = c
-        
+
         if front < 0.25:
             theta_for_wall_follow = theta_front
             a_for_wall_follow = front
@@ -88,21 +89,27 @@ class WallFollowNode(HealthPingingNode):
             self.send_control_command(SPEED, self.last_steering)
             return
 
-        alpha = math.atan((a_for_wall_follow * math.cos(theta_for_wall_follow) - b) / (a_for_wall_follow * math.sin(theta_for_wall_follow)))
+        alpha = math.atan(
+            (a_for_wall_follow * math.cos(theta_for_wall_follow) - b)
+            / (a_for_wall_follow * math.sin(theta_for_wall_follow))
+        )
         D_t = b * math.cos(alpha)
         D_tp1 = D_t + LOOKAHEAD * math.sin(alpha)
 
         error = DESIRED_DISTANCE_FROM_WALL - D_tp1
 
-        error_integral, error_diff = self.update_pid_and_get_error_integral_diff(error, self.last_steering)
+        error_integral, error_diff = self.update_pid_and_get_error_integral_diff(
+            error, self.last_steering
+        )
 
         steering = error * KP + error_integral * KI + error_diff * KD
         steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
 
-        speed, steering = self.filter_intersections(a, b, theta, speed, steering, logger=self.get_logger())
+        speed, steering = self.filter_intersections(
+            a, b, theta, speed, steering, logger=self.get_logger()
+        )
 
         self.send_control_command(speed, steering)
-
 
     def update_pid_and_get_error_integral_diff(self, error, steering):
         now = self.get_clock().now().nanoseconds
@@ -125,7 +132,7 @@ class WallFollowNode(HealthPingingNode):
             self.last_errors_window[-1] = error
         else:
             self.last_errors_window = np.append(self.last_errors_window, error)
-            
+
         return error_integral, error_diff
 
     def send_control_command(self, speed: float, steering: float):
@@ -136,19 +143,21 @@ class WallFollowNode(HealthPingingNode):
         twist.linear.x = speed
         twist.angular.z = angular_z
         self.drive_pub.publish(twist)
-    
+
     def get_A_angle_deg(self, a, b, theta):
-        c = math.sqrt( a**2 + b**2 - (2 * a * b * math.cos(theta)))
-            
-        A_rad = math.acos( (b**2 + c**2 - a**2) / (2 * b * c) )
-        
+        c = math.sqrt(a**2 + b**2 - (2 * a * b * math.cos(theta)))
+
+        A_rad = math.acos((b**2 + c**2 - a**2) / (2 * b * c))
+
         A = math.degrees(A_rad)
 
         return A
 
-    def filter_intersections(self, a, b, theta, initial_speed, initial_steering, logger=None):
+    def filter_intersections(
+        self, a, b, theta, initial_speed, initial_steering, logger=None
+    ):
         A = self.get_A_angle_deg(a, b, theta)
-            
+
         if b > AFTER_CORNER_THRESHOLD:
 
             return SPEED, -MAX_STEERING
@@ -158,6 +167,7 @@ class WallFollowNode(HealthPingingNode):
             return SPEED, 0
 
         return initial_speed, initial_steering
+
 
 def main(args=None):
     rclpy.init(args=args)
