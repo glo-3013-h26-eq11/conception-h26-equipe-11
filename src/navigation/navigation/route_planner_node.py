@@ -96,6 +96,8 @@ class RoutePlannerNode(HealthPingingNode):
             self.get_logger().error("Current node is None")
             return NodeAction.BACK_TO_INIT.value
 
+        self.goal_mode = mode.value
+
         goal_node = self._select_goal_for_mode(mode)
         result = self._route_selector.compute_path(self.current_node, goal_node)
 

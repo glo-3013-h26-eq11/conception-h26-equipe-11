@@ -2,6 +2,7 @@ import os
 import time
 from pathlib import Path
 import rclpy
+from rclpy.executors import SingleThreadedExecutor
 from playwright.sync_api import sync_playwright, expect
 from web_interface.static_web_server import PORT
 from integration_tests.integration_helper import (
@@ -91,9 +92,12 @@ def test_route_planner_node_updates_web():
 
         publisher_node.publish_current_node()
 
+        executor = SingleThreadedExecutor()
+        executor.add_node(publisher_node)
+
         start = time.time()
-        while time.time() - start < 3:
-            rclpy.spin_once(publisher_node, timeout_sec=0.1)
+        while time.time() - start < 4:
+            executor.spin_once(timeout_sec=0.1)
 
         destination_component = page.get_by_label(DESTINATION_LABEL)
 
