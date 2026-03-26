@@ -5,7 +5,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 from central_manager.enforcers.base_enforcer import Enforcer
 
-BRAKE_START_DIST: float = 1.0
+BRAKE_START_DIST: float = 0.75
 STOP_TARGET_DIST: float = 0.61
 STOP_DURATION: float = 1.0
 DISTANCE_STALE_SEC: float = 0.5
@@ -101,7 +101,6 @@ class StopSignEnforcer(Enforcer):
 
                 self.stop_over_publisher.publish(data)
 
-                return cmd
             return self.stop_robot(cmd)
 
         return cmd
