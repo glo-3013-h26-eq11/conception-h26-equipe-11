@@ -4,7 +4,6 @@ from std_msgs.msg import String, Float32, Bool
 import json
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
-import time
 from central_manager.blackboard_config import (
     BLACKBOARD_ENFORCERS,
     BLACKBOARD_PREVIOUS_STOP_TAG,

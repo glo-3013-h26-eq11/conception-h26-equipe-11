@@ -16,7 +16,7 @@ MAX_STEERING = 1.1  # radians
 SPEED = 0.2  # m/s
 WHEELBASE = 0.1  # m
 
-OBTUSE_ANGLE_THRESHOLD = 110  # degrees
+OBTUSE_ANGLE_THRESHOLD = 105  # degrees
 AFTER_CORNER_THRESHOLD = 0.5  # m
 
 
@@ -157,6 +157,9 @@ class WallFollowNode(HealthPingingNode):
         self, a, b, theta, initial_speed, initial_steering, logger=None
     ):
         A = self.get_A_angle_deg(a, b, theta)
+
+        print(f"A : {A}")
+        print(f"b : {b}")
 
         if b > AFTER_CORNER_THRESHOLD:
 

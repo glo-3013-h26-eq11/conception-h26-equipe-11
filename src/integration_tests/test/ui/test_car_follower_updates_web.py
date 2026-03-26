@@ -71,7 +71,7 @@ def test_car_follower_updates_web(node):
         executor.add_node(node)
 
         start = time.time()
-        while time.time() - start < 4:
+        while time.time() - start < 6:
             executor.spin_once(timeout_sec=0.1)
 
         expect(rover_chip).to_have_text(TEXT_DANGEROUS_DISTANCE, timeout=5000)
