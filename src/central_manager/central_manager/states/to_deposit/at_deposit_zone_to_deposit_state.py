@@ -2,6 +2,7 @@ from yasmin import State
 import rclpy
 from std_msgs.msg import String, Bool
 from central_manager.enforcers.wait_at_deposit_enforcer import WaitAtDepositEnforcer
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 class AtDepositZoneToDeposit(State):
@@ -43,7 +44,7 @@ class AtDepositZoneToDeposit(State):
         self.wait_at_deposit_enforcer = WaitAtDepositEnforcer(
             self.deposit_over_publisher
         )
-        blackboard["enforcers"] = [self.wait_at_deposit_enforcer]
+        blackboard[BLACKBOARD_ENFORCERS] = [self.wait_at_deposit_enforcer]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)

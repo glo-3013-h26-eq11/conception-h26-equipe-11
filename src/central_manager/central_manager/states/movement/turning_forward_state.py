@@ -2,8 +2,8 @@ from yasmin import State
 import rclpy
 from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.forward_turn_enforcer import ForwardTurnEnforcer
-from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 class TurningForwardState(State):
@@ -44,10 +44,9 @@ class TurningForwardState(State):
 
         self.car_follower_enforcer = CarFollowEnforcer()
 
-        blackboard["enforcers"] = [
+        blackboard[BLACKBOARD_ENFORCERS] = [
             ForwardTurnEnforcer(self.turn_over_publisher),
             self.car_follower_enforcer,
-            StopSignEnforcer(),
         ]
 
         while self.outcome is None:

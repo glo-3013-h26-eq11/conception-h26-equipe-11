@@ -2,14 +2,13 @@ import time
 from enum import Enum, auto
 from typing import Optional
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Bool
 from central_manager.enforcers.base_enforcer import Enforcer
 
-BRAKE_START_DIST: float = 1.0
+BRAKE_START_DIST: float = 0.75
 STOP_TARGET_DIST: float = 0.61
 STOP_DURATION: float = 1.0
 DISTANCE_STALE_SEC: float = 0.5
-TURN_TIME: float = 1.4
-COOLDOWN_DURATION: float = 2.0
 
 
 class _State(Enum):
@@ -20,7 +19,9 @@ class _State(Enum):
 
 
 class StopSignEnforcer(Enforcer):
-    def __init__(self, stop_duration: float = STOP_DURATION) -> None:
+    def __init__(
+        self, stop_over_publisher, stop_duration: float = STOP_DURATION, logger=None
+    ) -> None:
         super().__init__()
         self._state: _State = _State.IDLE
         self._stop_start: Optional[float] = None
@@ -28,10 +29,12 @@ class StopSignEnforcer(Enforcer):
 
         self.stop_duration: float = stop_duration
 
+        self.stop_over_publisher = stop_over_publisher
+
         self._distance: Optional[float] = None
         self._last_update: float = 0.0
 
-        self._logger = None
+        self._logger = logger
 
         self._has_triggered: bool = False
 
@@ -52,7 +55,6 @@ class StopSignEnforcer(Enforcer):
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         now = time.time()
-        initial_command = cmd
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
         d = None if stale else self._distance
 
@@ -90,19 +92,13 @@ class StopSignEnforcer(Enforcer):
                 self._state = _State.COOLDOWN
                 self._cooldown_start = now
                 self._log("FIN STOP — mode COOLDOWN, wall follower peut reprendre")
-                return cmd
-            return self.stop_robot(cmd)
 
-        if self._state == _State.COOLDOWN:
-            elapsed = now - self._cooldown_start
-            if elapsed >= COOLDOWN_DURATION:
-                self._state = _State.IDLE
-                self._has_triggered = False
-                self._stop_start = None
-                self._cooldown_start = None
-                self._log("COOLDOWN terminé — retour IDLE")
-                return initial_command
-            return cmd
+                data = Bool()
+                data.data = True
+
+                self.stop_over_publisher.publish(data)
+
+            return self.stop_robot(cmd)
 
         return cmd
 

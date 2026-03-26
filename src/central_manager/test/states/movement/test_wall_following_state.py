@@ -10,6 +10,10 @@ from central_manager.states.movement.wall_following_state import (
     WallFollowingState,
 )
 import json
+from central_manager.blackboard_config import (
+    BLACKBOARD_ENFORCERS,
+    BLACKBOARD_PREVIOUS_STOP_TAG,
+)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -27,8 +31,8 @@ def state():
     node.destroy_node()
 
 
-def test_wall_following_positioning_transitions_to_current_node(state):
-    blackboard = {"node": state.node, "enforcers": ["dummy"]}
+def test_when_stop_over_and_current_node_then_transitions(state):
+    blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
     outcome_holder = {}
 
     def run_state():
@@ -40,18 +44,24 @@ def test_wall_following_positioning_transitions_to_current_node(state):
     time.sleep(0.2)
 
     pub = state.node.create_publisher(String, "current_node", 10)
+    pub_stop_over = state.node.create_publisher(Bool, "stop_over", 10)
+
     data = {"distance": 5}
     msg = String(data=json.dumps(data))
     pub.publish(msg)
 
+    data_stop_over = Bool()
+    data_stop_over.data = False
+    pub_stop_over.publish(data_stop_over)
+
     thread.join(timeout=2.0)
 
     assert outcome_holder.get("outcome") == "current_node"
-    assert len(blackboard["enforcers"]) == 2
+    assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
 
 
 def test_when_stop_rover_then_outcome_back_to_init(state):
-    blackboard = {"node": state.node, "enforcers": []}
+    blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
     outcome_holder = {}
 
     def run_state():

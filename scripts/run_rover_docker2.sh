@@ -7,7 +7,7 @@ docker run --rm \
     --network host \
     --device=/dev/bus/usb \
     -v /dev:/dev \
-    -v /home/norlab/repos/louis/conception-h26-equipe-11:/home/ws \
+    -v /home/norlab/repos/louis2/conception-h26-equipe-11:/home/ws \
     -e ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-11} \
     test_louis:latest \
     bash -c "

@@ -5,6 +5,7 @@ from central_manager.states.to_deposit.at_intersection_to_deposit_state import (
     AtIntersectionToDepositState,
 )
 from central_manager.states.node_action_enum import NodeAction
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 @pytest.fixture
@@ -13,7 +14,7 @@ def blackboard_mock():
     node_mock = MagicMock()
     node_mock.get_logger.return_value = logger_mock
 
-    return {"node": node_mock, "enforcers": []}
+    return {"node": node_mock, BLACKBOARD_ENFORCERS: []}
 
 
 @pytest.mark.parametrize(
