@@ -29,6 +29,8 @@ class InitialState(State):
 
         blackboard["enforcers"] = [ImmobileEnforcer()]
 
+        blackboard["previous_stop_tag"] = None
+
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)
 
