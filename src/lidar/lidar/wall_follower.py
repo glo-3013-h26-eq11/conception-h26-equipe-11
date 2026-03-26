@@ -68,9 +68,6 @@ class WallFollowNode(HealthPingingNode):
         
         A_a = self.get_A_angle_deg(a, b, theta)
         A_c = self.get_A_angle_deg(c, b, theta_c)
-
-        self.get_logger().info(f"A_a : {A_a}")
-        self.get_logger().info(f"A_c : {A_c}")
         
         a_for_wall_follow = a
         theta_for_wall_follow = theta
@@ -152,17 +149,11 @@ class WallFollowNode(HealthPingingNode):
     def filter_intersections(self, a, b, theta, initial_speed, initial_steering, logger=None):
         A = self.get_A_angle_deg(a, b, theta)
             
-        # logger.info(f"A : {A}")
-
         if b > AFTER_CORNER_THRESHOLD:
-            if logger:
-                logger.info(f"FAST TURN : {b}")
 
             return SPEED, -MAX_STEERING
 
         elif A > OBTUSE_ANGLE_THRESHOLD:
-            if logger:
-                logger.info(f"FREEZE : {A}")
 
             return SPEED, 0
 

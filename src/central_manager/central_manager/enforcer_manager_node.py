@@ -21,6 +21,7 @@ class EnforcerManagerNode(HealthPingingNode):
         self.blackboard = Blackboard()
 
         self.blackboard["enforcers"] = []
+        self.blackboard["previous_stop_tag"] = None
 
         self.sm = StateMachineRover(self)
 

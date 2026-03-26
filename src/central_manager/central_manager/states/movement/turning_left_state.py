@@ -2,7 +2,6 @@ from yasmin import State
 import rclpy
 from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.left_turn_enforcer import LeftTurnEnforcer
-from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 
 
@@ -47,7 +46,6 @@ class TurningLeftState(State):
         blackboard["enforcers"] = [
             LeftTurnEnforcer(self.turn_over_publisher),
             self.car_follower_enforcer,
-            StopSignEnforcer(),
         ]
 
         while self.outcome is None:
