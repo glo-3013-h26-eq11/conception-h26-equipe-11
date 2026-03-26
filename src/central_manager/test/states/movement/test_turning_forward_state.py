@@ -8,6 +8,7 @@ from rclpy.node import Node
 from central_manager.states.movement.turning_forward_state import (
     TurningForwardState,
 )
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 DISTANCE = 0.3
 
@@ -28,7 +29,7 @@ def state():
 
 
 def test_when_turn_over_then_outcome_turn_over(state):
-    blackboard = {"node": state.node, "enforcers": []}
+    blackboard = {BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
 
     def run_state():
@@ -49,7 +50,7 @@ def test_when_turn_over_then_outcome_turn_over(state):
 
 
 def test_when_stop_rover_then_outcome_back_to_init(state):
-    blackboard = {"node": state.node, "enforcers": []}
+    blackboard = {BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
 
     def run_state():

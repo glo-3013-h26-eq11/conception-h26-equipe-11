@@ -3,6 +3,7 @@ from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.states.node_action_enum import NodeAction
 import rclpy
 from navigation_interfaces.srv import GetNodeAction
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 class AtIntersectionToDepositState(State):
@@ -28,7 +29,7 @@ class AtIntersectionToDepositState(State):
 
         self.node.get_logger().info("AT_INTERSECTION_TO_DEPOSIT state")
 
-        blackboard["enforcers"] = [ImmobileEnforcer()]
+        blackboard[BLACKBOARD_ENFORCERS] = [ImmobileEnforcer()]
 
         node_action = self.get_current_node_action()
 

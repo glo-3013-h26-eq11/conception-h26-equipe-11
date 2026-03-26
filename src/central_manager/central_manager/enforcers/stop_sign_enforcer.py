@@ -55,7 +55,6 @@ class StopSignEnforcer(Enforcer):
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         now = time.time()
-        initial_command = cmd
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
         d = None if stale else self._distance
 
@@ -93,8 +92,6 @@ class StopSignEnforcer(Enforcer):
                 self._state = _State.COOLDOWN
                 self._cooldown_start = now
                 self._log("FIN STOP — mode COOLDOWN, wall follower peut reprendre")
-
-                print("FIN STOP")
 
                 data = Bool()
                 data.data = True

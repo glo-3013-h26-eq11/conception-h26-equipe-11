@@ -7,6 +7,7 @@ from std_msgs.msg import String, Bool
 from rclpy.node import Node
 
 from central_manager.states.to_load.at_load_zone_to_load_state import AtLoadZoneToLoad
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -25,7 +26,7 @@ def state():
 
 
 def test_at_load_zone_to_load_state_transitions_to_load_over(state):
-    blackboard = {"node": state.node, "enforcers": []}
+    blackboard = {BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
 
     def run_state():
@@ -46,7 +47,7 @@ def test_at_load_zone_to_load_state_transitions_to_load_over(state):
 
 
 def test_when_stop_rover_then_outcome_back_to_init(state):
-    blackboard = {"node": state.node, "enforcers": []}
+    blackboard = {BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
 
     def run_state():

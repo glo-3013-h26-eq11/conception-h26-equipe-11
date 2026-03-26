@@ -9,6 +9,7 @@ from rclpy.node import Node
 from central_manager.states.to_deposit.at_deposit_zone_to_deposit_state import (
     AtDepositZoneToDeposit,
 )
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -27,7 +28,7 @@ def state():
 
 
 def test_at_deposit_zone_to_deposit_state_transitions_to_deposit_over(state):
-    blackboard = {"node": state.node, "enforcers": []}
+    blackboard = {BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
 
     def run_state():
@@ -48,7 +49,7 @@ def test_at_deposit_zone_to_deposit_state_transitions_to_deposit_over(state):
 
 
 def test_when_stop_rover_then_outcome_back_to_init(state):
-    blackboard = {"node": state.node, "enforcers": []}
+    blackboard = {BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
 
     def run_state():

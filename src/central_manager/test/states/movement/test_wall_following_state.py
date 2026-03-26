@@ -10,6 +10,7 @@ from central_manager.states.movement.wall_following_state import (
     WallFollowingState,
 )
 import json
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -28,7 +29,7 @@ def state():
 
 
 def test_wall_following_positioning_transitions_to_current_node(state):
-    blackboard = {"node": state.node, "enforcers": ["dummy"]}
+    blackboard = {BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
 
     def run_state():
@@ -47,11 +48,11 @@ def test_wall_following_positioning_transitions_to_current_node(state):
     thread.join(timeout=2.0)
 
     assert outcome_holder.get("outcome") == "current_node"
-    assert len(blackboard["enforcers"]) == 2
+    assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
 
 
 def test_when_stop_rover_then_outcome_back_to_init(state):
-    blackboard = {"node": state.node, "enforcers": []}
+    blackboard = {BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
 
     def run_state():
