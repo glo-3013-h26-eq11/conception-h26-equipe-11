@@ -36,4 +36,3 @@ def test_when_ping_then_publish_node_status(health_pinging_node):
         rclpy.spin_once(health_pinging_node, timeout_sec=0.1)
 
     assert len(received_msgs) >= 1
-
