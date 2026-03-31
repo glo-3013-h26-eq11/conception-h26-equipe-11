@@ -14,7 +14,7 @@ setup(
         ("share/" + package_name, ["package.xml"]),
         (os.path.join("share", package_name, "launch"), glob("launch/*.launch.py")),
     ],
-    install_requires=["setuptools"],
+    install_requires=["setuptools", "pyserial"],
     zip_safe=True,
     maintainer="devuser",
     maintainer_email="lemes3@ulaval.ca",
@@ -29,7 +29,7 @@ setup(
         "console_scripts": [
             "rover_interface_node = rover.rover_interface_node:main",
             "rover_port_usb_node = rover.rover_port_usb_node:main",
-            "imu_controller_node = rover.imu_controller_node:main",
+            "rover_imu_publisher_node = rover.rover_IMU_publisher_node:main",
         ],
     },
 )
