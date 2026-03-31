@@ -16,10 +16,7 @@ class RoutePlannerNode(HealthPingingNode):
         self._goal_selector = GoalSelector(route_selector) if route_selector else None
 
         self.subscription_current = self.create_subscription(
-            String, "current_node", self.current_node_callback, 10
-        )
-        self.subscription_goal_mode = self.create_subscription(
-            String, "goal_mode", self.goal_mode_callback, 10
+            String, "current_node", self.current_node_id_distance_callback, 10
         )
 
         if route_selector is None:
@@ -30,6 +27,7 @@ class RoutePlannerNode(HealthPingingNode):
         self.publisher_directions = self.create_publisher(
             String, "route_plan/directions", 10
         )
+
         self.publisher_nodes = self.create_publisher(String, "route_plan/nodes", 10)
 
         self.get_node_action_service_load = self.create_service(
@@ -56,7 +54,7 @@ class RoutePlannerNode(HealthPingingNode):
 
     def handle_get_node_action_deposit(self, _request, response):
         response.action = self._compute_node_action(
-            mode=GoalMode.GO_DROP, wait_action=NodeAction.WAIT_DEPOSIT_ZONE
+            mode=GoalMode.GO_DEPOSIT, wait_action=NodeAction.WAIT_DEPOSIT_ZONE
         )
         return response
 
@@ -75,41 +73,48 @@ class RoutePlannerNode(HealthPingingNode):
         except (json.JSONDecodeError, ValueError, TypeError) as e:
             self.get_logger().error(f"Failed to parse map: {e}")
 
-    def current_node_callback(self, msg: String) -> None:
-        self.current_node = msg.data.strip()
-        self._try_compute_route()
+    def current_node_id_distance_callback(self, msg: String) -> None:
 
-    def goal_mode_callback(self, msg: String) -> None:
-        self.goal_mode = msg.data.strip()
+        if self._route_selector is None:
+            return
+
+        data = json.loads(msg.data)
+
+        tag = data.get("tag")
+
+        self.current_node = self._route_selector.tag_to_id(tag)
+
         self._try_compute_route()
 
     def _compute_node_action(self, mode: GoalMode, wait_action: NodeAction) -> str:
+
         if self._route_selector is None:
-            return wait_action.value
+            self.get_logger().error("Route selector is None")
+            return NodeAction.BACK_TO_INIT.value
+
         if self.current_node is None or not self.current_node:
-            return wait_action.value
+            self.get_logger().error("Current node is None")
+            return NodeAction.BACK_TO_INIT.value
+
+        self.goal_mode = mode.value
 
         goal_node = self._select_goal_for_mode(mode)
         result = self._route_selector.compute_path(self.current_node, goal_node)
-        if result is None:
-            msg_dirs = String()
-            msg_dirs.data = json.dumps([])
-            self.publisher_directions.publish(msg_dirs)
 
-            msg_nodes = String()
-            msg_nodes.data = json.dumps([])
-            self.publisher_nodes.publish(msg_nodes)
+        if result is None:
             return wait_action.value
 
         nodes_path, directions_path = result
 
-        msg_dirs = String()
-        msg_dirs.data = json.dumps(directions_path)
-        self.publisher_directions.publish(msg_dirs)
+        if len(directions_path) >= 1:
 
-        msg_nodes = String()
-        msg_nodes.data = json.dumps(nodes_path)
-        self.publisher_nodes.publish(msg_nodes)
+            msg_dirs = String()
+            msg_dirs.data = json.dumps(directions_path)
+            self.publisher_directions.publish(msg_dirs)
+
+            msg_nodes = String()
+            msg_nodes.data = json.dumps(nodes_path)
+            self.publisher_nodes.publish(msg_nodes)
 
         if not directions_path:
             return wait_action.value
@@ -120,6 +125,12 @@ class RoutePlannerNode(HealthPingingNode):
             "right": NodeAction.RIGHT_TURN.value,
         }
         next_direction = directions_path[0]
+
+        # For points depots/chargement, selon la def du problème il faut aller "straight`,
+        # mais techniquement wall follow devrait être l'action
+        if "Z" in self.current_node:
+            return NodeAction.WALL_FOLLOW.value
+
         return direction_to_action.get(next_direction, wait_action.value)
 
     def _select_goal_for_mode(self, mode: GoalMode) -> str:

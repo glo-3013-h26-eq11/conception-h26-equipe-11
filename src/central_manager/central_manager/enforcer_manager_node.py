@@ -1,8 +1,11 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from central_manager.state_machine import StateMachineRover
+from central_manager.blackboard_config import (
+    BLACKBOARD_ENFORCERS,
+    BLACKBOARD_PREVIOUS_STOP_TAG,
+)
 from web_interface.system_health_node import HealthPingingNode
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Bool
 from typing import List
 import rclpy
 import threading
@@ -17,15 +20,12 @@ class EnforcerManagerNode(HealthPingingNode):
             Twist, "/cmd_vel", self.cmd_callback, 10
         )
 
-        self.pub_cmd_vel_safe = self.create_publisher(Twist, "cmd_vel_safe", 10)
-
-        self.pub_dangerous_distance_car_follower = self.create_publisher(
-            Bool, "/car_follower/dangerous_distance", 10
-        )
+        self.pub_cmd_vel_safe = self.create_publisher(Twist, "/cmd_vel_safe", 10)
 
         self.blackboard = Blackboard()
 
-        self.blackboard["enforcers"] = []
+        self.blackboard[BLACKBOARD_ENFORCERS] = []
+        self.blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
 
         self.sm = StateMachineRover(self)
 
@@ -33,7 +33,7 @@ class EnforcerManagerNode(HealthPingingNode):
         self._sm_thread.start()
 
     def _get_enforcers(self) -> List[Enforcer]:
-        return self.blackboard["enforcers"]
+        return self.blackboard[BLACKBOARD_ENFORCERS]
 
     def _run_sm(self):
         self.get_logger().info("Starting the state machine...")
@@ -48,11 +48,6 @@ class EnforcerManagerNode(HealthPingingNode):
             enforcer.update_with_real_speed(cmd)
 
         self.pub_cmd_vel_safe.publish(cmd)
-
-    def publish_dangerous_distance(self):
-        dangerous_distance = Bool()
-        dangerous_distance.data = True
-        self.pub_dangerous_distance_car_follower.publish(dangerous_distance)
 
 
 def main(args=None):

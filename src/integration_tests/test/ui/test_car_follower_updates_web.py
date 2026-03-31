@@ -1,4 +1,7 @@
 import rclpy
+from rclpy.executors import SingleThreadedExecutor
+import time
+from rclpy.node import Node
 from playwright.sync_api import sync_playwright, expect
 from web_interface.static_web_server import PORT
 from integration_tests.integration_helper import (
@@ -9,6 +12,7 @@ from integration_tests.integration_helper import (
 )
 import pytest
 from central_manager.enforcer_manager_node import EnforcerManagerNode
+from std_msgs.msg import Bool
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
 
@@ -29,14 +33,19 @@ def ros_context():
     rclpy.shutdown()
 
 
-def test_car_follower_updates_web():
+@pytest.fixture()
+def node():
+    node: Node = EnforcerManagerNode()
+    yield node
+    node.destroy_node()
+
+
+def test_car_follower_updates_web(node):
     build_web_interface()
 
     web_and_rosbridge = start_process(WEB_AND_ROSBRIDGE_CMD)
 
     wait_for_server(WEBAPP_URL)
-
-    enforcer_manager_node = EnforcerManagerNode()
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -50,9 +59,20 @@ def test_car_follower_updates_web():
 
         expect(rover_chip).to_have_text(TEXT_SAFE_DISTANCE, timeout=5000)
 
-        enforcer_manager_node.publish_dangerous_distance()
+        publisher = node.create_publisher(Bool, "/car_follower/dangerous_distance", 10)
 
-        page.wait_for_timeout(2000)
+        data = Bool()
+        data.data = True
+        publisher.publish(data)
+
+        page.wait_for_timeout(3000)
+
+        executor = SingleThreadedExecutor()
+        executor.add_node(node)
+
+        start = time.time()
+        while time.time() - start < 6:
+            executor.spin_once(timeout_sec=0.1)
 
         expect(rover_chip).to_have_text(TEXT_DANGEROUS_DISTANCE, timeout=5000)
 

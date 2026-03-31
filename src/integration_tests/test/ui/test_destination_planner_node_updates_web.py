@@ -2,6 +2,7 @@ import os
 import time
 from pathlib import Path
 import rclpy
+from rclpy.executors import SingleThreadedExecutor
 from playwright.sync_api import sync_playwright, expect
 from web_interface.static_web_server import PORT
 from integration_tests.integration_helper import (
@@ -13,6 +14,7 @@ from integration_tests.integration_helper import (
 import pytest
 from rclpy.node import Node
 from std_msgs.msg import String
+import json
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
 
@@ -37,8 +39,7 @@ ROS_NODE_CMD_TARGET = (
 )
 
 DESTINATION_LABEL = "Destination"
-CURRENT_NODE = "ZD1"
-GOAL_NODE = "ZC1"
+CURRENT_NODE = 5  # ZD1
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -53,17 +54,12 @@ class TopicPublisher(Node):
         super().__init__("topic_publisher")
 
         self.publisher_current_node = self.create_publisher(String, "current_node", 10)
-        self.publisher_goal_node = self.create_publisher(String, "goal_node", 10)
 
     def publish_current_node(self):
         msg = String()
-        msg.data = CURRENT_NODE
+        data = {"tag": CURRENT_NODE}
+        msg.data = json.dumps(data)
         self.publisher_current_node.publish(msg)
-
-    def publish_goal_node(self):
-        msg = String()
-        msg.data = GOAL_NODE
-        self.publisher_goal_node.publish(msg)
 
 
 def test_route_planner_node_updates_web():
@@ -93,13 +89,14 @@ def test_route_planner_node_updates_web():
 
         page.wait_for_timeout(3000)
 
-        publisher_node.publish_goal_node()
-
         publisher_node.publish_current_node()
 
+        executor = SingleThreadedExecutor()
+        executor.add_node(publisher_node)
+
         start = time.time()
-        while time.time() - start < 3:
-            rclpy.spin_once(publisher_node, timeout_sec=0.1)
+        while time.time() - start < 4:
+            executor.spin_once(timeout_sec=0.1)
 
         expect(page.locator(".mdi-arrow-up")).to_be_visible()
 

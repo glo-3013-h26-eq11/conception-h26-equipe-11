@@ -59,6 +59,18 @@ source install/setup.bash
 ros2 launch web_interface web_interface_launch.py
 ```
 
+### Full clone sur le rover
+```bash
+git clone https://github.com/glo-3013-h26-eq11/conception-h26-equipe-11.git
+cd conception-h26-equipe11
+git submodule update --init --recursive
+docker run -it --privileged --network host --device=/dev/bus/usb -v /dev:/dev -v .:/home/ws test_louis:latest
+cd src/web_interface/web_intersace
+npm install
+npx vite build
+cd ../../..
+```
+
 ### Code coverage
 ```bash
 mkdir .coverage_folder

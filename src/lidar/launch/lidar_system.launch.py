@@ -2,8 +2,9 @@
 
 import launch
 import launch_ros.actions
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
 import os
 
@@ -15,6 +16,7 @@ def generate_launch_description():
 
     return launch.LaunchDescription(
         [
+            DeclareLaunchArgument("output_topic", default_value="/cmd_vel"),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     os.path.join(ldlidar_launch_dir, "stl19p.launch.py")
@@ -25,6 +27,7 @@ def generate_launch_description():
                 executable="wall_follower",
                 name="wall_follower_node",
                 output="screen",
+                parameters=[{"output_topic": LaunchConfiguration("output_topic")}],
             ),
         ]
     )

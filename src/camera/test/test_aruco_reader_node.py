@@ -5,7 +5,7 @@ import importlib
 
 import pytest
 import rclpy
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import Image
 from std_msgs.msg import String
 
 
@@ -15,7 +15,7 @@ def _install_fake_modules(monkeypatch, *, ids_4x4, ids_5x5, depth_value=0.42):
     cv_bridge_mod = types.ModuleType("cv_bridge")
 
     class _FakeBridge:
-        def compressed_imgmsg_to_cv2(self, _msg, desired_encoding="bgr8"):
+        def imgmsg_to_cv2(self, _msg, desired_encoding="bgr8"):
             return object()
 
     cv_bridge_mod.CvBridge = _FakeBridge
@@ -106,7 +106,7 @@ def rclpy_context():
 
 
 def _make_compressed_image(frame_id="oak", sec=1, nanosec=2):
-    msg = CompressedImage()
+    msg = Image()
     msg.header.frame_id = frame_id
     msg.header.stamp.sec = sec
     msg.header.stamp.nanosec = nanosec
@@ -143,10 +143,17 @@ def test_publishes_ids_when_detected(monkeypatch):
     assert payload["stamp"]["sec"] == 123
     assert payload["stamp"]["nanosec"] == 456
     assert payload["markers_4x4"] == [
-        {"id": 1, "depth": 0.5},
-        {"id": 2, "depth": 0.5},
+        {"tag": 1, "depth": 0.5, "angle_x_deg": pytest.approx(0), "z_forward": 0.5},
+        {"tag": 2, "depth": 0.5, "angle_x_deg": pytest.approx(0), "z_forward": 0.5},
     ]
-    assert payload["markers_5x5"] == [{"id": 10, "depth": 0.5}]
+    assert payload["markers_5x5"] == [
+        {
+            "tag": 10,
+            "depth": 0.5,
+            "angle_x_deg": pytest.approx(0.0),
+            "z_forward": pytest.approx(0.5),
+        }
+    ]
 
     node.destroy_node()
     listener.destroy_node()

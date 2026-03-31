@@ -2,15 +2,12 @@ from yasmin import State
 import rclpy
 from std_msgs.msg import String, Bool
 from central_manager.enforcers.wait_at_deposit_enforcer import WaitAtDepositEnforcer
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 class AtDepositZoneToDeposit(State):
     def __init__(self, node):
-        super().__init__(
-            outcomes=[
-                "deposit_over",
-            ]
-        )
+        super().__init__(outcomes=["deposit_over", "back_to_init"])
 
         node.create_subscription(String, "deposit_over", self.deposit_over_callback, 10)
 
@@ -24,6 +21,8 @@ class AtDepositZoneToDeposit(State):
 
         self.wait_at_deposit_enforcer = None
 
+        node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
+
         self.node = node
 
     def deposit_over_callback(self, msg: String):
@@ -33,9 +32,9 @@ class AtDepositZoneToDeposit(State):
         if self.wait_at_deposit_enforcer:
             self.wait_at_deposit_enforcer.merchandise_callback(msg)
 
-        self.node.get_logger().error(
-            "No WaitAtDepostiEnforcer ready to process merchandise callback"
-        )
+    def rover_stop_callback(self, msg: Bool):
+        if not msg.data:
+            self.outcome = "back_to_init"
 
     def execute(self, blackboard):
         self.outcome = None
@@ -45,7 +44,7 @@ class AtDepositZoneToDeposit(State):
         self.wait_at_deposit_enforcer = WaitAtDepositEnforcer(
             self.deposit_over_publisher
         )
-        blackboard["enforcers"] = [self.wait_at_deposit_enforcer]
+        blackboard[BLACKBOARD_ENFORCERS] = [self.wait_at_deposit_enforcer]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)

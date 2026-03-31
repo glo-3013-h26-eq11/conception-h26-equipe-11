@@ -8,6 +8,9 @@ from lidar.wall_follower import (
     is_valid_lidar_scan,
     SPEED,
     WHEELBASE,
+    AFTER_CORNER_THRESHOLD,
+    THETA_DEG,
+    MAX_STEERING,
 )
 
 
@@ -96,24 +99,6 @@ def test_when_node_is_created_then_initial_state_is_correct(wall_follow_node):
     assert len(wall_follow_node.last_errors_window) == 0
 
 
-def test_when_small_steering_then_publishes_zero_angular_velocity(wall_follow_node):
-    # Arrange
-    published_msgs = []
-
-    def fake_publish(msg):
-        published_msgs.append(msg)
-
-    wall_follow_node.drive_pub.publish = fake_publish
-
-    # Act
-    wall_follow_node.send_control_command(SPEED, 0.04)
-
-    # Assert
-    assert len(published_msgs) == 1
-    assert published_msgs[0].linear.x == pytest.approx(SPEED)
-    assert published_msgs[0].angular.z == pytest.approx(0.0)
-
-
 def test_when_positive_steering_then_publishes_positive_velocity(wall_follow_node):
     # Arrange
     published_msgs = []
@@ -184,71 +169,49 @@ def test_when_invalid_wall_measurements_then_repeats_last_command(
     assert commands[0][1] == pytest.approx(0.3)
 
 
-def test_when_valid_scan_then_publishes_pid_command(wall_follow_node, monkeypatch):
-    # Arrange
-    commands = []
+def test_when_big_b_then_steering_right_max(wall_follow_node):
+    b = AFTER_CORNER_THRESHOLD + 0.1
+    a = 0.5
 
-    def fake_send_control_command(speed, steering):
-        commands.append((speed, steering))
+    initial_speed = 0.2
+    initial_steering = 0.0
+    theta_rad = math.radians(THETA_DEG)
 
-    monkeypatch.setattr(
-        wall_follow_node, "send_control_command", fake_send_control_command
+    result_speed, result_steering = wall_follow_node.filter_intersections(
+        a, b, theta_rad, initial_speed, initial_steering
     )
 
-    scan = create_scan(default_distance=1.0)
-
-    # Act
-    wall_follow_node.lidar_callback(scan)
-
-    # Assert
-    assert len(commands) == 1
-    assert commands[0][0] == pytest.approx(SPEED)
+    assert result_speed == initial_speed
+    assert result_steering == -MAX_STEERING
 
 
-def test_when_first_valid_callback_then_initializes_internal_state(
-    wall_follow_node, monkeypatch
-):
-    # Arrange
-    def fake_send_control_command(speed, steering):
-        pass
+def test_when_small_b_big_a_then_steering_filtered(wall_follow_node):
+    b = 0.2
+    a = 0.8
+    theta_rad = math.radians(THETA_DEG)
 
-    monkeypatch.setattr(
-        wall_follow_node, "send_control_command", fake_send_control_command
+    initial_speed = 0.2
+    initial_steering = 5.0
+
+    result_speed, result_steering = wall_follow_node.filter_intersections(
+        a, b, theta_rad, initial_speed, initial_steering
+    )
+    print(f"result steering : {result_steering}")
+    assert result_speed == initial_speed
+    assert result_steering == 0.0
+
+
+def test_when_b_a_then_nothing_filtered(wall_follow_node):
+    b = 0.15
+    a = 0.12
+    theta_rad = math.radians(THETA_DEG)
+
+    initial_speed = 0.2
+    initial_steering = 5.0
+
+    result_speed, result_steering = wall_follow_node.filter_intersections(
+        a, b, theta_rad, initial_speed, initial_steering
     )
 
-    scan = create_scan(default_distance=1.0)
-
-    assert wall_follow_node.last_time is None
-    assert len(wall_follow_node.last_errors_window) == 0
-
-    # Act
-    wall_follow_node.lidar_callback(scan)
-
-    # Assert
-    assert wall_follow_node.last_time is not None
-    assert len(wall_follow_node.last_errors_window) == 1
-
-
-def test_when_multiple_valid_callbacks_then_error_window_grows(
-    wall_follow_node, monkeypatch
-):
-    # Arrange
-    def fake_send_control_command(speed, steering):
-        pass
-
-    monkeypatch.setattr(
-        wall_follow_node, "send_control_command", fake_send_control_command
-    )
-
-    scan = create_scan(default_distance=1.0)
-
-    # Act
-    wall_follow_node.lidar_callback(scan)
-    first_len = len(wall_follow_node.last_errors_window)
-
-    wall_follow_node.lidar_callback(scan)
-    second_len = len(wall_follow_node.last_errors_window)
-
-    # Assert
-    assert first_len == 1
-    assert second_len == 2
+    assert result_speed == initial_speed
+    assert result_steering == initial_steering

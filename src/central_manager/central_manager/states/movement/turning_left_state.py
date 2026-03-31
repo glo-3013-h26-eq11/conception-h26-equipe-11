@@ -1,17 +1,14 @@
 from yasmin import State
 import rclpy
-from std_msgs.msg import String
+from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.left_turn_enforcer import LeftTurnEnforcer
-from central_manager.enforcers.stop_enforcer import StopEnforcer
+from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 class TurningLeftState(State):
     def __init__(self, node):
-        super().__init__(
-            outcomes=[
-                "turn_over",
-            ]
-        )
+        super().__init__(outcomes=["turn_over", "back_to_init"])
 
         self.node = node
 
@@ -19,19 +16,37 @@ class TurningLeftState(State):
 
         self.turn_over_publisher = node.create_publisher(String, "turn_over", 10)
 
+        node.create_subscription(
+            Float32, "distance_to_car", self.distance_to_car_callback, 10
+        )
+
+        self.car_follower_enforcer: CarFollowEnforcer = None
+
+        node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
+
         self.outcome = None
+
+    def distance_to_car_callback(self, msg: Float32):
+        if self.car_follower_enforcer:
+            self.car_follower_enforcer.update_distance(msg.data)
 
     def turn_over_callback(self, msg: String):
         self.outcome = "turn_over"
+
+    def rover_stop_callback(self, msg: Bool):
+        if not msg.data:
+            self.outcome = "back_to_init"
 
     def execute(self, blackboard):
         self.outcome = None
 
         self.node.get_logger().info("TURNING_LEFT state")
 
-        blackboard["enforcers"] = [
+        self.car_follower_enforcer = CarFollowEnforcer()
+
+        blackboard[BLACKBOARD_ENFORCERS] = [
             LeftTurnEnforcer(self.turn_over_publisher),
-            StopEnforcer(),
+            self.car_follower_enforcer,
         ]
 
         while self.outcome is None:
