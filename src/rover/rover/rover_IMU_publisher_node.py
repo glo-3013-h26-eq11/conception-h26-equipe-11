@@ -54,7 +54,7 @@ class ImuPublisherNode(Node):
     def serial_read_loop(self):
         """Read QMI8658 IMU data from serial port"""
         try:
-            self.serial_port = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+            self.serial_port = serial.Serial('/dev/ttyACM', 115200, timeout=1)
             self.get_logger().info("Serial port opened successfully")
             
             while self.serial_running and rclpy.ok():

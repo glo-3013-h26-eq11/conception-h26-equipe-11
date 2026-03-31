@@ -100,7 +100,14 @@ class RoverUsbPortNode(HealthPingingNode):
         self.raw_publisher.publish(raw_msg)
 
     def try_parse_and_publish_imu(self, frame_bytes: bytes):
-        if len(frame_bytes) != IMU_FRAME_SIZE_BYTES:
+        frame_len = len(frame_bytes)
+
+        if frame_len ==62:
+            payload = frame_bytes[:60]
+        elif frame_len == 60:
+            payload = frame_bytes
+        else:
+            self.get_logger().debug(f"Received non-IMU frame of length {frame_len} bytes")
             return
 
         try:
