@@ -29,6 +29,7 @@ setup(
         "console_scripts": [
             "rover_interface_node = rover.rover_interface_node:main",
             "rover_port_usb_node = rover.rover_port_usb_node:main",
+            "imu_controller_node = rover.imu_controller_node:main",
         ],
     },
 )

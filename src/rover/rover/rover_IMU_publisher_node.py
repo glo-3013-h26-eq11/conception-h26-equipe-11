@@ -3,7 +3,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 import serial
 
-IMU_PORT = "/dev/ttyACM1"
+IMU_PORT = "/dev/ttyACM0"
 
 
 class ImuNode(Node):
