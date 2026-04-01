@@ -61,14 +61,18 @@ def test_car_follower_updates_web(node):
 
         publisher = node.create_publisher(Bool, "/car_follower/dangerous_distance", 10)
 
+        executor = SingleThreadedExecutor()
+        executor.add_node(node)
+
+        start = time.time()
+        while time.time() - start < 2:
+            executor.spin_once(timeout_sec=0.1)
+
         data = Bool()
         data.data = True
         publisher.publish(data)
 
         page.wait_for_timeout(3000)
-
-        executor = SingleThreadedExecutor()
-        executor.add_node(node)
 
         start = time.time()
         while time.time() - start < 7:
