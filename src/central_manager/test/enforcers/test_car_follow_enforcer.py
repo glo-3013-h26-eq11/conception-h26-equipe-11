@@ -19,10 +19,12 @@ def _cmd(linear_x=0.5, angular_z=0.0):
     cmd.angular.z = angular_z
     return cmd
 
+
 def test_no_detection_passes_cmd_unchanged(enforcer):
     cmd = _cmd(0.5)
     result = enforcer.enforce_cmd(cmd)
     assert result.linear.x == pytest.approx(0.5)
+
 
 def test_far_distance_full_speed(enforcer):
     enforcer.update_distance(SAFE_DISTANCE_TO_CAR * 2)
