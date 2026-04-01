@@ -5,8 +5,13 @@ import rclpy
 from std_msgs.msg import String, Float32, Bool
 from web_interface.system_health_node import HealthPingingNode
 
-SAFE_DISTANCE_TO_CAR = 0.25  # m
+SAFE_DISTANCE_TO_CAR = 0.15  # m
 CAR_DETECTION_REFRESH = 0.5
+
+FRONT_ARUCO_ID = 1
+RIGHT_ARUCO_ID = 2
+BACK_ARUCO_ID = 3
+LEFT_ARUCO_ID = 4
 
 
 class CurrentNodeFromArucoNode(HealthPingingNode):
@@ -75,19 +80,25 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
 
             d = float(marker.get("depth", 9999))
             angle = float(marker.get("angle_x_deg", 0))
+            tag_id = int(marker.get("tag", 0))
 
-            if angle <= 45.0:
-                if closest_vehicle_dist is None or d < closest_vehicle_dist:
+            if tag_id == FRONT_ARUCO_ID:
+                continue
 
-                    closest_vehicle_dist = d
+            if tag_id == BACK_ARUCO_ID and angle > 45.0:
+                continue
 
-                    distance = Float32()
-                    distance.data = closest_vehicle_dist
+            if closest_vehicle_dist is None or d < closest_vehicle_dist:
 
-                    self._following_car_pub.publish(distance)
+                closest_vehicle_dist = d
 
-                    if d <= SAFE_DISTANCE_TO_CAR:
-                        self.is_car_at_dangerous_distance = True
+                distance = Float32()
+                distance.data = closest_vehicle_dist
+
+                self._following_car_pub.publish(distance)
+
+                if d <= SAFE_DISTANCE_TO_CAR:
+                    self.is_car_at_dangerous_distance = True
 
     def _publish_distance(self):
         out = Bool()
