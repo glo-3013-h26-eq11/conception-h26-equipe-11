@@ -1,8 +1,11 @@
+import json
 import math
+import time
 import numpy as np
 import rclpy
 from web_interface.system_health_node import HealthPingingNode
 from sensor_msgs.msg import LaserScan
+from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
@@ -18,6 +21,8 @@ WHEELBASE = 0.1  # m
 
 OBTUSE_ANGLE_THRESHOLD = 105  # degrees
 AFTER_CORNER_THRESHOLD = 0.5  # m
+
+TARGET_DEGREES = 90
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -40,13 +45,47 @@ class WallFollowNode(HealthPingingNode):
         output_topic = self.get_parameter("output_topic").value
 
         self.create_subscription(LaserScan, scan_topic, self.lidar_callback, 10)
+        self.create_subscription(String, "/rover/imu/json", self.imu_callback, 10)
         self.drive_pub = self.create_publisher(Twist, output_topic, 10)
         self.last_time = None
         self.last_steering = 0.0
         self.last_errors_window = np.array([])
-        self._corner_detected = False
-        self._corner_time = None
-
+        self.accumulated_degrees = 0.0
+        self.last_turn_time = None
+        self.turn_finished = False
+        
+    def imu_callback(self, msg: String):
+        if self.turn_finished:
+            return
+ 
+        try:
+            data = json.loads(msg.data)
+        except json.JSONDecodeError:
+            return
+ 
+        gyro_z = data.get("gyro_z")
+        if gyro_z is None:
+            return
+ 
+        now = time.monotonic()
+ 
+        if self.last_time is None:
+            self.last_time = now
+            return
+ 
+        dt = now - self.last_turn_time
+        self.last_time = now
+ 
+        self.accumulated_degrees += gyro_z * dt
+ 
+        self.get_logger().info(
+            f"Turned: {abs(self.accumulated_degrees):.2f}° / {TARGET_DEGREES}°",
+            throttle_duration_sec=0.2,
+        )
+ 
+        if abs(self.accumulated_degrees) >= TARGET_DEGREES:
+            self.turn_complete = True
+        
     def lidar_callback(self, scan: LaserScan):
         lidar_range_array = scan.ranges
         angle_min = scan.angle_min
