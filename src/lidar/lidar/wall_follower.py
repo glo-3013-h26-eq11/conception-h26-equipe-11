@@ -6,10 +6,10 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
-LOOKAHEAD = 1.0  # m
+LOOKAHEAD = 0.35  # m
 DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 20
-KP = 1.5
+KP = 2.0
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 1.1  # radians
