@@ -106,7 +106,7 @@ class WallFollowNode(HealthPingingNode):
         steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
 
         speed, steering = self.filter_intersections(
-            a, b, theta, speed, steering, logger=self.get_logger()
+            a, b, theta, speed, steering, scan, logger=self.get_logger()
         )
 
         self.send_control_command(speed, steering)
@@ -154,12 +154,16 @@ class WallFollowNode(HealthPingingNode):
         return A
 
     def filter_intersections(
-        self, a, b, theta, initial_speed, initial_steering, logger=None
+        self, a, b, theta, initial_speed, initial_steering, scan:LaserScan, logger=None
     ):
         A = self.get_A_angle_deg(a, b, theta)
 
         print(f"A : {A}")
         print(f"b : {b}")
+        
+        INTERSECTION_HALF_CONE_ANGLE = 7
+        
+        b = self.get_closest_point_in_half_cone(scan, 0, INTERSECTION_HALF_CONE_ANGLE)
 
         if b > AFTER_CORNER_THRESHOLD:
 
@@ -170,6 +174,26 @@ class WallFollowNode(HealthPingingNode):
             return SPEED, 0
 
         return initial_speed, initial_steering
+    
+    def get_closest_point_in_half_cone(self, scan:LaserScan, angle_start_deg, half_cone_angle_deg):
+        angles_deg = list(range(angle_start_deg, half_cone_angle_deg))
+        
+        min = math.inf
+        
+        for angle_deg in angles_deg:
+            angle_rad = math.radians(angle_deg)
+            
+            distance = angle_to_distance(angle_rad, scan.ranges, scan.angle_min, scan.angle_increment)
+            
+            if not math.isfinite(distance):
+                continue
+            
+            if distance < min:
+                min = distance
+                
+        return min
+            
+            
 
 
 def main(args=None):
