@@ -13,7 +13,7 @@ KP = 1.5
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 1.1  # radians
-SPEED = 0.2  # m/s
+SPEED = 0.4  # m/s
 WHEELBASE = 0.1  # m
 
 OBTUSE_ANGLE_THRESHOLD = 105  # degrees
