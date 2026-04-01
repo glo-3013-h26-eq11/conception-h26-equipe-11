@@ -1,6 +1,7 @@
 import json
 import struct
 import time
+import time
 
 import serial
 import rclpy
@@ -11,7 +12,7 @@ from web_interface.system_health_node import HealthPingingNode
 JETSON_ROVER_PORT = "/dev/ttyACM0"
 BAUDRATE = 115200
 DELIMITER = b"\r\n"
-FRAME_SIZE = 118  # 29 floats (116 bytes) + 2 trailing bytes
+FRAME_SIZE = 118
 
 
 class RoverUsbPortNode(HealthPingingNode):
@@ -104,12 +105,10 @@ class RoverUsbPortNode(HealthPingingNode):
             "mag_z":   floats[16],
         }
 
-        # Float32MultiArray for downstream numerical nodes
         simple_msg = Float32MultiArray()
         simple_msg.data = [float(v) for v in imu.values()]
         self.imu_simple_publisher.publish(simple_msg)
 
-        # JSON string for human-readable consumption
         json_msg = String()
         json_msg.data = json.dumps({k: round(v, 4) for k, v in imu.items()})
         self.imu_json_publisher.publish(json_msg)
