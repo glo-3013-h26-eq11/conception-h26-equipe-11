@@ -7,13 +7,13 @@ from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
 LOOKAHEAD = 0.35  # m
-DESIRED_DISTANCE_FROM_WALL = 0.15  # m
+DESIRED_DISTANCE_FROM_WALL = 0.12  # m
 INTEGRAL_WINDOW_SIZE = 20
-KP = 2.0
+KP = 5.0
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 1.1  # radians
-SPEED = 0.2  # m/s
+SPEED = 0.20  # m/s
 WHEELBASE = 0.1  # m
 
 OBTUSE_ANGLE_THRESHOLD = 105  # degrees
@@ -162,7 +162,7 @@ class WallFollowNode(HealthPingingNode):
     ):
         A = self.get_A_angle_deg(a, b, theta)
 
-        INTERSECTION_HALF_CONE_ANGLE = 7
+        INTERSECTION_HALF_CONE_ANGLE = 22
 
         b = self.get_closest_point_in_half_cone(scan, 0, INTERSECTION_HALF_CONE_ANGLE)
 
