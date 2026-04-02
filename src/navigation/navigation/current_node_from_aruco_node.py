@@ -4,6 +4,7 @@ from typing import Optional
 import rclpy
 from std_msgs.msg import String, Float32, Bool
 from web_interface.system_health_node import HealthPingingNode
+from numpy import abs
 
 SAFE_DISTANCE_TO_CAR = 0.25  # m
 CAR_DETECTION_REFRESH = 0.5
@@ -48,23 +49,25 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
 
         for marker in markers_5x5:
 
-            d = float(marker.get("depth", 9999))
+            depth = float(marker.get("depth", 9999))
             angle = float(marker.get("angle_x_deg", 0))
-            z_fwd = float(marker.get("z_forward", 0))
+            z_forward = float(marker.get("z_forward", 0))
+            tag_angle = float(marker.get("tag_angle", 0))
             marker_id = marker.get("tag")
 
-            if d <= 1.0 and angle <= 15.0 and z_fwd >= 0.15:
+            if depth <= 1.0 and angle <= 15.0 and z_forward >= 0.15:
 
-                if closest_stop_dist is None or d < closest_stop_dist:
+                if abs(tag_angle) < 45.0:
+                    if closest_stop_dist is None or depth < closest_stop_dist:
 
-                    closest_stop_dist = d
+                        closest_stop_dist = depth
 
-                    out = String()
-                    out.data = json.dumps(
-                        {"tag": marker_id, "distance": closest_stop_dist}
-                    )
+                        out = String()
+                        out.data = json.dumps(
+                            {"tag": marker_id, "distance": closest_stop_dist}
+                        )
 
-                    self._current_node_pub.publish(out)
+                        self._current_node_pub.publish(out)
 
     def _detect_cars(self, payload):
         markers_4x4 = payload.get("markers_4x4", [])
