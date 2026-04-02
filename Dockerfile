@@ -35,6 +35,9 @@ RUN python3 -m pip install --user -r requirements.txt
 RUN python3 -m playwright install
 RUN python3 -m playwright install-deps chromium
 
+ENV ROS_DOMAIN_ID="11"
+ENV ROS_LOCALHOST_ONLY=1
+
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash"
 RUN rm -rf build/ install/ log/
 

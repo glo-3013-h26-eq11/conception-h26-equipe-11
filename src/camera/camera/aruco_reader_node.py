@@ -93,7 +93,7 @@ class ArucoReaderNode(HealthPingingNode):
 
             if ids_4x4 is not None:
                 for i, marker_id in enumerate(ids_4x4.flatten()):
-                    depth, angle, z_fwd = self.calculate_marker_depth(
+                    depth, angle, z_fwd, tag_angle = self.calculate_marker_depth(
                         corners_4x4[i], marker_size=0.02
                     )
 
@@ -103,12 +103,13 @@ class ArucoReaderNode(HealthPingingNode):
                             "depth": float(depth),
                             "angle_x_deg": float(angle),
                             "z_forward": float(z_fwd),
+                            "tag_angle": float(tag_angle),
                         }
                     )
 
             if ids_5x5 is not None:
                 for i, marker_id in enumerate(ids_5x5.flatten()):
-                    depth, angle, z_fwd = self.calculate_marker_depth(
+                    depth, angle, z_fwd, tag_angle = self.calculate_marker_depth(
                         corners_5x5[i], marker_size=0.075
                     )
 
@@ -118,6 +119,7 @@ class ArucoReaderNode(HealthPingingNode):
                             "depth": float(depth),
                             "angle_x_deg": float(angle),
                             "z_forward": float(z_fwd),
+                            "tag_angle": float(tag_angle),
                         }
                     )
 
@@ -150,6 +152,7 @@ class ArucoReaderNode(HealthPingingNode):
                 [corner], marker_size, self.mtx, self.dist
             )
             tvec = tvecs[0][0]
+            rvec = rvecs[0][0]
         else:
             half = marker_size / 2.0
             obj_points = np.array(
@@ -175,7 +178,8 @@ class ArucoReaderNode(HealthPingingNode):
         # Z: forward distance to marker. If Z is very small the rover is
         # already passing under the marker — must not trigger stop.
         z_forward = float(tvec[2])
-        return dist_xz, angle_x_deg, z_forward
+        tag_angle = float(np.degrees(rvec[2]))
+        return dist_xz, angle_x_deg, z_forward, tag_angle
 
 
 def main(args=None):
