@@ -43,48 +43,57 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
 
     def _detect_intersections(self, payload):
         markers_5x5 = payload.get("markers_5x5", [])
-        
+
         if not markers_5x5:
             return
-        
+
         self.get_logger().info(f"Detected: {len(markers_5x5)} markers")
-        
+
         valid_markers = [m for m in markers_5x5 if m.get("z_forward", 0) >= 0.15]
-        
+
         if not valid_markers:
             self.get_logger().warn("No valid markers according to the z_forward.")
             return
-        
+
         selected_marker = None
-        
+
         front_strict = [m for m in valid_markers if m.get("angle_x_deg", 999) < 10.0]
         if front_strict:
             selected_marker = min(front_strict, key=lambda m: m.get("depth", 9999))
-            self.get_logger().info(f"Front strict: Tag {selected_marker['tag']}, angle {selected_marker['angle_x_deg']}°")
-        
+            self.get_logger().info(
+                f"Front strict: Tag {selected_marker['tag']}, angle {selected_marker['angle_x_deg']}°"
+            )
+
         if not selected_marker:
             front_wide = [m for m in valid_markers if m.get("angle_x_deg", 999) < 30.0]
             if front_wide:
                 selected_marker = min(front_wide, key=lambda m: m.get("depth", 9999))
-                self.get_logger().info(f"Front wide: Tag {selected_marker['tag']}, angle {selected_marker['angle_x_deg']}°")
-        
+                self.get_logger().info(
+                    f"Front wide: Tag {selected_marker['tag']}, angle {selected_marker['angle_x_deg']}°"
+                )
+
         if not selected_marker:
             side = [m for m in valid_markers if m.get("angle_x_deg", 999) < 60.0]
             if side:
                 selected_marker = min(side, key=lambda m: m.get("depth", 9999))
-                self.get_logger().info(f"Side: Tag {selected_marker['tag']}, angle {selected_marker['angle_x_deg']}°")
-        
+                self.get_logger().info(
+                    f"Side: Tag {selected_marker['tag']}, angle {selected_marker['angle_x_deg']}°"
+                )
+
         if selected_marker:
             marker_id = selected_marker.get("tag")
             distance = selected_marker.get("depth")
-            
+
             out = String()
             out.data = json.dumps({"tag": marker_id, "distance": distance})
             self._current_node_pub.publish(out)
-            self.get_logger().info(f"Published: Tag {marker_id}, distance {distance:.2f}m")
+            self.get_logger().info(
+                f"Published: Tag {marker_id}, distance {distance:.2f}m"
+            )
         else:
-            self.get_logger().warn("No marker selected according to the range < 60 degrees fixed.")
-            
+            self.get_logger().warn(
+                "No marker selected according to the range < 60 degrees fixed."
+            )
 
     def _detect_cars(self, payload):
         markers_4x4 = payload.get("markers_4x4", [])
