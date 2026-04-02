@@ -103,7 +103,7 @@ class ArucoReaderNode(HealthPingingNode):
                             "depth": float(depth),
                             "angle_x_deg": float(angle),
                             "z_forward": float(z_fwd),
-                            "tag_angle": float(tag_angle)
+                            "tag_angle": float(tag_angle),
                         }
                     )
 
@@ -119,7 +119,7 @@ class ArucoReaderNode(HealthPingingNode):
                             "depth": float(depth),
                             "angle_x_deg": float(angle),
                             "z_forward": float(z_fwd),
-                            "tag_angle": float(tag_angle)
+                            "tag_angle": float(tag_angle),
                         }
                     )
 
