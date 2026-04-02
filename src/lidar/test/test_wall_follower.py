@@ -2,6 +2,7 @@ import math
 import pytest
 import rclpy
 from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Empty
 from lidar.wall_follower import (
     WallFollowNode,
     angle_to_distance,
@@ -185,3 +186,23 @@ def test_when_big_b_then_steering_right_max(wall_follow_node):
 
     assert result_speed == initial_speed
     assert result_steering == -MAX_STEERING
+
+
+def test_when_intersection_filter_is_paused_then_keep_initial_command(wall_follow_node):
+    b = AFTER_CORNER_THRESHOLD + 0.1
+    a = 0.5
+
+    initial_speed = 0.2
+    initial_steering = 0.15
+    theta_rad = math.radians(THETA_DEG)
+
+    scan = create_scan(default_distance=float("inf"))
+
+    wall_follow_node.pause_intersection_filter_callback(Empty())
+
+    result_speed, result_steering = wall_follow_node.filter_intersections(
+        a, b, theta_rad, initial_speed, initial_steering, scan
+    )
+
+    assert result_speed == initial_speed
+    assert result_steering == initial_steering

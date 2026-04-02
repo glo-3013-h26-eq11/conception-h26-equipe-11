@@ -4,6 +4,7 @@ import pytest
 import rclpy
 from std_msgs.msg import String, Bool
 from rclpy.node import Node
+from unittest.mock import Mock
 
 from central_manager.states.movement.turning_forward_state import (
     TurningForwardState,
@@ -31,6 +32,7 @@ def state():
 def test_when_turn_over_then_outcome_turn_over(state):
     blackboard = {BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
+    state.intersection_filter_pause_publisher = Mock()
 
     def run_state():
         outcome_holder["outcome"] = state.execute(blackboard)
@@ -47,6 +49,7 @@ def test_when_turn_over_then_outcome_turn_over(state):
     thread.join(timeout=2.0)
 
     assert outcome_holder.get("outcome") == "turn_over"
+    state.intersection_filter_pause_publisher.publish.assert_called_once()
 
 
 def test_when_stop_rover_then_outcome_back_to_init(state):
@@ -70,3 +73,12 @@ def test_when_stop_rover_then_outcome_back_to_init(state):
     thread.join(timeout=2.0)
 
     assert outcome_holder.get("outcome") == "back_to_init"
+
+
+def test_when_turn_over_received_while_state_is_inactive_then_ignore_message(state):
+    state.intersection_filter_pause_publisher = Mock()
+
+    state.turn_over_callback(String(data="done"))
+
+    assert state.outcome is None
+    state.intersection_filter_pause_publisher.publish.assert_not_called()

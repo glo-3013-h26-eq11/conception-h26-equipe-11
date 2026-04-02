@@ -30,6 +30,17 @@ def test_given_travel_done_when_enforce_cmd_then_publish_turn_over(enforcer):
     enforcer.turn_over_publisher.publish.assert_called_once()
 
 
+def test_given_turn_is_already_done_when_enforce_cmd_many_times_then_publish_turn_over_once(
+    enforcer,
+):
+    enforcer.travel_distance_already_done = enforcer.total_distance_to_travel
+
+    enforcer.enforce_cmd(Twist())
+    enforcer.enforce_cmd(Twist())
+
+    enforcer.turn_over_publisher.publish.assert_called_once()
+
+
 def test_given_travel_not_done_when_enforce_cmd_then_move_forward(enforcer):
     initial_command = Twist()
 

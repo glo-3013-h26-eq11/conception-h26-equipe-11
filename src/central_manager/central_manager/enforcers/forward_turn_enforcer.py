@@ -15,17 +15,26 @@ class ForwardTurnEnforcer(Enforcer):
         self.total_distance_to_travel = FORWARD_DISTANCE
 
         self.turn_over_publisher = turn_over_publisher
+        self._turn_over_sent = False
 
     def update_with_real_speed(self, real_speed_cmd: Twist):
+        if self._turn_over_sent:
+            return
+
         dt = self._compute_delta_time()
 
-        self.travel_distance_already_done += real_speed_cmd.linear.x * dt
+        self.travel_distance_already_done = min(
+            self.total_distance_to_travel,
+            self.travel_distance_already_done + real_speed_cmd.linear.x * dt,
+        )
 
     def enforce_cmd(self, cmd) -> Twist:
         cmd = Twist()
 
         if self._is_distance_already_done():
-            self.turn_over_publisher.publish(String())
+            if not self._turn_over_sent:
+                self.turn_over_publisher.publish(String())
+                self._turn_over_sent = True
             return cmd
 
         cmd.angular.z = 0.0

@@ -4,6 +4,7 @@ import rclpy
 from web_interface.system_health_node import HealthPingingNode
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Empty
 
 THETA_DEG = 60
 LOOKAHEAD = 0.35  # m
@@ -18,6 +19,8 @@ WHEELBASE = 0.1  # m
 
 OBTUSE_ANGLE_THRESHOLD = 105  # degrees
 AFTER_CORNER_THRESHOLD = 0.5  # m
+INTERSECTION_FILTER_PAUSE_SEC = 1.0
+INTERSECTION_FILTER_PAUSE_TOPIC = "wall_follow/intersection_filter_pause"
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -35,17 +38,30 @@ class WallFollowNode(HealthPingingNode):
         super().__init__("wall_follow_node", "lidar")
         self.declare_parameter("scan_topic", "/scan")
         self.declare_parameter("output_topic", "/cmd_vel")
+        self.declare_parameter(
+            "intersection_filter_pause_sec", INTERSECTION_FILTER_PAUSE_SEC
+        )
 
         scan_topic = self.get_parameter("scan_topic").value
         output_topic = self.get_parameter("output_topic").value
+        self.intersection_filter_pause_sec = float(
+            self.get_parameter("intersection_filter_pause_sec").value
+        )
 
         self.create_subscription(LaserScan, scan_topic, self.lidar_callback, 10)
+        self.create_subscription(
+            Empty,
+            INTERSECTION_FILTER_PAUSE_TOPIC,
+            self.pause_intersection_filter_callback,
+            10,
+        )
         self.drive_pub = self.create_publisher(Twist, output_topic, 10)
         self.last_time = None
         self.last_steering = 0.0
         self.last_errors_window = np.array([])
         self._corner_detected = False
         self._corner_time = None
+        self._intersection_filter_paused_until_ns = 0
 
     def lidar_callback(self, scan: LaserScan):
         lidar_range_array = scan.ranges
@@ -139,6 +155,18 @@ class WallFollowNode(HealthPingingNode):
 
         return error_integral, error_diff
 
+    def pause_intersection_filter_callback(self, _msg: Empty):
+        now_ns = self.get_clock().now().nanoseconds
+        self._intersection_filter_paused_until_ns = now_ns + int(
+            self.intersection_filter_pause_sec * 1e9
+        )
+
+    def is_intersection_filter_paused(self) -> bool:
+        return (
+            self.get_clock().now().nanoseconds
+            < self._intersection_filter_paused_until_ns
+        )
+
     def send_control_command(self, speed: float, steering: float):
 
         angular_z = speed * math.tan(steering) / WHEELBASE
@@ -160,6 +188,11 @@ class WallFollowNode(HealthPingingNode):
     def filter_intersections(
         self, a, b, theta, initial_speed, initial_steering, scan: LaserScan, logger=None
     ):
+        # After a forward turn, let the rover reacquire the wall before
+        # re-enabling the intersection-specific steering overrides.
+        if self.is_intersection_filter_paused():
+            return initial_speed, initial_steering
+
         A = self.get_A_angle_deg(a, b, theta)
 
         INTERSECTION_HALF_CONE_ANGLE = 7

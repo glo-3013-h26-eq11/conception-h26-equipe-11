@@ -1,9 +1,11 @@
 from yasmin import State
 import rclpy
-from std_msgs.msg import String, Float32, Bool
+from std_msgs.msg import String, Float32, Bool, Empty
 from central_manager.enforcers.forward_turn_enforcer import ForwardTurnEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
+
+INTERSECTION_FILTER_PAUSE_TOPIC = "wall_follow/intersection_filter_pause"
 
 
 class TurningForwardState(State):
@@ -18,6 +20,10 @@ class TurningForwardState(State):
             Float32, "distance_to_car", self.distance_to_car_callback, 10
         )
 
+        self.intersection_filter_pause_publisher = node.create_publisher(
+            Empty, INTERSECTION_FILTER_PAUSE_TOPIC, 10
+        )
+
         self.car_follower_enforcer: CarFollowEnforcer = None
 
         node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
@@ -25,31 +31,41 @@ class TurningForwardState(State):
         self.node = node
 
         self.outcome = None
+        self.is_executing = False
 
     def turn_over_callback(self, msg: String):
+        if not self.is_executing:
+            return
+
+        self.intersection_filter_pause_publisher.publish(Empty())
         self.outcome = "turn_over"
 
     def distance_to_car_callback(self, msg: Float32):
-        if self.car_follower_enforcer:
+        if self.is_executing and self.car_follower_enforcer:
             self.car_follower_enforcer.update_distance(msg.data)
 
     def rover_stop_callback(self, msg: Bool):
-        if not msg.data:
+        if self.is_executing and not msg.data:
             self.outcome = "back_to_init"
 
     def execute(self, blackboard):
         self.outcome = None
+        self.is_executing = True
 
-        self.node.get_logger().info("TURNING_FORWARD state")
+        try:
+            self.node.get_logger().info("TURNING_FORWARD state")
 
-        self.car_follower_enforcer = CarFollowEnforcer()
+            self.car_follower_enforcer = CarFollowEnforcer()
 
-        blackboard[BLACKBOARD_ENFORCERS] = [
-            ForwardTurnEnforcer(self.turn_over_publisher),
-            self.car_follower_enforcer,
-        ]
+            blackboard[BLACKBOARD_ENFORCERS] = [
+                ForwardTurnEnforcer(self.turn_over_publisher),
+                self.car_follower_enforcer,
+            ]
 
-        while self.outcome is None:
-            rclpy.spin_once(self.node, timeout_sec=0.1)
+            while self.outcome is None:
+                rclpy.spin_once(self.node, timeout_sec=0.1)
 
-        return self.outcome
+            return self.outcome
+        finally:
+            self.is_executing = False
+            self.car_follower_enforcer = None
