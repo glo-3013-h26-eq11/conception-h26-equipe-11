@@ -61,7 +61,8 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
         if front_strict:
             selected_marker = min(front_strict, key=lambda m: m.get("depth", 9999))
             self.get_logger().info(
-                f"Front strict: Tag {selected_marker['tag']}, angle {selected_marker['angle_x_deg']}°"
+                f"Front strict: Tag {selected_marker['tag']}, "
+                f"angle {selected_marker['angle_x_deg']}°"
             )
 
         if not selected_marker:
@@ -69,7 +70,8 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             if front_wide:
                 selected_marker = min(front_wide, key=lambda m: m.get("depth", 9999))
                 self.get_logger().info(
-                    f"Front wide: Tag {selected_marker['tag']}, angle {selected_marker['angle_x_deg']}°"
+                    f"Front wide: Tag {selected_marker['tag']}, "
+                    f"angle {selected_marker['angle_x_deg']}°"
                 )
 
         if not selected_marker:
