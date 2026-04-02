@@ -25,6 +25,8 @@ class WallFollowingState(State):
         )
 
         node.create_subscription(Bool, "stop_over", self.stop_over, 10)
+        
+        node.create_subscription(Float32, "/wall_follower/alpha", self.alpha_callback, 10)
 
         self.stop_over_publisher = node.create_publisher(Bool, "stop_over", 10)
 
@@ -34,6 +36,8 @@ class WallFollowingState(State):
 
         self.stop_sign_enforcer: StopSignEnforcer = None
 
+        self.latest_alpha = 0.0
+
         self.outcome = None
 
         self.cooldown = None
@@ -41,6 +45,11 @@ class WallFollowingState(State):
         self.seen_tag = None
 
         self.previous_tag = None
+
+        self.blackboard = None
+
+    def alpha_callback(self, msg: Float32):
+        self.latest_alpha = msg.data
 
     def distance_to_car_callback(self, msg: Float32):
         if self.car_follower_enforcer:
@@ -61,6 +70,8 @@ class WallFollowingState(State):
 
     def stop_over(self, msg: Bool):
         self.node.get_logger().info("STOPPED : SAYS WALL FOLLOWER")
+        if self.blackboard is not None:
+            self.blackboard["arrival_alpha_rad"] = self.latest_alpha
         self.outcome = "current_node"
 
     def rover_stop_callback(self, msg: Bool):
@@ -68,6 +79,8 @@ class WallFollowingState(State):
             self.outcome = "back_to_init"
 
     def execute(self, blackboard):
+        self.blackboard = blackboard 
+
         self.outcome = None
 
         self.previous_tag = blackboard[BLACKBOARD_PREVIOUS_STOP_TAG]

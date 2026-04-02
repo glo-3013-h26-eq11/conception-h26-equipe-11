@@ -4,6 +4,7 @@ import rclpy
 from web_interface.system_health_node import HealthPingingNode
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Float32
 
 THETA_DEG = 60
 LOOKAHEAD = 1.0  # m
@@ -13,7 +14,7 @@ KP = 1.5
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 1.1  # radians
-SPEED = 0.4  # m/s
+SPEED = 0.3  # m/s
 WHEELBASE = 0.1  # m
 
 OBTUSE_ANGLE_THRESHOLD = 105  # degrees
@@ -38,6 +39,7 @@ class WallFollowNode(HealthPingingNode):
 
         scan_topic = self.get_parameter("scan_topic").value
         output_topic = self.get_parameter("output_topic").value
+        self.alpha_pub = self.create_publisher(Float32, "/wall_follower/alpha", 10)
 
         self.create_subscription(LaserScan, scan_topic, self.lidar_callback, 10)
         self.drive_pub = self.create_publisher(Twist, output_topic, 10)
@@ -93,6 +95,10 @@ class WallFollowNode(HealthPingingNode):
             (a_for_wall_follow * math.cos(theta_for_wall_follow) - b)
             / (a_for_wall_follow * math.sin(theta_for_wall_follow))
         )
+        msg = Float32()
+        msg.data = float(alpha)
+        self.alpha_pub.publish(msg)
+
         D_t = b * math.cos(alpha)
         D_tp1 = D_t + LOOKAHEAD * math.sin(alpha)
 
@@ -158,8 +164,8 @@ class WallFollowNode(HealthPingingNode):
     ):
         A = self.get_A_angle_deg(a, b, theta)
 
-        print(f"A : {A}")
-        print(f"b : {b}")
+        # print(f"A : {A}")
+        # print(f"b : {b}")
 
         if b > AFTER_CORNER_THRESHOLD:
 
