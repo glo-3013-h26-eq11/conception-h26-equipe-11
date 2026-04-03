@@ -6,14 +6,14 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
-LOOKAHEAD = 1.0  # m
-DESIRED_DISTANCE_FROM_WALL = 0.15  # m
+LOOKAHEAD = 0.35  # m
+DESIRED_DISTANCE_FROM_WALL = 0.12  # m
 INTEGRAL_WINDOW_SIZE = 20
-KP = 1.5
+KP = 5.0
 KD = 0.5
 KI = 0.05
 MAX_STEERING = 1.1  # radians
-SPEED = 0.2  # m/s
+SPEED = 0.20  # m/s
 WHEELBASE = 0.1  # m
 
 OBTUSE_ANGLE_THRESHOLD = 105  # degrees
@@ -66,6 +66,15 @@ class WallFollowNode(HealthPingingNode):
         b = angle_to_distance(theta_b, lidar_range_array, angle_min, angle_increment)
         c = angle_to_distance(theta_c, lidar_range_array, angle_min, angle_increment)
 
+        if (
+            not is_valid_lidar_scan(a)
+            or not is_valid_lidar_scan(b)
+            or not is_valid_lidar_scan(c)
+        ):
+            self.get_logger().warn("Invalid lidar scan, repeating last command")
+            self.send_control_command(SPEED, self.last_steering)
+            return
+
         A_a = self.get_A_angle_deg(a, b, theta)
         A_c = self.get_A_angle_deg(c, b, theta_c)
 
@@ -84,11 +93,6 @@ class WallFollowNode(HealthPingingNode):
             theta_for_wall_follow = theta_front
             a_for_wall_follow = front
 
-        if not is_valid_lidar_scan(a_for_wall_follow) or not is_valid_lidar_scan(b):
-            self.get_logger().warn("Invalid lidar scan, repeating last command")
-            self.send_control_command(SPEED, self.last_steering)
-            return
-
         alpha = math.atan(
             (a_for_wall_follow * math.cos(theta_for_wall_follow) - b)
             / (a_for_wall_follow * math.sin(theta_for_wall_follow))
@@ -106,7 +110,7 @@ class WallFollowNode(HealthPingingNode):
         steering = max(-MAX_STEERING, min(MAX_STEERING, steering))
 
         speed, steering = self.filter_intersections(
-            a, b, theta, speed, steering, logger=self.get_logger()
+            a, b, theta, speed, steering, scan, logger=self.get_logger()
         )
 
         self.send_control_command(speed, steering)
@@ -154,12 +158,13 @@ class WallFollowNode(HealthPingingNode):
         return A
 
     def filter_intersections(
-        self, a, b, theta, initial_speed, initial_steering, logger=None
+        self, a, b, theta, initial_speed, initial_steering, scan: LaserScan, logger=None
     ):
         A = self.get_A_angle_deg(a, b, theta)
 
-        print(f"A : {A}")
-        print(f"b : {b}")
+        INTERSECTION_HALF_CONE_ANGLE = 22
+
+        b = self.get_closest_point_in_half_cone(scan, 0, INTERSECTION_HALF_CONE_ANGLE)
 
         if b > AFTER_CORNER_THRESHOLD:
 
@@ -170,6 +175,28 @@ class WallFollowNode(HealthPingingNode):
             return SPEED, 0
 
         return initial_speed, initial_steering
+
+    def get_closest_point_in_half_cone(
+        self, scan: LaserScan, angle_start_deg, half_cone_angle_deg
+    ):
+        angles_deg = list(range(angle_start_deg, half_cone_angle_deg))
+
+        min = math.inf
+
+        for angle_deg in angles_deg:
+            angle_rad = math.radians(angle_deg)
+
+            distance = angle_to_distance(
+                angle_rad, scan.ranges, scan.angle_min, scan.angle_increment
+            )
+
+            if not math.isfinite(distance):
+                continue
+
+            if distance < min:
+                min = distance
+
+        return min
 
 
 def main(args=None):

@@ -60,13 +60,17 @@ def test_ros_logs_updates_web():
 
         page.wait_for_timeout(3000)
 
-        rosout_publisher_topic.publish()
-
         executor = SingleThreadedExecutor()
         executor.add_node(rosout_publisher_topic)
 
         start = time.time()
         while time.time() - start < 2:
+            executor.spin_once(timeout_sec=0.1)
+
+        rosout_publisher_topic.publish()
+
+        start = time.time()
+        while time.time() - start < 4:
             executor.spin_once(timeout_sec=0.1)
 
         expect(page.locator(".v-virtual-scroll__container")).to_contain_text(MESSAGE)
