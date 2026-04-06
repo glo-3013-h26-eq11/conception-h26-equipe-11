@@ -48,10 +48,10 @@ class WallFollowingState(State):
 
     def at_intersection_callback(self, msg: String):
         data = json.loads(msg.data)
-        
+
         distance = float(data.get("distance"))
         angle = float(data.get("angle"))
-        
+
         self.node.get_logger().info(f"Angle of the aruco : {angle}")
 
         self.seen_tag = data.get("tag")

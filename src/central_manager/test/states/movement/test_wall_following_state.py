@@ -46,7 +46,7 @@ def test_when_stop_over_and_current_node_then_transitions(state):
     pub = state.node.create_publisher(String, "current_node", 10)
     pub_stop_over = state.node.create_publisher(Bool, "stop_over", 10)
 
-    data = {"distance": 5}
+    data = {"distance": 5, "angle": 0.0}
     msg = String(data=json.dumps(data))
     pub.publish(msg)
 
