@@ -48,7 +48,11 @@ class WallFollowingState(State):
 
     def at_intersection_callback(self, msg: String):
         data = json.loads(msg.data)
+        
         distance = float(data.get("distance"))
+        angle = float(data.get("angle"))
+        
+        self.node.get_logger().info(f"Angle of the aruco : {angle}")
 
         self.seen_tag = data.get("tag")
 
@@ -58,6 +62,7 @@ class WallFollowingState(State):
 
         if self.stop_sign_enforcer:
             self.stop_sign_enforcer.update_distance(distance)
+            self.stop_sign_enforcer.update_relative_angle(angle)
 
     def stop_over(self, msg: Bool):
         self.node.get_logger().info("STOPPED : SAYS WALL FOLLOWER")

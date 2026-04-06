@@ -64,7 +64,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
 
                         out = String()
                         out.data = json.dumps(
-                            {"tag": marker_id, "distance": closest_stop_dist}
+                            {"tag": marker_id, "distance": closest_stop_dist, "angle": angle}
                         )
                         self.get_logger().info(f"validated current node : {out.data}")
                         self._current_node_pub.publish(out)

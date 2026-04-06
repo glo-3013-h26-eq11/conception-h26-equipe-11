@@ -13,6 +13,8 @@ DISTANCE_STALE_SEC: float = 0.5
 
 GOOD_ANGLE_ALIGNMENT = math.radians(3)
 
+ANGLE_CORRECTION_SPEED = 0.3 # rad/s
+
 
 class _State(Enum):
     IDLE = auto()
@@ -60,6 +62,16 @@ class StopSignEnforcer(Enforcer):
         dt = self._compute_delta_time()
 
         self.last_real_speed_timer += dt
+        
+    def correct_rover_left(self) -> Twist:
+        cmd = Twist()
+        cmd.linear.x = 0
+        cmd.angular.z = ANGLE_CORRECTION_SPEED
+    
+    def correct_rover_right(self) -> Twist:
+        cmd = Twist()
+        cmd.linear.x = 0
+        cmd.angular.z = -ANGLE_CORRECTION_SPEED
 
     def is_rover_at_valid_angle_from_aruco(self):
         return self._relative_angle > -GOOD_ANGLE_ALIGNMENT or self._relative_angle < GOOD_ANGLE_ALIGNMENT
@@ -106,6 +118,10 @@ class StopSignEnforcer(Enforcer):
 
         if self._state == _State.ADJUST_ANGLE:
             
+            if self._relative_angle < GOOD_ANGLE_ALIGNMENT:
+                cmd = self.correct_rover_left()
+            elif self._relative_angle > GOOD_ANGLE_ALIGNMENT:
+                cmd = self.correct_rover_right()
 
             if self.is_rover_at_valid_angle_from_aruco():
                 self._state = _State.OVER
@@ -114,6 +130,11 @@ class StopSignEnforcer(Enforcer):
                 data.data = True
 
                 self.stop_over_publisher.publish(data)
+                
+                return self.stop_robot(cmd)
+        
+        if self._state == _State.OVER:
+            return self.stop_robot(cmd)
 
         return cmd
 
