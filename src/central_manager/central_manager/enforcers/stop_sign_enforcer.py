@@ -4,18 +4,22 @@ from typing import Optional
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 from central_manager.enforcers.base_enforcer import Enforcer
+import math
 
 BRAKE_START_DIST: float = 0.75
 STOP_TARGET_DIST: float = 0.61
 STOP_DURATION: float = 1.0
 DISTANCE_STALE_SEC: float = 0.5
 
+GOOD_ANGLE_ALIGNMENT = math.radians(3)
+
 
 class _State(Enum):
     IDLE = auto()
     BRAKING = auto()
     STOPPED = auto()
-    COOLDOWN = auto()
+    ADJUST_ANGLE = auto()
+    OVER = auto()
 
 
 class StopSignEnforcer(Enforcer):
@@ -25,13 +29,13 @@ class StopSignEnforcer(Enforcer):
         super().__init__()
         self._state: _State = _State.IDLE
         self._stop_start: Optional[float] = None
-        self._cooldown_start: Optional[float] = None
 
         self.stop_duration: float = stop_duration
 
         self.stop_over_publisher = stop_over_publisher
 
         self._distance: Optional[float] = None
+        self._relative_angle = None
         self._last_update: float = 0.0
 
         self._logger = logger
@@ -39,7 +43,7 @@ class StopSignEnforcer(Enforcer):
         self._has_triggered: bool = False
 
     def is_done(self):
-        if self._state == _State.IDLE or self._state == _State.COOLDOWN:
+        if self._state == _State.IDLE or self._state == _State.OVER:
             return True
         else:
             return False
@@ -48,10 +52,17 @@ class StopSignEnforcer(Enforcer):
         self._distance = distance
         self._last_update = time.time()
 
+    def update_relative_angle(self, relative_angle):
+        self._relative_angle = relative_angle
+        self._last_update = time.time()
+
     def update_with_real_speed(self, real_speed_cmd: Twist):
         dt = self._compute_delta_time()
 
         self.last_real_speed_timer += dt
+
+    def is_rover_at_valid_angle_from_aruco(self):
+        return self._relative_angle > -GOOD_ANGLE_ALIGNMENT or self._relative_angle < GOOD_ANGLE_ALIGNMENT
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         now = time.time()
@@ -89,16 +100,20 @@ class StopSignEnforcer(Enforcer):
         if self._state == _State.STOPPED:
             elapsed = now - self._stop_start
             if elapsed >= self.stop_duration:
-                self._state = _State.COOLDOWN
-                self._cooldown_start = now
-                self._log("FIN STOP — mode COOLDOWN, wall follower peut reprendre")
+                self._log("FIN STOP — mode ADJUST_ANGLE")
 
+            return self.stop_robot(cmd)
+
+        if self._state == _State.ADJUST_ANGLE:
+            
+
+            if self.is_rover_at_valid_angle_from_aruco():
+                self._state = _State.OVER
+                
                 data = Bool()
                 data.data = True
 
                 self.stop_over_publisher.publish(data)
-
-            return self.stop_robot(cmd)
 
         return cmd
 
