@@ -43,7 +43,8 @@ class RoutePlannerNode(HealthPingingNode):
         )
 
         self.current_node: str | None = None
-        self.available_goals: list[str] = ["ZD1"]
+        self.constant_deposit_zone = "ZD1"
+        self.available_goals: list[str] = [self.constant_deposit_zone]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
     def handle_get_node_action_load(self, _request, response):
@@ -194,6 +195,7 @@ class RoutePlannerNode(HealthPingingNode):
                 load_goals.append(zc_goal)
 
         self.available_goals = sorted(set(load_goals))
+        self.available_goals.append(self.constant_deposit_zone)
         self.get_logger().info(
             f"Load goals refreshed from API/map: {self.available_goals}"
         )
