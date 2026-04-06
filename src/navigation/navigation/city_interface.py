@@ -4,7 +4,7 @@ import requests
 class CityInterface:
 
     def __init__(self):
-        self.URL = "http://designiii.ca/"
+        self.URL = "https://designiii.ca/"
 
     def set_url(self, url: str):
         self.URL = url
