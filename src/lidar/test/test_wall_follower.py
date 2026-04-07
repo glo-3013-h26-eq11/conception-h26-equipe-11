@@ -11,6 +11,7 @@ from lidar.wall_follower import (
     AFTER_CORNER_THRESHOLD,
     THETA_DEG,
     MAX_STEERING,
+    RIGHT_CORNER_SPEED,
 )
 
 
@@ -173,7 +174,7 @@ def test_when_big_b_then_steering_right_max(wall_follow_node):
     b = AFTER_CORNER_THRESHOLD + 0.1
     a = 0.5
 
-    initial_speed = 0.2
+    initial_speed = RIGHT_CORNER_SPEED
     initial_steering = 0.0
     theta_rad = math.radians(THETA_DEG)
 
