@@ -42,7 +42,7 @@ class TurningLeftState(State):
         except json.JSONDecodeError:
             return
 
-        gyro_z = data.get("gyro_z")
+        gyro_z = data.get("gz")
         if gyro_z is None:
             self.node.get_logger().info(f"no gyro_z")
             return
@@ -56,7 +56,6 @@ class TurningLeftState(State):
         self.last_imu_time = now
 
         self.accumulated_degrees += math.degrees(gyro_z) * dt
-        self.node.get_logger().info(f"Accumulated degrees: {self.accumulated_degrees:.2f}")
 
         if self._is_turn_done():
             self.node.get_logger().info(
