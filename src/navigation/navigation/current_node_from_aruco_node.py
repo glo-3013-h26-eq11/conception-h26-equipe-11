@@ -84,7 +84,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             d = float(marker.get("depth", 9999))
             angle = float(marker.get("angle_x_deg", 0))
             tag_id = int(marker.get("tag", 0))
-            
+
             if tag_id == FRONT_ARUCO_ID and abs(angle) <= 45.0:
                 continue
 
@@ -92,7 +92,6 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
                 continue
 
             if closest_vehicle_dist is None or d < closest_vehicle_dist:
-
 
                 closest_vehicle_dist = d
 
