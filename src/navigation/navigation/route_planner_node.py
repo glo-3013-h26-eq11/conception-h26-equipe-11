@@ -54,7 +54,7 @@ class RoutePlannerNode(HealthPingingNode):
         )
 
         self.current_node: str | None = None
-        self.constant_deposit_zone = "ZD1"
+        self.constant_deposit_zone = None
         self.available_goals: list[str] = [self.constant_deposit_zone]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
@@ -86,7 +86,7 @@ class RoutePlannerNode(HealthPingingNode):
             self.get_logger().error(f"Failed to parse map: {e}")
 
     def set_home_deposit_callback(self, msg):
-        self.home_deposit_zone = msg
+        self.constant_deposit_zone = msg
 
     def current_node_id_distance_callback(self, msg: String) -> None:
 
