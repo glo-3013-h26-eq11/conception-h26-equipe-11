@@ -19,8 +19,9 @@ WHEELBASE = 0.1  # m
 OBTUSE_ANGLE_THRESHOLD = 105  # degrees
 AFTER_CORNER_THRESHOLD = 0.5  # m
 
-INTERSECTION_HALF_CONE_ANGLE = 45 # degrees
+INTERSECTION_HALF_CONE_ANGLE = 45  # degrees
 RIGHT_CORNER_SPEED = 0.1
+
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
     index = int((theta_rad - angle_min) / angle_increment)
@@ -163,7 +164,9 @@ class WallFollowNode(HealthPingingNode):
         self, a, b, theta, initial_speed, initial_steering, scan: LaserScan, logger=None
     ):
 
-        b, b_angle_deg  = self.get_closest_point_in_half_cone(scan, 0, INTERSECTION_HALF_CONE_ANGLE)
+        b, b_angle_deg = self.get_closest_point_in_half_cone(
+            scan, 0, INTERSECTION_HALF_CONE_ANGLE
+        )
 
         A = self.get_A_angle_deg(a, b, theta - math.radians(b_angle_deg))
 
