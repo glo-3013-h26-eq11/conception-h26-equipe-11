@@ -43,10 +43,8 @@ class StopSignEnforcer(Enforcer):
 
         self._logger = logger
 
-        self._has_triggered: bool = False
-
     def is_done(self):
-        if self._state == _State.IDLE or self._state == _State.OVER:
+        if self._state == _State.OVER:
             return True
         else:
             return False
@@ -82,77 +80,69 @@ class StopSignEnforcer(Enforcer):
             and self._relative_angle < GOOD_ANGLE_ALIGNEMENT_RIGHT
         )
 
+    def stop_robot(self) -> Twist:
+        return Twist()
+
     def enforce_cmd(self, cmd: Twist) -> Twist:
         now = time.time()
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
         d = None if stale else self._distance
 
-        if self._has_triggered and (d is None or d > BRAKE_START_DIST):
-            self._has_triggered = False
-            cmd = self.switch_state(_State.IDLE, cmd)
-
-        if self._state == _State.IDLE and not self._has_triggered:
+        if self._state == _State.IDLE:
             if d is not None and d <= BRAKE_START_DIST:
-                self._has_triggered = True
-
-                cmd = self.switch_state(_State.BRAKING, cmd)
-
+                self.switch_state(_State.BRAKING)
                 self._log(f"STOP détecté à {d:.2f} m — freinage")
 
         if self._state == _State.BRAKING:
-            if d is None:
-                return cmd
-            if d <= STOP_TARGET_DIST:
+            if d is not None and d <= STOP_TARGET_DIST:
                 self._stop_start = now
                 self._log(
                     f"ARRÊT — distance {d:.2f} m, pause {self.stop_duration:.1f}s"
                 )
 
-                cmd = self.switch_state(_State.STOPPED, cmd)
+                self.switch_state(_State.STOPPED)
+                cmd = self.stop_robot()
 
-                return self.stop_robot(cmd)
-            factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
-            factor = max(0.0, min(1.0, factor))
-            out = Twist()
-            out.linear.x = max(cmd.linear.x * factor, 0.25)
-            out.angular.z = cmd.angular.z
-            return out
+            if d is not None:
+                factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
+                factor = max(0.0, min(1.0, factor))
+
+                cmd.linear.x = max(cmd.linear.x * factor, 0.25)
+                cmd.angular.z = 0.0 # Important pour ne pas perdre le Aruco
 
         if self._state == _State.STOPPED:
             elapsed = now - self._stop_start
             if elapsed >= self.stop_duration:
-                cmd = self.switch_state(_State.ADJUST_ANGLE, cmd)
+                self.switch_state(_State.ADJUST_ANGLE)
                 self._log("FIN STOP — mode ADJUST_ANGLE")
 
-            return self.stop_robot(cmd)
+            cmd = self.stop_robot()
 
         if self._state == _State.ADJUST_ANGLE:
-            self._log(f"adjust state : _relative angle {self._relative_angle}")
+            self._log(f"ADJUST : {self._relative_angle} deg")
 
-            if self._relative_angle is None:
-                return cmd
+            if self._relative_angle is not None:
 
-            if self._relative_angle < GOOD_ANGLE_ALIGNMENT_LEFT:
-                cmd = self.correct_rover_right()
-            elif self._relative_angle > GOOD_ANGLE_ALIGNEMENT_RIGHT:
-                cmd = self.correct_rover_left()
+                if self._relative_angle < GOOD_ANGLE_ALIGNMENT_LEFT:
+                    cmd = self.correct_rover_right()
 
-            if self.is_rover_at_valid_angle_from_aruco():
-                cmd = self.switch_state(_State.OVER, cmd)
+                elif self._relative_angle > GOOD_ANGLE_ALIGNEMENT_RIGHT:
+                    cmd = self.correct_rover_left()
+
+                if self.is_rover_at_valid_angle_from_aruco():
+                    cmd = self.switch_state(_State.OVER)
 
         if self._state == _State.OVER:
-
+            self._log("STOP OVER")
             data = Bool()
             data.data = True
             self.stop_over_publisher.publish(data)
-
-            return self.stop_robot(cmd)
+            cmd = self.stop_robot()
 
         return cmd
 
-    def switch_state(self, new_state:_State, cmd:Twist):
+    def switch_state(self, new_state:_State):
         self._state = new_state
-        return self.enforce_cmd(cmd)
 
     def _log(self, msg: str) -> None:
         if self._logger is not None:

@@ -9,7 +9,9 @@ from numpy import abs
 SAFE_DISTANCE_TO_CAR = 0.25  # m
 CAR_DETECTION_REFRESH = 0.5
 
-FRONT_CONE_DETECTION = 75.0
+FRONT_CONE_DETECTION = 60.0
+
+ARUCO_TILT_THRESHOLD = 35.0
 
 
 class CurrentNodeFromArucoNode(HealthPingingNode):
@@ -59,7 +61,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
 
             if depth <= 1.0 and angle <= FRONT_CONE_DETECTION and z_forward >= 0.15:
 
-                if abs(tag_angle) < 45.0:
+                if abs(tag_angle) < ARUCO_TILT_THRESHOLD:
                     if closest_stop_dist is None or depth < closest_stop_dist:
 
                         closest_stop_dist = depth
