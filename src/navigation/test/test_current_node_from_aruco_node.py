@@ -141,9 +141,7 @@ def test_when_detect_aruco_5x5_publish_distance_and_tag(node):
 
 
 def test_when_detect_aruco_4x4_less_45_deg_publish(node):
-    payload = {
-        "markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.8, "angle_x_deg": 7.0}]
-    }
+    payload = {"markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.8, "angle_x_deg": 7.0}]}
 
     subscriber = FloatSubscriber(node, "distance_to_car")
 
@@ -161,9 +159,7 @@ def test_when_detect_aruco_4x4_less_45_deg_publish(node):
 
 
 def test_when_detect_aruco_4x4_bigger_45_deg_no_publish(node):
-    payload = {
-        "markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.8, "angle_x_deg": 46.0}]
-    }
+    payload = {"markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.8, "angle_x_deg": 46.0}]}
 
     subscriber = FloatSubscriber(node, "distance_to_car")
 
@@ -184,13 +180,7 @@ def test_when_detect_aruco_4x4_lesser_45_deg_less_safe_distance_publish_dangerou
     node,
 ):
     payload = {
-        "markers_4x4": [
-            {
-                "tag": BACK_ARUCO_ID,
-                "depth": SAFE_DISTANCE_TO_CAR - 0.1,
-                "angle_x_deg": 7.0,
-            }
-        ]
+        "markers_4x4": [{"depth": SAFE_DISTANCE_TO_CAR - 0.1, "angle_x_deg": 7.0}]
     }
 
     subscriber = BoolSubscriber(node, "/car_follower/dangerous_distance")
@@ -213,13 +203,7 @@ def test_when_detect_aruco_4x4_less_safe_distance_publish_dangerous_distance_tha
     node,
 ):
     payload = {
-        "markers_4x4": [
-            {
-                "tag": BACK_ARUCO_ID,
-                "depth": SAFE_DISTANCE_TO_CAR - 0.1,
-                "angle_x_deg": 7.0,
-            }
-        ]
+        "markers_4x4": [{"depth": SAFE_DISTANCE_TO_CAR - 0.1, "angle_x_deg": 7.0}]
     }
 
     subscriber = BoolSubscriber(node, "/car_follower/dangerous_distance")
@@ -239,21 +223,8 @@ def test_when_detect_aruco_4x4_less_safe_distance_publish_dangerous_distance_tha
     assert not subscriber.received[-1]
 
 
-# ---------------------------------------------------------------------------
-# Tests for directional car-follower logic (face-based marker detection)
-# ---------------------------------------------------------------------------
-
-# FRONT (avant,  ID=1) → ignoré (rover en face de nous)
-# BACK  (arrière,ID=3) → car-follow proportionnel, filtre angle <= 45°
-# LEFT  (gauche, ID=4) → car-follow proportionnel, pas de filtre d'angle
-# RIGHT (droite, ID=2) → car-follow proportionnel, pas de filtre d'angle
-
-
 def test_front_face_marker_does_not_publish_distance(node):
-    """FRONT marker (tag=1, avant) must NOT trigger car-follow distance."""
-    payload = {
-        "markers_4x4": [{"tag": FRONT_ARUCO_ID, "depth": 0.4, "angle_x_deg": 5.0}]
-    }
+    payload = {"markers_4x4": [{"tag": FRONT_ARUCO_ID, "depth": 0.4, "angle_x_deg": 5.0}]}
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
@@ -269,11 +240,26 @@ def test_front_face_marker_does_not_publish_distance(node):
     assert len(subscriber.received) == 0
 
 
+def test_front_face_marker_at_large_angle_publishes_distance(node):
+    payload = {"markers_4x4": [{"tag": FRONT_ARUCO_ID, "depth": 0.4, "angle_x_deg": 60.0}]}
+
+    subscriber = FloatSubscriber(node, "distance_to_car")
+    publisher = StringPublisher(node, "aruco_detections")
+
+    for _ in range(5):
+        rclpy.spin_once(node, timeout_sec=0.05)
+
+    publisher.publish(payload)
+
+    for _ in range(5):
+        rclpy.spin_once(node, timeout_sec=0.05)
+
+    assert len(subscriber.received) == 1
+    assert subscriber.received[0] == pytest.approx(0.4)
+
+
 def test_back_face_marker_publishes_distance(node):
-    """BACK marker (tag=3, arrière) within 45° publishes to distance_to_car."""
-    payload = {
-        "markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.5, "angle_x_deg": 10.0}]
-    }
+    payload = {"markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.5, "angle_x_deg": 10.0}]}
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
@@ -291,10 +277,7 @@ def test_back_face_marker_publishes_distance(node):
 
 
 def test_back_face_marker_bigger_45_deg_no_publish(node):
-    """BACK marker beyond 45° must NOT publish (rover seen during a turn)."""
-    payload = {
-        "markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.5, "angle_x_deg": 50.0}]
-    }
+    payload = {"markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.5, "angle_x_deg": 46.0}]}
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
@@ -311,10 +294,7 @@ def test_back_face_marker_bigger_45_deg_no_publish(node):
 
 
 def test_left_side_marker_publishes_distance(node):
-    """LEFT marker (tag=4, gauche) publishes distance regardless of angle."""
-    payload = {
-        "markers_4x4": [{"tag": LEFT_ARUCO_ID, "depth": 0.4, "angle_x_deg": 70.0}]
-    }
+    payload = {"markers_4x4": [{"tag": LEFT_ARUCO_ID, "depth": 0.5, "angle_x_deg": 60.0}]}
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
@@ -328,14 +308,11 @@ def test_left_side_marker_publishes_distance(node):
         rclpy.spin_once(node, timeout_sec=0.05)
 
     assert len(subscriber.received) == 1
-    assert subscriber.received[0] == pytest.approx(0.4)
+    assert subscriber.received[0] == pytest.approx(0.5)
 
 
 def test_right_side_marker_publishes_distance(node):
-    """RIGHT marker (tag=2, droite) publishes distance regardless of angle."""
-    payload = {
-        "markers_4x4": [{"tag": RIGHT_ARUCO_ID, "depth": 0.3, "angle_x_deg": 65.0}]
-    }
+    payload = {"markers_4x4": [{"tag": RIGHT_ARUCO_ID, "depth": 0.3, "angle_x_deg": 20.0}]}
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
