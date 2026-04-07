@@ -1,4 +1,3 @@
-import time
 import pytest
 from geometry_msgs.msg import Twist
 from central_manager.enforcers.car_follow_enforcer import (
