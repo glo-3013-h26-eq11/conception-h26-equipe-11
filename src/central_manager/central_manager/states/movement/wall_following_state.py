@@ -52,8 +52,6 @@ class WallFollowingState(State):
         distance = float(data.get("distance"))
         angle = float(data.get("angle"))
 
-        self.node.get_logger().info(f"Angle of the aruco : {angle}")
-
         self.seen_tag = data.get("tag")
 
         if self.previous_tag is not None:

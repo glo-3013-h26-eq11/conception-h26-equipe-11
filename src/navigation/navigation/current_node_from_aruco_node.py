@@ -9,6 +9,8 @@ from numpy import abs
 SAFE_DISTANCE_TO_CAR = 0.25  # m
 CAR_DETECTION_REFRESH = 0.5
 
+FRONT_CONE_DETECTION = 75.0
+
 
 class CurrentNodeFromArucoNode(HealthPingingNode):
     def __init__(self):
@@ -55,7 +57,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             tag_angle = float(marker.get("tag_angle", 0))
             marker_id = marker.get("tag")
 
-            if depth <= 1.0 and angle <= 15.0 and z_forward >= 0.15:
+            if depth <= 1.0 and angle <= FRONT_CONE_DETECTION and z_forward >= 0.15:
 
                 if abs(tag_angle) < 45.0:
                     if closest_stop_dist is None or depth < closest_stop_dist:
@@ -70,7 +72,6 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
                                 "angle": tag_angle,
                             }
                         )
-                        self.get_logger().info(f"validated current node : {out.data}")
                         self._current_node_pub.publish(out)
 
     def _detect_cars(self, payload):

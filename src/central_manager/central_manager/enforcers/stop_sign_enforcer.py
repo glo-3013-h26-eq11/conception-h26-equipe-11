@@ -11,9 +11,10 @@ STOP_TARGET_DIST: float = 0.61
 STOP_DURATION: float = 1.0
 DISTANCE_STALE_SEC: float = 0.5
 
-GOOD_ANGLE_ALIGNMENT = math.radians(3)
+GOOD_ANGLE_ALIGNMENT_LEFT = -9.0
+GOOD_ANGLE_ALIGNEMENT_RIGHT = 2.0
 
-ANGLE_CORRECTION_SPEED = 0.3  # rad/s
+ANGLE_CORRECTION_SPEED = 0.7  # rad/s
 
 
 class _State(Enum):
@@ -65,18 +66,20 @@ class StopSignEnforcer(Enforcer):
 
     def correct_rover_left(self) -> Twist:
         cmd = Twist()
-        cmd.linear.x = 0
+        cmd.linear.x = 0.0
         cmd.angular.z = ANGLE_CORRECTION_SPEED
+        return cmd
 
     def correct_rover_right(self) -> Twist:
         cmd = Twist()
-        cmd.linear.x = 0
+        cmd.linear.x = 0.0
         cmd.angular.z = -ANGLE_CORRECTION_SPEED
+        return cmd
 
     def is_rover_at_valid_angle_from_aruco(self):
         return (
-            self._relative_angle > -GOOD_ANGLE_ALIGNMENT
-            or self._relative_angle < GOOD_ANGLE_ALIGNMENT
+            self._relative_angle > GOOD_ANGLE_ALIGNMENT_LEFT
+            and self._relative_angle < GOOD_ANGLE_ALIGNEMENT_RIGHT
         )
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
@@ -86,24 +89,27 @@ class StopSignEnforcer(Enforcer):
 
         if self._has_triggered and (d is None or d > BRAKE_START_DIST):
             self._has_triggered = False
-            self._state = _State.IDLE
-            self._cooldown_start = None
+            cmd = self.switch_state(_State.IDLE, cmd)
 
         if self._state == _State.IDLE and not self._has_triggered:
             if d is not None and d <= BRAKE_START_DIST:
-                self._state = _State.BRAKING
                 self._has_triggered = True
+
+                cmd = self.switch_state(_State.BRAKING, cmd)
+
                 self._log(f"STOP détecté à {d:.2f} m — freinage")
 
         if self._state == _State.BRAKING:
             if d is None:
                 return cmd
             if d <= STOP_TARGET_DIST:
-                self._state = _State.STOPPED
                 self._stop_start = now
                 self._log(
                     f"ARRÊT — distance {d:.2f} m, pause {self.stop_duration:.1f}s"
                 )
+
+                cmd = self.switch_state(_State.STOPPED, cmd)
+
                 return self.stop_robot(cmd)
             factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
             factor = max(0.0, min(1.0, factor))
@@ -115,21 +121,24 @@ class StopSignEnforcer(Enforcer):
         if self._state == _State.STOPPED:
             elapsed = now - self._stop_start
             if elapsed >= self.stop_duration:
-                self._state = _State.ADJUST_ANGLE
+                cmd = self.switch_state(_State.ADJUST_ANGLE, cmd)
                 self._log("FIN STOP — mode ADJUST_ANGLE")
 
             return self.stop_robot(cmd)
 
         if self._state == _State.ADJUST_ANGLE:
+            self._log(f"adjust state : _relative angle {self._relative_angle}")
 
-            if self._relative_angle < GOOD_ANGLE_ALIGNMENT:
-                cmd = self.correct_rover_left()
-            elif self._relative_angle > GOOD_ANGLE_ALIGNMENT:
+            if self._relative_angle is None:
+                return cmd
+
+            if self._relative_angle < GOOD_ANGLE_ALIGNMENT_LEFT:
                 cmd = self.correct_rover_right()
+            elif self._relative_angle > GOOD_ANGLE_ALIGNEMENT_RIGHT:
+                cmd = self.correct_rover_left()
 
             if self.is_rover_at_valid_angle_from_aruco():
-                self._state = _State.OVER
-                return self.stop_robot(cmd)
+                cmd = self.switch_state(_State.OVER, cmd)
 
         if self._state == _State.OVER:
 
@@ -140,6 +149,10 @@ class StopSignEnforcer(Enforcer):
             return self.stop_robot(cmd)
 
         return cmd
+
+    def switch_state(self, new_state:_State, cmd:Twist):
+        self._state = new_state
+        return self.enforce_cmd(cmd)
 
     def _log(self, msg: str) -> None:
         if self._logger is not None:
