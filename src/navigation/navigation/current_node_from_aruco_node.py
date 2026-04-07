@@ -5,7 +5,7 @@ import rclpy
 from std_msgs.msg import String, Float32, Bool
 from web_interface.system_health_node import HealthPingingNode
 
-SAFE_DISTANCE_TO_CAR = 0.15  # m
+SAFE_DISTANCE_TO_CAR = 0.20  # m
 CAR_DETECTION_REFRESH = 0.5
 
 FRONT_ARUCO_ID = 1
@@ -81,14 +81,15 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             d = float(marker.get("depth", 9999))
             angle = float(marker.get("angle_x_deg", 0))
             tag_id = int(marker.get("tag", 0))
-
-            if tag_id == FRONT_ARUCO_ID:
+            
+            if tag_id == FRONT_ARUCO_ID and abs(angle) <= 45.0:
                 continue
 
-            if tag_id == BACK_ARUCO_ID and angle > 45.0:
+            if tag_id == BACK_ARUCO_ID and abs(angle) > 45.0:
                 continue
 
             if closest_vehicle_dist is None or d < closest_vehicle_dist:
+
 
                 closest_vehicle_dist = d
 
