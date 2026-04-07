@@ -28,6 +28,12 @@ def node():
     }
     route_selector = RouteSelector(graph=temp_graph)
     route_planner_node = RoutePlannerNode(route_selector=route_selector)
+    route_planner_node._city_interface.get_cranes = lambda: {
+        "cranes": [
+            {"id": 1, "nb_tokens": 1},
+            {"id": 2, "nb_tokens": 0},
+        ]
+    }
 
     yield route_planner_node
 
@@ -334,3 +340,17 @@ def test_when_handle_get_node_action_deposit_then_current_then_nodes_published_(
 
     assert len(received) == 2
     assert received[-1][-1] == "ZD1"
+
+
+def test_when_refresh_available_load_goals_then_keeps_only_zc_in_map_with_tokens(node):
+    node._city_interface.get_cranes = lambda: {
+        "cranes": [
+            {"id": 1, "nb_tokens": 2},
+            {"id": 2, "nb_tokens": 5},
+            {"id": 3, "nb_tokens": 0},
+        ]
+    }
+
+    node._refresh_available_load_goals_from_city_interface()
+
+    assert node.available_goals == ["ZC1"]
