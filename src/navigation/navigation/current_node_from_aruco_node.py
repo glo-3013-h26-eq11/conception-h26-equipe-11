@@ -67,7 +67,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
                             {
                                 "tag": marker_id,
                                 "distance": closest_stop_dist,
-                                "angle": angle,
+                                "angle": tag_angle,
                             }
                         )
                         self.get_logger().info(f"validated current node : {out.data}")
