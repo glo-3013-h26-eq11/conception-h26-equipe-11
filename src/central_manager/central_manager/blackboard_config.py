@@ -1,0 +1,2 @@
+BLACKBOARD_ENFORCERS = "enforcers"
+BLACKBOARD_PREVIOUS_STOP_TAG = "previous_stop_tag"

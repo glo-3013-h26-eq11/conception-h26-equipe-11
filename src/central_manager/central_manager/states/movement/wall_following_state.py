@@ -4,9 +4,10 @@ from std_msgs.msg import String, Float32, Bool
 import json
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
-import time
-
-COOLDOWN_TIME = 2.0
+from central_manager.blackboard_config import (
+    BLACKBOARD_ENFORCERS,
+    BLACKBOARD_PREVIOUS_STOP_TAG,
+)
 
 
 class WallFollowingState(State):
@@ -66,16 +67,10 @@ class WallFollowingState(State):
         if not msg.data:
             self.outcome = "back_to_init"
 
-    def update_cooldown(self):
-        self.cooldown = time.monotonic()
-
-    def is_cooldown_over(self):
-        return self.cooldown is None or time.monotonic() - self.cooldown > COOLDOWN_TIME
-
     def execute(self, blackboard):
         self.outcome = None
 
-        self.previous_tag = blackboard["previous_stop_tag"]
+        self.previous_tag = blackboard[BLACKBOARD_PREVIOUS_STOP_TAG]
 
         self.node.get_logger().info("WALL_FOLLOWING_STATE state")
 
@@ -85,11 +80,14 @@ class WallFollowingState(State):
             self.stop_over_publisher, logger=self.node.get_logger()
         )
 
-        blackboard["enforcers"] = [self.stop_sign_enforcer, self.car_follower_enforcer]
+        blackboard[BLACKBOARD_ENFORCERS] = [
+            self.stop_sign_enforcer,
+            self.car_follower_enforcer,
+        ]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)
 
-        blackboard["previous_stop_tag"] = self.seen_tag
+        blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = self.seen_tag
 
         return self.outcome

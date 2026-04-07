@@ -4,6 +4,10 @@ from yasmin import State
 from std_msgs.msg import Bool, String
 import rclpy
 from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
+from central_manager.blackboard_config import (
+    BLACKBOARD_ENFORCERS,
+    BLACKBOARD_PREVIOUS_STOP_TAG,
+)
 
 
 class InitialState(State):
@@ -47,7 +51,7 @@ class InitialState(State):
 
         self.node.get_logger().info("INITIAL state")
 
-        blackboard["enforcers"] = [ImmobileEnforcer()]
+        blackboard[BLACKBOARD_ENFORCERS] = [ImmobileEnforcer()]
 
         blackboard["previous_stop_tag"] = None
         blackboard["home_deposit_zone"] = self.home_deposit_zone

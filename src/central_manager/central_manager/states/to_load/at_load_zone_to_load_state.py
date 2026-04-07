@@ -2,6 +2,7 @@ from yasmin import State
 import rclpy
 from std_msgs.msg import String, Bool
 from central_manager.enforcers.wait_at_load_enforcer import WaitAtLoadEnforcer
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 class AtLoadZoneToLoad(State):
@@ -41,7 +42,7 @@ class AtLoadZoneToLoad(State):
         self.node.get_logger().info("WAIT_AT_LOAD_ZONE state")
 
         self.wait_at_load_enforcer = WaitAtLoadEnforcer(self.load_over_publisher)
-        blackboard["enforcers"] = [self.wait_at_load_enforcer]
+        blackboard[BLACKBOARD_ENFORCERS] = [self.wait_at_load_enforcer]
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)

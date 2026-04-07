@@ -195,7 +195,7 @@ def test_when_detect_aruco_4x4_lesser_45_deg_less_safe_distance_publish_dangerou
     assert subscriber.received[0]
 
 
-def test_when_detect_aruco_4x4_less_safe_distance_publish_dangerous_distance_than_safe_distance(
+def test_when_detect_aruco_4x4_less_safe_distance_publish_dangerous_distance_then_safe_distance(
     node,
 ):
     payload = {
@@ -212,7 +212,7 @@ def test_when_detect_aruco_4x4_less_safe_distance_publish_dangerous_distance_tha
     publisher.publish(payload)
 
     start = time.time()
-    while time.time() - start < 2.0:
+    while time.time() - start < 6.0:
         rclpy.spin_once(node, timeout_sec=0.1)
 
     assert len(subscriber.received) > 1

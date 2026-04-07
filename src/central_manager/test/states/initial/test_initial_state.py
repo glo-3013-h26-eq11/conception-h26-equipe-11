@@ -7,6 +7,7 @@ from std_msgs.msg import Bool
 from rclpy.node import Node
 
 from central_manager.states.initial.initial_state import InitialState
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 @pytest.fixture(scope="module")
@@ -20,7 +21,7 @@ def test_initial_state_transitions_to_system_ready(rclpy_init):
     node = Node("test_initial_state_node")
     state = InitialState(node)
 
-    blackboard = {"node": node, "enforcers": []}
+    blackboard = {"node": node, BLACKBOARD_ENFORCERS: []}
     outcome_holder = {}
 
     def run_state():
@@ -38,6 +39,6 @@ def test_initial_state_transitions_to_system_ready(rclpy_init):
     thread.join(timeout=2.0)
 
     assert outcome_holder.get("outcome") == "system_ready"
-    assert len(blackboard["enforcers"]) == 1
+    assert len(blackboard[BLACKBOARD_ENFORCERS]) == 1
 
     node.destroy_node()

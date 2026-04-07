@@ -5,6 +5,7 @@ from central_manager.states.to_load.at_intersection_to_load_state import (
     AtIntersectionToLoadState,
 )
 from central_manager.states.node_action_enum import NodeAction
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 @pytest.fixture
@@ -13,7 +14,7 @@ def blackboard_mock():
     node_mock = MagicMock()
     node_mock.get_logger.return_value = logger_mock
 
-    return {"node": node_mock, "enforcers": []}
+    return {"node": node_mock, BLACKBOARD_ENFORCERS: []}
 
 
 @pytest.mark.parametrize(
@@ -35,7 +36,7 @@ def test_at_intersection_to_load_state_outcomes(
         outcome = state.execute(blackboard_mock)
 
     assert outcome == expected_outcome
-    assert len(blackboard_mock["enforcers"]) == 1
+    assert len(blackboard_mock[BLACKBOARD_ENFORCERS]) == 1
 
 
 def test_invalid_node_action_logs_error(blackboard_mock):

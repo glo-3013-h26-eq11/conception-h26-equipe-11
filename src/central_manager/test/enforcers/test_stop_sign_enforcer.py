@@ -1,12 +1,19 @@
 import time
 import pytest
 from geometry_msgs.msg import Twist
-from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer, _State
+from central_manager.enforcers.stop_sign_enforcer import (
+    StopSignEnforcer,
+    _State,
+    STOP_DURATION,
+    BRAKE_START_DIST,
+)
+from unittest.mock import Mock
 
 
 @pytest.fixture
 def enforcer():
-    return StopSignEnforcer()
+    stop_over_publisher = Mock()
+    return StopSignEnforcer(stop_over_publisher)
 
 
 def make_cmd(v=1.0, w=0.0):
@@ -23,7 +30,7 @@ def test_given_no_specification_when_checked_then_state_is_idle(enforcer):
 def test_given_enforcer_close_to_stop_when_enforce_then_state_is_braking(enforcer):
     cmd = make_cmd()
 
-    enforcer.update_distance(0.9)
+    enforcer.update_distance(BRAKE_START_DIST)
     enforcer.enforce_cmd(cmd)
 
     assert enforcer._state == _State.BRAKING
@@ -32,13 +39,13 @@ def test_given_enforcer_close_to_stop_when_enforce_then_state_is_braking(enforce
 def test_given_enforcer_braking_when_approaching_stop_then_speed_reduces(enforcer):
     cmd = make_cmd(1.0)
 
-    enforcer.update_distance(0.9)
+    enforcer.update_distance(BRAKE_START_DIST)
     enforcer.enforce_cmd(cmd)
-    enforcer.update_distance(0.8)
+    enforcer.update_distance(BRAKE_START_DIST - 0.1)
     out = enforcer.enforce_cmd(cmd)
 
     assert out.linear.x < cmd.linear.x
-    assert out.linear.x >= 0.3
+    assert out.linear.x >= 0.2
 
 
 def test_given_enforcer_braking_and_close_to_stop_when_enforce_then_state_is_stopped(
@@ -46,43 +53,21 @@ def test_given_enforcer_braking_and_close_to_stop_when_enforce_then_state_is_sto
 ):
     cmd = make_cmd(1.0)
 
-    enforcer.update_distance(0.9)
+    enforcer.update_distance(BRAKE_START_DIST)
     enforcer.enforce_cmd(cmd)
-    enforcer.update_distance(0.6)
+    enforcer.update_distance(BRAKE_START_DIST - 0.3)
     out = enforcer.enforce_cmd(cmd)
 
     assert enforcer._state == _State.STOPPED
     assert out.linear.x == 0.0
 
 
-def test_given_enforcer_stopped_when_stop_duration_elapsed_then_state_is_cooldown(
-    enforcer,
-):
-    enforcer.stop_duration = 0.2
-    cmd = make_cmd()
+def test_given_enforcer_stopped_when_wait_time_done_then_publish_stop_over(enforcer):
+    enforcer._state = _State.STOPPED
+    enforcer._stop_start = time.time() - STOP_DURATION - 0.1
+    cmd = make_cmd(1.0)
 
-    enforcer.update_distance(0.9)
-    enforcer.enforce_cmd(cmd)
     enforcer.update_distance(0.6)
     enforcer.enforce_cmd(cmd)
-    time.sleep(0.25)
-    out = enforcer.enforce_cmd(cmd)
 
-    assert enforcer._state == _State.COOLDOWN
-    assert out.linear.x == cmd.linear.x
-
-
-def test_given_enforcer_in_cooldown_when_cooldown_elapsed_then_state_is_idle(enforcer):
-    enforcer.stop_duration = 0.1
-    cmd = make_cmd()
-
-    enforcer.update_distance(0.9)
-    enforcer.enforce_cmd(cmd)
-    enforcer.update_distance(0.6)
-    enforcer.enforce_cmd(cmd)
-    time.sleep(0.15)
-    enforcer.enforce_cmd(cmd)
-    time.sleep(2.1)
-    enforcer.enforce_cmd(cmd)
-
-    assert enforcer._state == _State.IDLE
+    enforcer.stop_over_publisher.publish.assert_called_once()

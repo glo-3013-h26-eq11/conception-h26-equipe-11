@@ -4,6 +4,7 @@ from central_manager.states.node_action_enum import NodeAction
 from rclpy.node import Node
 from navigation_interfaces.srv import GetNodeAction
 import rclpy
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 class AtIntersectionToLoadState(State):
@@ -29,7 +30,7 @@ class AtIntersectionToLoadState(State):
 
         self.node.get_logger().info("AT_INTERSECTION_TO_LOAD state")
 
-        blackboard["enforcers"] = [ImmobileEnforcer()]
+        blackboard[BLACKBOARD_ENFORCERS] = [ImmobileEnforcer()]
 
         node_action = self.get_current_node_action()
 
@@ -52,9 +53,7 @@ class AtIntersectionToLoadState(State):
             self.outcome = "back_to_init"
 
         else:
-            blackboard["node"].get_logger().error(
-                f"INVALID node action : {self.outcome}"
-            )
+            self.node.get_logger().error(f"INVALID node action : {self.outcome}")
 
         self.node.get_logger().info(f"Node action : {self.outcome}")
 

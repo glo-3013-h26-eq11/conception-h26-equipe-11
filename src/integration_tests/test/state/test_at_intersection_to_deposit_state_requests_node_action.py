@@ -8,6 +8,7 @@ from central_manager.states.to_deposit.at_intersection_to_deposit_state import (
     AtIntersectionToDepositState,
 )
 import pytest
+from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -32,7 +33,7 @@ def test_route_planner_service_integration():
     time.sleep(0.5)
 
     state = AtIntersectionToDepositState(test_node)
-    blackboard = {"node": test_node, "enforcers": []}
+    blackboard = {"node": test_node, BLACKBOARD_ENFORCERS: []}
 
     outcome = state.execute(blackboard)
 

@@ -3,6 +3,7 @@ import rclpy
 from web_interface.system_health_node import HealthPingingNode
 from std_msgs.msg import String
 from navigation.goal_selector import GoalMode, GoalSelector
+from navigation.city_interface import CityInterface
 from navigation.route_selector import RouteSelector
 from central_manager.states.node_action_enum import NodeAction
 from navigation_interfaces.srv import GetNodeAction
@@ -14,10 +15,18 @@ class RoutePlannerNode(HealthPingingNode):
 
         self._route_selector = route_selector
         self._goal_selector = GoalSelector(route_selector) if route_selector else None
+        self._city_interface = CityInterface()
+        # a voir comment on se fait donner le vehicle_id
+        self.declare_parameter("vehicle_id", 99)
+        self._vehicle_id: int = int(self.get_parameter("vehicle_id").value)
 
         self.subscription_current = self.create_subscription(
             String, "current_node", self.current_node_id_distance_callback, 10
         )
+
+        self.home_deposit_sub = self.create_subscription(
+                String, "home_deposit_zone", self.set_home_deposit_callback, 10
+            )
 
         self.home_deposit_sub = self.create_subscription(
                 String, "home_deposit_zone", self.set_home_deposit_callback, 10
@@ -45,10 +54,8 @@ class RoutePlannerNode(HealthPingingNode):
         )
 
         self.current_node: str | None = None
-        # Hardcode temporaire.
-        # On va utiliser city_interface quand le reste sera stable.
-        self.home_deposit_zone = None
-        self.available_goals: list[str] = ["ZC1", "ZD1"]
+        self.constant_deposit_zone = "ZD1"
+        self.available_goals: list[str] = [self.constant_deposit_zone]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
     def handle_get_node_action_load(self, _request, response):
@@ -105,6 +112,8 @@ class RoutePlannerNode(HealthPingingNode):
             return NodeAction.BACK_TO_INIT.value
 
         self.goal_mode = mode.value
+        if mode == GoalMode.GO_LOAD:
+            self._refresh_available_load_goals_from_city_interface()
 
         goal_node = self._select_goal_for_mode(mode)
         result = self._route_selector.compute_path(self.current_node, goal_node)
@@ -123,6 +132,7 @@ class RoutePlannerNode(HealthPingingNode):
             msg_nodes = String()
             msg_nodes.data = json.dumps(nodes_path)
             self.publisher_nodes.publish(msg_nodes)
+            self._post_nodes_path_to_city_interface(nodes_path)
 
         if not directions_path:
             return wait_action.value
@@ -141,6 +151,20 @@ class RoutePlannerNode(HealthPingingNode):
 
         return direction_to_action.get(next_direction, wait_action.value)
 
+    def _post_nodes_path_to_city_interface(self, nodes_path: list[str]) -> None:
+        if not nodes_path:
+            return
+
+        try:
+            self._city_interface.post_vehicle_with_id(self._vehicle_id, nodes_path)
+            self.get_logger().info(
+                f"Posted route_plan/nodes to city API for vehicle={self._vehicle_id}: {nodes_path}"
+            )
+        except Exception as e:
+            self.get_logger().warning(
+                f"Failed posting route_plan/nodes to city API for vehicle={self._vehicle_id}: {e}"
+            )
+
     def _select_goal_for_mode(self, mode: GoalMode) -> str:
         if self._route_selector is None:
             return self.current_node
@@ -156,6 +180,54 @@ class RoutePlannerNode(HealthPingingNode):
         if selected is None:
             return self.current_node
         return selected
+
+    def _refresh_available_load_goals_from_city_interface(self) -> None:
+        if self._route_selector is None:
+            return
+
+        try:
+            payload = self._city_interface.get_cranes()
+        except Exception as e:
+            self.get_logger().warning(f"Failed to refresh ZC goals from city API: {e}")
+            return
+
+        if not isinstance(payload, dict):
+            self.get_logger().warning("Invalid cranes payload format from city API.")
+            return
+
+        cranes = payload.get("cranes", [])
+        if not isinstance(cranes, list):
+            self.get_logger().warning("Invalid 'cranes' field format from city API.")
+            return
+
+        city_nodes = set(self._route_selector.graph.keys())
+        load_goals: list[str] = []
+
+        for crane in cranes:
+            if not isinstance(crane, dict):
+                continue
+
+            crane_id = crane.get("id")
+            nb_tokens = crane.get("nb_tokens", 0)
+
+            if crane_id is None:
+                continue
+
+            try:
+                if int(nb_tokens) <= 0:
+                    continue
+            except (TypeError, ValueError):
+                continue
+
+            zc_goal = f"ZC{crane_id}"
+            if zc_goal in city_nodes:
+                load_goals.append(zc_goal)
+
+        self.available_goals = sorted(set(load_goals))
+        self.available_goals.append(self.constant_deposit_zone)
+        self.get_logger().info(
+            f"Load goals refreshed from API/map: {self.available_goals}"
+        )
 
     def _try_compute_route(self) -> None:
         if self._route_selector is None:

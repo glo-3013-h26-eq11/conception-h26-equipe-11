@@ -1,5 +1,9 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from central_manager.state_machine import StateMachineRover
+from central_manager.blackboard_config import (
+    BLACKBOARD_ENFORCERS,
+    BLACKBOARD_PREVIOUS_STOP_TAG,
+)
 from web_interface.system_health_node import HealthPingingNode
 from geometry_msgs.msg import Twist
 from typing import List
@@ -20,8 +24,8 @@ class EnforcerManagerNode(HealthPingingNode):
 
         self.blackboard = Blackboard()
 
-        self.blackboard["enforcers"] = []
-        self.blackboard["previous_stop_tag"] = None
+        self.blackboard[BLACKBOARD_ENFORCERS] = []
+        self.blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
 
         self.sm = StateMachineRover(self)
 
@@ -29,7 +33,7 @@ class EnforcerManagerNode(HealthPingingNode):
         self._sm_thread.start()
 
     def _get_enforcers(self) -> List[Enforcer]:
-        return self.blackboard["enforcers"]
+        return self.blackboard[BLACKBOARD_ENFORCERS]
 
     def _run_sm(self):
         self.get_logger().info("Starting the state machine...")
