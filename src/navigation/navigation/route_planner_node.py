@@ -47,6 +47,7 @@ class RoutePlannerNode(HealthPingingNode):
         self.current_node: str | None = None
         # Hardcode temporaire.
         # On va utiliser city_interface quand le reste sera stable.
+        self.home_deposit_zone = None
         self.available_goals: list[str] = ["ZC1", "ZD1"]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
@@ -78,7 +79,7 @@ class RoutePlannerNode(HealthPingingNode):
             self.get_logger().error(f"Failed to parse map: {e}")
 
     def set_home_deposit_callback(self, msg):
-        self.available_goals.append[msg]
+        self.home_deposit_zone = msg
 
     def current_node_id_distance_callback(self, msg: String) -> None:
 
