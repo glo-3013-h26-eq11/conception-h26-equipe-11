@@ -55,9 +55,10 @@ def main(args=None):
 
     enforcer_manager_node = EnforcerManagerNode()
 
-    rclpy.spin(enforcer_manager_node)
-
-    enforcer_manager_node.destroy_node()
+    try:
+        rclpy.spin(enforcer_manager_node)
+    finally:
+        enforcer_manager_node.destroy_node()
 
     rclpy.shutdown()
 

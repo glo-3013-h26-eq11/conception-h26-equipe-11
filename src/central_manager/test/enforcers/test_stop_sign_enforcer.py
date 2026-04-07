@@ -8,6 +8,7 @@ from central_manager.enforcers.stop_sign_enforcer import (
     BRAKE_START_DIST,
 )
 from unittest.mock import Mock
+import math
 
 
 @pytest.fixture
@@ -62,12 +63,68 @@ def test_given_enforcer_braking_and_close_to_stop_when_enforce_then_state_is_sto
     assert out.linear.x == 0.0
 
 
-def test_given_enforcer_stopped_when_wait_time_done_then_publish_stop_over(enforcer):
+def test_given_enforcer_stopped_when_wait_time_done_then_adjust(enforcer):
     enforcer._state = _State.STOPPED
     enforcer._stop_start = time.time() - STOP_DURATION - 0.1
+    enforcer._relative_angle = 0
     cmd = make_cmd(1.0)
 
     enforcer.update_distance(0.6)
     enforcer.enforce_cmd(cmd)
 
-    enforcer.stop_over_publisher.publish.assert_called_once()
+    assert enforcer._state == _State.ADJUST_ANGLE
+
+
+def test_given_rover_too_left_when_adjust_then_adjust_right(enforcer):
+    enforcer._state = _State.ADJUST_ANGLE
+    enforcer._relative_angle = math.radians(-50)
+
+    cmd = make_cmd(1.0)
+
+    result_cmd = enforcer.enforce_cmd(cmd)
+
+    assert result_cmd.linear.x == 0
+    assert result_cmd.angular.z == enforcer.correct_rover_right()
+
+
+def test_given_rover_too_right_when_adjust_then_adjust_left(enforcer):
+    enforcer._state = _State.ADJUST_ANGLE
+    enforcer._relative_angle = math.radians(50)
+
+    cmd = make_cmd(1.0)
+
+    result_cmd = enforcer.enforce_cmd(cmd)
+
+    assert result_cmd.linear.x == 0
+    assert result_cmd.angular.z == enforcer.correct_rover_left()
+
+
+def test_given_rover_angle_perfect_when_enforce_then_over(enforcer):
+    enforcer._state = _State.ADJUST_ANGLE
+    enforcer._relative_angle = 0
+
+    cmd = make_cmd(1.0)
+
+    enforcer.enforce_cmd(cmd)
+
+    assert enforcer._state == _State.OVER
+
+
+def test_given_rover_angle_perfect_when_enforce_then_stop_cmd(enforcer):
+    enforcer._state = _State.ADJUST_ANGLE
+    enforcer._relative_angle = 0
+
+    cmd = make_cmd(1.0)
+
+    result_cmd = enforcer.enforce_cmd(cmd)
+
+    assert result_cmd == Twist()
+
+
+def test_given_enforcer_over_then_stop_cmd(enforcer):
+    enforcer._state = _State.OVER
+    cmd = make_cmd(1.0)
+
+    result_cmd = enforcer.enforce_cmd(cmd)
+
+    assert result_cmd == Twist()
