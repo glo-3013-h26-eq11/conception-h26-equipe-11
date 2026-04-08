@@ -124,13 +124,24 @@ class StopSignEnforcer(Enforcer):
             if self._relative_angle is not None:
 
                 if self._relative_angle < GOOD_ANGLE_ALIGNMENT_LEFT:
+                    self._log(f"CORRECT RIGHT")
+
                     cmd = self.correct_rover_right()
 
                 elif self._relative_angle > GOOD_ANGLE_ALIGNEMENT_RIGHT:
+                    self._log(f"CORRECT LEFT")
+
                     cmd = self.correct_rover_left()
+                
+                else:
+                    self._log(f"NO CORRECTION")
+                    
+                    cmd = self.stop_robot()
 
                 if self.is_rover_at_valid_angle_from_aruco():
                     cmd = self.switch_state(_State.OVER)
+            else:
+                cmd = self.stop_robot()
 
         if self._state == _State.OVER:
             self._log("STOP OVER")
