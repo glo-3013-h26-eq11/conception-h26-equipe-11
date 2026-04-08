@@ -14,7 +14,7 @@ from yasmin import Blackboard
 
 
 class EnforcerManagerNode(HealthPingingNode):
-    def __init__(self):
+    def __init__(self, state_machine=None):
         super().__init__("enforcer_manager_node", "central_manager")
 
         self.sub_cmd_vel_from_aruco_callback = self.create_subscription(
@@ -32,7 +32,7 @@ class EnforcerManagerNode(HealthPingingNode):
         self.blackboard[BLACKBOARD_ENFORCERS] = []
         self.blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
 
-        self.sm = StateMachineRover(self)
+        self.sm = state_machine or StateMachineRover(self)
 
         self._sm_thread = threading.Thread(target=self._run_sm, daemon=True)
         self._sm_thread.start()
