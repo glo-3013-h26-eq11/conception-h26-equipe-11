@@ -7,7 +7,9 @@ from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.blackboard_config import (
     BLACKBOARD_ENFORCERS,
     BLACKBOARD_PREVIOUS_STOP_TAG,
+    BLACKBOARD_HOME_DEPOSIT_ZONE
 )
+
 
 
 class InitialState(State):
@@ -53,8 +55,8 @@ class InitialState(State):
 
         blackboard[BLACKBOARD_ENFORCERS] = [ImmobileEnforcer()]
 
-        blackboard["previous_stop_tag"] = None
-        blackboard["home_deposit_zone"] = self.home_deposit_zone
+        blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
+        blackboard[BLACKBOARD_HOME_DEPOSIT_ZONE] = self.home_deposit_zone
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)

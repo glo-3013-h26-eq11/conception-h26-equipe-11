@@ -28,10 +28,6 @@ class RoutePlannerNode(HealthPingingNode):
                 String, "home_deposit_zone", self.set_home_deposit_callback, 10
             )
 
-        self.home_deposit_sub = self.create_subscription(
-                String, "home_deposit_zone", self.set_home_deposit_callback, 10
-            )
-
         if route_selector is None:
             self.subscription_map = self.create_subscription(
                 String, "map_manager/parsed_map_topic", self._map_callback, 10
@@ -54,8 +50,8 @@ class RoutePlannerNode(HealthPingingNode):
         )
 
         self.current_node: str | None = None
-        self.constant_deposit_zone = None
-        self.available_goals: list[str] = [self.constant_deposit_zone]
+        self.home_deposit_zone = None
+        self.available_goals: list[str] = [self.home_deposit_zone]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
     def handle_get_node_action_load(self, _request, response):
@@ -86,7 +82,7 @@ class RoutePlannerNode(HealthPingingNode):
             self.get_logger().error(f"Failed to parse map: {e}")
 
     def set_home_deposit_callback(self, msg):
-        self.constant_deposit_zone = msg
+        self.home_deposit_zone = msg
 
     def current_node_id_distance_callback(self, msg: String) -> None:
 
@@ -224,7 +220,7 @@ class RoutePlannerNode(HealthPingingNode):
                 load_goals.append(zc_goal)
 
         self.available_goals = sorted(set(load_goals))
-        self.available_goals.append(self.constant_deposit_zone)
+        self.available_goals.append(self.home_deposit_zone)
         self.get_logger().info(
             f"Load goals refreshed from API/map: {self.available_goals}"
         )
