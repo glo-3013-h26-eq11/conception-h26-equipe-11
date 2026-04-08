@@ -84,6 +84,9 @@ class StopSignEnforcer(Enforcer):
         return Twist()
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
+        
+        self._log(f"state : {self._state}")
+        
         now = time.time()
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
         d = None if stale else self._distance
