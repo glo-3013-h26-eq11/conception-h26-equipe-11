@@ -5,7 +5,7 @@ from std_msgs.msg import String
 import rclpy
 import math
 
-ARC_RADIUS = 0.21  # m
+ARC_RADIUS = 0.225  # m
 LEFT_TURN_SPEED = 0.4  # m
 
 
