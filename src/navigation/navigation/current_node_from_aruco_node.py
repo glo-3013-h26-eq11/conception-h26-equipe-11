@@ -66,7 +66,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
                         out.data = json.dumps(
                             {"tag": marker_id, "distance": closest_stop_dist}
                         )
-
+                        self.get_logger().info(f"validated current node : {out.data}")
                         self._current_node_pub.publish(out)
 
     def _detect_cars(self, payload):
