@@ -9,9 +9,9 @@ from numpy import abs
 SAFE_DISTANCE_TO_CAR = 0.25  # m
 CAR_DETECTION_REFRESH = 0.5
 
-FRONT_CONE_DETECTION = 60.0
+FRONT_CONE_DETECTION = 25.0
 
-ARUCO_TILT_THRESHOLD = 35.0
+ARUCO_TILT_THRESHOLD = 47.0
 
 
 class CurrentNodeFromArucoNode(HealthPingingNode):
@@ -49,8 +49,6 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
     def _detect_intersections(self, payload):
         markers_5x5 = payload.get("markers_5x5", [])
 
-        closest_stop_dist: Optional[float] = None
-
         for marker in markers_5x5:
 
             depth = float(marker.get("depth", 9999))
@@ -58,24 +56,20 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             z_forward = float(marker.get("z_forward", 0))
             tag_angle = float(marker.get("tag_angle", 0))
             marker_id = marker.get("tag")
-
-            self.get_logger().info(f"depth : {depth} --- angle_x : {angle} --- z_forward : {z_forward} --- aurco_tilt : {tag_angle} --- marker_id : {marker_id}")
             
-            if depth <= 1.0 and angle <= FRONT_CONE_DETECTION and z_forward >= 0.15:
+            if depth <= 1.0 and abs(angle) <= FRONT_CONE_DETECTION and z_forward >= 0.15:
 
                 if abs(tag_angle) < ARUCO_TILT_THRESHOLD:
-                    if closest_stop_dist is None or depth < closest_stop_dist:
-
-                        closest_stop_dist = depth
-
+                        
                         out = String()
                         out.data = json.dumps(
                             {
                                 "tag": marker_id,
-                                "distance": closest_stop_dist,
+                                "distance": depth,
                                 "angle": tag_angle,
                             }
                         )
+
                         self._current_node_pub.publish(out)
 
     def _detect_cars(self, payload):

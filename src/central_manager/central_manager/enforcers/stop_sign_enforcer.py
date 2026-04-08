@@ -9,12 +9,14 @@ import math
 BRAKE_START_DIST: float = 0.75
 STOP_TARGET_DIST: float = 0.61
 STOP_DURATION: float = 1.0
-DISTANCE_STALE_SEC: float = 0.5
+DISTANCE_STALE_SEC: float = 0.3
 
-GOOD_ANGLE_ALIGNMENT_LEFT = -9.0
-GOOD_ANGLE_ALIGNEMENT_RIGHT = 2.0
+MAX_BREAKING_SPEED = 0.1
 
-ANGLE_CORRECTION_SPEED = 0.7  # rad/s
+GOOD_ANGLE_ALIGNMENT_LEFT = -12.0
+GOOD_ANGLE_ALIGNEMENT_RIGHT = -2.0
+
+ANGLE_CORRECTION_SPEED = 0.5  # rad/s
 
 
 class _State(Enum):
@@ -85,32 +87,35 @@ class StopSignEnforcer(Enforcer):
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         
-        self._log(f"state : {self._state}")
+        self._log(f"state : {self._state} --- angle : {self._relative_angle} --- distance ; {self._distance}")
         
         now = time.time()
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
-        d = None if stale else self._distance
+
+        if stale:
+            self._state = _State.IDLE
+            self._distance = None
 
         if self._state == _State.IDLE:
-            if d is not None and d <= BRAKE_START_DIST:
+            if self._distance is not None and self._distance <= BRAKE_START_DIST:
                 self.switch_state(_State.BRAKING)
-                self._log(f"STOP détecté à {d:.2f} m — freinage")
+                self._log(f"STOP détecté à {self._distance:.2f} m — freinage")
 
         if self._state == _State.BRAKING:
-            if d is not None and d <= STOP_TARGET_DIST:
+            if self._distance is not None and self._distance <= STOP_TARGET_DIST:
                 self._stop_start = now
                 self._log(
-                    f"ARRÊT — distance {d:.2f} m, pause {self.stop_duration:.1f}s"
+                    f"ARRÊT — distance {self._distance:.2f} m, pause {self.stop_duration:.1f}s"
                 )
 
                 self.switch_state(_State.STOPPED)
                 cmd = self.stop_robot()
 
-            if d is not None:
-                factor = (d - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
+            if self._distance is not None:
+                factor = (self._distance - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
                 factor = max(0.0, min(1.0, factor))
 
-                cmd.linear.x = max(cmd.linear.x * factor, 0.25)
+                cmd.linear.x = max(cmd.linear.x * factor, MAX_BREAKING_SPEED)
                 cmd.angular.z = 0.0 # Important pour ne pas perdre le Aruco
 
         if self._state == _State.STOPPED:
@@ -152,6 +157,8 @@ class StopSignEnforcer(Enforcer):
             data.data = True
             self.stop_over_publisher.publish(data)
             cmd = self.stop_robot()
+
+        self._log(f"STOP CMD : {cmd}")
 
         return cmd
 
