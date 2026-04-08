@@ -86,9 +86,11 @@ class StopSignEnforcer(Enforcer):
         return Twist()
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
-        
-        self._log(f"state : {self._state} --- angle : {self._relative_angle} --- distance ; {self._distance}")
-        
+
+        self._log(
+            f"state : {self._state} --- angle : {self._relative_angle} --- distance ; {self._distance}"
+        )
+
         now = time.time()
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
 
@@ -112,11 +114,13 @@ class StopSignEnforcer(Enforcer):
                 cmd = self.stop_robot()
 
             if self._distance is not None:
-                factor = (self._distance - STOP_TARGET_DIST) / (BRAKE_START_DIST - STOP_TARGET_DIST)
+                factor = (self._distance - STOP_TARGET_DIST) / (
+                    BRAKE_START_DIST - STOP_TARGET_DIST
+                )
                 factor = max(0.0, min(1.0, factor))
 
                 cmd.linear.x = max(cmd.linear.x * factor, MAX_BREAKING_SPEED)
-                cmd.angular.z = 0.0 # Important pour ne pas perdre le Aruco
+                cmd.angular.z = 0.0  # Important pour ne pas perdre le Aruco
 
         if self._state == _State.STOPPED:
             elapsed = now - self._stop_start
@@ -140,10 +144,10 @@ class StopSignEnforcer(Enforcer):
                     self._log(f"CORRECT LEFT")
 
                     cmd = self.correct_rover_left()
-                
+
                 else:
                     self._log(f"NO CORRECTION")
-                    
+
                     cmd = self.stop_robot()
 
                 if self.is_rover_at_valid_angle_from_aruco():
@@ -162,7 +166,7 @@ class StopSignEnforcer(Enforcer):
 
         return cmd
 
-    def switch_state(self, new_state:_State):
+    def switch_state(self, new_state: _State):
         self._state = new_state
 
     def _log(self, msg: str) -> None:

@@ -56,21 +56,25 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             z_forward = float(marker.get("z_forward", 0))
             tag_angle = float(marker.get("tag_angle", 0))
             marker_id = marker.get("tag")
-            
-            if depth <= 1.0 and abs(angle) <= FRONT_CONE_DETECTION and z_forward >= 0.15:
+
+            if (
+                depth <= 1.0
+                and abs(angle) <= FRONT_CONE_DETECTION
+                and z_forward >= 0.15
+            ):
 
                 if abs(tag_angle) < ARUCO_TILT_THRESHOLD:
-                        
-                        out = String()
-                        out.data = json.dumps(
-                            {
-                                "tag": marker_id,
-                                "distance": depth,
-                                "angle": tag_angle,
-                            }
-                        )
 
-                        self._current_node_pub.publish(out)
+                    out = String()
+                    out.data = json.dumps(
+                        {
+                            "tag": marker_id,
+                            "distance": depth,
+                            "angle": tag_angle,
+                        }
+                    )
+
+                    self._current_node_pub.publish(out)
 
     def _detect_cars(self, payload):
         markers_4x4 = payload.get("markers_4is_rover_at_valid_angle_from_arucox4", [])
