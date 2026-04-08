@@ -7,7 +7,7 @@ from central_manager.enforcers.base_enforcer import Enforcer
 
 BRAKE_START_DIST: float = 0.75
 STOP_TARGET_DIST: float = 0.61
-STOP_DURATION: float = 1.0
+STOP_DURATION: float = 100.0
 DISTANCE_STALE_SEC: float = 0.3
 
 MAX_BREAKING_SPEED = 0.1
