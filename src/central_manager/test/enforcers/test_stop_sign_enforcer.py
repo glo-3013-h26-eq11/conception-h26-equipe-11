@@ -15,7 +15,9 @@ from unittest.mock import Mock
 @pytest.fixture
 def enforcer():
     stop_over_publisher = Mock()
-    return StopSignEnforcer(stop_over_publisher)
+    enforcer = StopSignEnforcer(stop_over_publisher)
+    enforcer._last_update = time.time()
+    return enforcer
 
 
 def make_cmd(v=1.0, w=0.0):
@@ -99,7 +101,7 @@ def test_given_rover_too_right_when_adjust_then_adjust_left(enforcer):
 
 def test_given_rover_angle_perfect_when_enforce_then_over(enforcer):
     enforcer._state = _State.ADJUST_ANGLE
-    enforcer._relative_angle = 0
+    enforcer._relative_angle = GOOD_ANGLE_ALIGNEMENT_RIGHT - 0.1
 
     cmd = make_cmd(1.0)
 
@@ -110,7 +112,7 @@ def test_given_rover_angle_perfect_when_enforce_then_over(enforcer):
 
 def test_given_rover_angle_perfect_when_enforce_then_stop_cmd(enforcer):
     enforcer._state = _State.ADJUST_ANGLE
-    enforcer._relative_angle = 0
+    enforcer._relative_angle = GOOD_ANGLE_ALIGNEMENT_RIGHT - 0.1
 
     cmd = make_cmd(1.0)
 
