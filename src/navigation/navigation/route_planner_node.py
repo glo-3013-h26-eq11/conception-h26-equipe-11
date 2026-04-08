@@ -214,9 +214,6 @@ class RoutePlannerNode(HealthPingingNode):
 
         self.available_goals = sorted(set(load_goals))
         self.available_goals.append(self.constant_deposit_zone)
-        self.get_logger().info(
-            f"Load goals refreshed from API/map: {self.available_goals}"
-        )
 
     def _try_compute_route(self) -> None:
         if self._route_selector is None:
