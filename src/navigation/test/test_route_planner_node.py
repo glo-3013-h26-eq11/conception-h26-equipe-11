@@ -353,4 +353,4 @@ def test_when_refresh_available_load_goals_then_keeps_only_zc_in_map_with_tokens
 
     node._refresh_available_load_goals_from_city_interface()
 
-    assert node.available_goals == ["ZC1"]
+    assert node.available_goals == ["ZC1", node.constant_deposit_zone]
