@@ -11,6 +11,7 @@ from cv_bridge import CvBridge
 import cv2
 import numpy as np
 
+CAMERA_OFFSET: float = 0.03
 
 class ArucoReaderNode(HealthPingingNode):
     def __init__(self):
@@ -170,7 +171,7 @@ class ArucoReaderNode(HealthPingingNode):
         # mounted at a fixed height of ~24 cm, so the Y component is a
         # constant vertical offset that would bias the euclidean norm.
         # Using sqrt(X² + Z²) gives the true floor distance to the marker.
-        dist_xz = float(np.linalg.norm([tvec[0], tvec[2]]))
+        dist_xz = float(np.linalg.norm([tvec[0], tvec[2]])) + CAMERA_OFFSET
         # Horizontal angle: 0° = straight ahead, ±90° = fully to the side.
         # Used to ignore markers seen during a turn (large lateral offset).
         angle_x_deg = float(np.degrees(np.arctan2(abs(tvec[0]), abs(tvec[2]))))
@@ -178,6 +179,7 @@ class ArucoReaderNode(HealthPingingNode):
         # already passing under the marker — must not trigger stop.
         z_forward = float(tvec[2])
         tag_angle = float(np.degrees(rvec[2]))
+        
         return dist_xz, angle_x_deg, z_forward, tag_angle
 
 
