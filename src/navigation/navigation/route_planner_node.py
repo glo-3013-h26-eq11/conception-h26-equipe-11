@@ -16,9 +16,9 @@ class RoutePlannerNode(HealthPingingNode):
         self._route_selector = route_selector
         self._goal_selector = GoalSelector(route_selector) if route_selector else None
         self._city_interface = CityInterface()
-        # a voir comment on se fait donner le vehicle_id
-        self.declare_parameter("vehicle_id", 99)
-        self._vehicle_id: int = int(self.get_parameter("vehicle_id").value)
+        
+        self.home_deposit_zone = None
+        self._vehicle_id: int = int(self.home_deposit_zone[2:])
 
         self.subscription_current = self.create_subscription(
             String, "current_node", self.current_node_id_distance_callback, 10
@@ -50,7 +50,6 @@ class RoutePlannerNode(HealthPingingNode):
         )
 
         self.current_node: str | None = None
-        self.home_deposit_zone = None
         self.available_goals: list[str] = [self.home_deposit_zone]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
