@@ -7,12 +7,6 @@ class Enforcer(ABC):
     def __init__(self):
         self.last_real_speed_timer = None
 
-    @staticmethod
-    def stop_robot(cmd: Twist) -> Twist:
-        cmd.linear.x = 0.0
-        cmd.angular.z = 0.0
-        return cmd
-
     @abstractmethod
     def enforce_cmd(self, cmd: Twist) -> Twist:
         pass

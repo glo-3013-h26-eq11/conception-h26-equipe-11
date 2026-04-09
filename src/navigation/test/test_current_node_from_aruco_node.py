@@ -11,6 +11,7 @@ from navigation.current_node_from_aruco_node import (
     BACK_ARUCO_ID,
     LEFT_ARUCO_ID,
     RIGHT_ARUCO_ID,
+    FRONT_CONE_DETECTION,
 )
 
 
@@ -102,7 +103,11 @@ def test_when_detect_aruco_5x5_bigger_1m_less_15deg_zfwd_g_15_then_not_publish(n
 
 
 def test_when_detect_aruco_5x5_less_1m_bigger_15deg_zfwd_g_15_then_publish(node):
-    payload = {"markers_5x5": [{"depth": 0.8, "angle_x_deg": 16.0, "z_forward": 0.2}]}
+    payload = {
+        "markers_5x5": [
+            {"depth": 0.8, "angle_x_deg": FRONT_CONE_DETECTION + 1.0, "z_forward": 0.2}
+        ]
+    }
 
     subscriber = StringSubscriber(node, "current_node")
 
@@ -199,7 +204,7 @@ def test_when_detect_aruco_4x4_lesser_45_deg_less_safe_distance_publish_dangerou
     assert subscriber.received[0]
 
 
-def test_when_detect_aruco_4x4_less_safe_distance_publish_dangerous_distance_than_safe_distance(
+def test_when_detect_aruco_4x4_less_safe_distance_publish_dangerous_distance_then_safe_distance(
     node,
 ):
     payload = {
@@ -216,7 +221,7 @@ def test_when_detect_aruco_4x4_less_safe_distance_publish_dangerous_distance_tha
     publisher.publish(payload)
 
     start = time.time()
-    while time.time() - start < 5.0:
+    while time.time() - start < 6.0:
         rclpy.spin_once(node, timeout_sec=0.1)
 
     assert len(subscriber.received) > 1

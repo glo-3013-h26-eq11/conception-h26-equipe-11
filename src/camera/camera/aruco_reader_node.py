@@ -137,7 +137,6 @@ class ArucoReaderNode(HealthPingingNode):
                 "markers_4x4": detections_4x4,
                 "markers_5x5": detections_5x5,
             }
-
             out = String()
             out.data = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
             self.detections_pub.publish(out)
