@@ -56,9 +56,9 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
         for marker in markers_5x5:
 
             depth = float(marker.get("depth", 9999))
-            angle = float(marker.get("angle_x_deg", 0))
+            angle = float(marker.get("angle_x_deg", 0)) # décalage latéral (gauche-droite) du tag dans le champ de la caméra
             z_forward = float(marker.get("z_forward", 0))
-            tag_angle = float(marker.get("tag_angle", 0))
+            tag_angle = float(marker.get("tag_angle", 0))  # inclinaison physique (tilt) du tag
             marker_id = marker.get("tag")
 
             if (
@@ -91,9 +91,13 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             angle = float(marker.get("angle_x_deg", 0))
             tag_id = int(marker.get("tag", 0))
 
+            # L'aruco FRONT est sur la face avant d'un autre véhicule.
+            # S'il est centré <=45°, la voiture nous fait face donc on l'ignore. (sur papier)
             if tag_id == FRONT_ARUCO_ID and abs(angle) <= 45.0:
                 continue
 
+            # L'aruco BACK est sur la face arrière d'un autre véhicule (celui qu'on suit).
+            # Si l'angle est trop grand (>45°), la voiture est sur le côté et n'est pas dans notre voie donc on l'ignore.
             if tag_id == BACK_ARUCO_ID and abs(angle) > 45.0:
                 continue
 
