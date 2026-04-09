@@ -18,7 +18,7 @@ class RoutePlannerNode(HealthPingingNode):
         self._city_interface = CityInterface()
         
         self.home_deposit_zone = None
-        self._vehicle_id: int = int(self.home_deposit_zone[2:])
+        self._vehicle_id: int = None
 
         self.subscription_current = self.create_subscription(
             String, "current_node", self.current_node_id_distance_callback, 10
@@ -81,7 +81,9 @@ class RoutePlannerNode(HealthPingingNode):
             self.get_logger().error(f"Failed to parse map: {e}")
 
     def set_home_deposit_callback(self, msg):
-        self.home_deposit_zone = msg
+        self.home_deposit_zone = msg.data
+        self._vehicle_id = int(self.home_deposit_zone[2:])
+        
 
     def current_node_id_distance_callback(self, msg: String) -> None:
 
