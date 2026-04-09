@@ -146,7 +146,9 @@ def test_when_detect_aruco_5x5_publish_distance_and_tag(node):
 
 
 def test_when_detect_aruco_4x4_less_45_deg_publish(node):
-    payload = {"markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.8, "angle_x_deg": 7.0}]}
+    payload = {
+        "markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.8, "angle_x_deg": 7.0}]
+    }
 
     subscriber = FloatSubscriber(node, "distance_to_car")
 
@@ -164,7 +166,9 @@ def test_when_detect_aruco_4x4_less_45_deg_publish(node):
 
 
 def test_when_detect_aruco_4x4_bigger_45_deg_no_publish(node):
-    payload = {"markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.8, "angle_x_deg": 46.0}]}
+    payload = {
+        "markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.8, "angle_x_deg": 46.0}]
+    }
 
     subscriber = FloatSubscriber(node, "distance_to_car")
 
@@ -229,7 +233,9 @@ def test_when_detect_aruco_4x4_less_safe_distance_publish_dangerous_distance_the
 
 
 def test_front_face_marker_does_not_publish_distance(node):
-    payload = {"markers_4x4": [{"tag": FRONT_ARUCO_ID, "depth": 0.4, "angle_x_deg": 5.0}]}
+    payload = {
+        "markers_4x4": [{"tag": FRONT_ARUCO_ID, "depth": 0.4, "angle_x_deg": 5.0}]
+    }
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
@@ -246,7 +252,9 @@ def test_front_face_marker_does_not_publish_distance(node):
 
 
 def test_front_face_marker_at_large_angle_publishes_distance(node):
-    payload = {"markers_4x4": [{"tag": FRONT_ARUCO_ID, "depth": 0.4, "angle_x_deg": 60.0}]}
+    payload = {
+        "markers_4x4": [{"tag": FRONT_ARUCO_ID, "depth": 0.4, "angle_x_deg": 60.0}]
+    }
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
@@ -264,7 +272,9 @@ def test_front_face_marker_at_large_angle_publishes_distance(node):
 
 
 def test_back_face_marker_publishes_distance(node):
-    payload = {"markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.5, "angle_x_deg": 10.0}]}
+    payload = {
+        "markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.5, "angle_x_deg": 10.0}]
+    }
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
@@ -282,7 +292,9 @@ def test_back_face_marker_publishes_distance(node):
 
 
 def test_back_face_marker_bigger_45_deg_no_publish(node):
-    payload = {"markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.5, "angle_x_deg": 46.0}]}
+    payload = {
+        "markers_4x4": [{"tag": BACK_ARUCO_ID, "depth": 0.5, "angle_x_deg": 46.0}]
+    }
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
@@ -299,7 +311,9 @@ def test_back_face_marker_bigger_45_deg_no_publish(node):
 
 
 def test_left_side_marker_publishes_distance(node):
-    payload = {"markers_4x4": [{"tag": LEFT_ARUCO_ID, "depth": 0.5, "angle_x_deg": 60.0}]}
+    payload = {
+        "markers_4x4": [{"tag": LEFT_ARUCO_ID, "depth": 0.5, "angle_x_deg": 60.0}]
+    }
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
@@ -317,7 +331,9 @@ def test_left_side_marker_publishes_distance(node):
 
 
 def test_right_side_marker_publishes_distance(node):
-    payload = {"markers_4x4": [{"tag": RIGHT_ARUCO_ID, "depth": 0.3, "angle_x_deg": 20.0}]}
+    payload = {
+        "markers_4x4": [{"tag": RIGHT_ARUCO_ID, "depth": 0.3, "angle_x_deg": 20.0}]
+    }
 
     subscriber = FloatSubscriber(node, "distance_to_car")
     publisher = StringPublisher(node, "aruco_detections")
