@@ -135,8 +135,8 @@ class StopSignEnforcer(Enforcer):
         if self._state == _State.STOPPED:
             elapsed = now - self._stop_start
             if elapsed >= self.stop_duration:
-                self.switch_state(_State.ADJUST_ANGLE)
-                self._log("FIN STOP — mode ADJUST_ANGLE")
+                self.switch_state(_State.OVER)
+                self._log("FIN STOP — OVER")
 
             cmd = self.stop_robot()
 
