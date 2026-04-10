@@ -12,8 +12,8 @@ DISTANCE_STALE_SEC: float = 0.3
 
 MAX_BREAKING_SPEED = 0.1
 
-GOOD_ANGLE_ALIGNMENT_LEFT = -12.0
-GOOD_ANGLE_ALIGNEMENT_RIGHT = -2.0
+GOOD_ANGLE_ALIGNMENT_LEFT = -13.0
+GOOD_ANGLE_ALIGNEMENT_RIGHT = -3.0
 
 ANGLE_CORRECTION_SPEED = 0.5  # rad/s
 
@@ -77,9 +77,23 @@ class StopSignEnforcer(Enforcer):
 
     def is_rover_at_valid_angle_from_aruco(self):
         return (
-            self._relative_angle > GOOD_ANGLE_ALIGNMENT_LEFT
+            self._relative_angle is not None
+            and self._relative_angle > GOOD_ANGLE_ALIGNMENT_LEFT
             and self._relative_angle < GOOD_ANGLE_ALIGNEMENT_RIGHT
         )
+
+    def _apply_braking_angle_correction(self, cmd: Twist) -> Twist:
+        if self._relative_angle is None:
+            return cmd
+
+        if self._relative_angle < GOOD_ANGLE_ALIGNMENT_LEFT:
+            cmd.angular.z = -ANGLE_CORRECTION_SPEED
+        elif self._relative_angle > GOOD_ANGLE_ALIGNEMENT_RIGHT:
+            cmd.angular.z = ANGLE_CORRECTION_SPEED
+        else:
+            cmd.angular.z = 0.0
+
+        return cmd
 
     def stop_robot(self) -> Twist:
         return Twist()
@@ -107,15 +121,16 @@ class StopSignEnforcer(Enforcer):
 
                 self.switch_state(_State.STOPPED)
                 cmd = self.stop_robot()
-
-            if self._distance is not None:
+            elif self._distance is not None:
                 factor = (self._distance - STOP_TARGET_DIST) / (
                     BRAKE_START_DIST - STOP_TARGET_DIST
                 )
                 factor = max(0.0, min(1.0, factor))
 
+                
                 cmd.linear.x = max(cmd.linear.x * factor, MAX_BREAKING_SPEED)
-                cmd.angular.z = 0.0  # Important pour ne pas perdre le Aruco
+                cmd.angular.z = 0.0
+                cmd = self._apply_braking_angle_correction(cmd)
 
         if self._state == _State.STOPPED:
             elapsed = now - self._stop_start
@@ -156,8 +171,6 @@ class StopSignEnforcer(Enforcer):
             data.data = True
             self.stop_over_publisher.publish(data)
             cmd = self.stop_robot()
-
-        self._log(f"STOP CMD : {cmd}")
 
         return cmd
 

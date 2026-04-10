@@ -179,7 +179,6 @@ class ArucoReaderNode(HealthPingingNode):
         # already passing under the marker — must not trigger stop.
         z_forward = float(tvec[2])
         tag_angle = float(np.degrees(rvec[2]))
-        
         return dist_xz, angle_x_deg, z_forward, tag_angle
 
 
