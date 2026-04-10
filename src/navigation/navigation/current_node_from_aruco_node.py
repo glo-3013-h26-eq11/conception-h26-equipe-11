@@ -6,7 +6,7 @@ from std_msgs.msg import String, Float32, Bool
 from web_interface.system_health_node import HealthPingingNode
 from numpy import abs
 
-SAFE_DISTANCE_TO_CAR = 0.20  # m
+SAFE_DISTANCE_TO_CAR = 0.23  # m
 CAR_DETECTION_REFRESH = 0.5
 
 FRONT_ARUCO_ID = 1
