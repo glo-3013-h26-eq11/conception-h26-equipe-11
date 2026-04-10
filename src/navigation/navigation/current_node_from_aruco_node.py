@@ -94,15 +94,12 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             angle = float(marker.get("angle_x_deg", 0))
             tag_id = int(marker.get("tag", 0))
 
-            # L'aruco FRONT est sur la face avant d'un autre véhicule.
-            # S'il est centré <=45°, la voiture nous fait face donc on l'ignore. (sur papier)
-            if tag_id == FRONT_ARUCO_ID and abs(angle) <= 45.0:
+            # Ignorer les véhicules sur le côté (>45°)
+            if tag_id == BACK_ARUCO_ID and abs(angle) > 45.0:
                 continue
 
-            # L'aruco BACK est sur la face arrière d'un autre véhicule (celui qu'on suit).
-            # Si l'angle est trop grand (>45°), la voiture est sur le côté
-            # et n'est pas dans notre voie donc on l'ignore.
-            if tag_id == BACK_ARUCO_ID and abs(angle) > 45.0:
+            # FRONT sur le côté : pas dans notre voie, ignorer
+            if tag_id == FRONT_ARUCO_ID and abs(angle) > 45.0:
                 continue
 
             if closest_vehicle_dist is None or d < closest_vehicle_dist:
