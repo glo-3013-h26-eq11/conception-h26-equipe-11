@@ -1,4 +1,5 @@
 from yasmin import State
+import time
 import rclpy
 from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.forward_turn_enforcer import ForwardTurnEnforcer
@@ -50,6 +51,6 @@ class TurningForwardState(State):
         ]
 
         while self.outcome is None:
-            rclpy.spin_once(self.node, timeout_sec=0.1)
+            time.sleep(0.1)
 
         return self.outcome

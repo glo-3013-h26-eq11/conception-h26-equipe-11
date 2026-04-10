@@ -1,4 +1,5 @@
 from yasmin import State
+import time
 from std_msgs.msg import Bool
 import rclpy
 from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
@@ -36,6 +37,6 @@ class InitialState(State):
         blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
 
         while self.outcome is None:
-            rclpy.spin_once(self.node, timeout_sec=0.1)
+            time.sleep(0.1)
 
         return self.outcome

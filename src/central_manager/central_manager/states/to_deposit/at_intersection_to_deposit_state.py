@@ -1,4 +1,5 @@
 from yasmin import State
+import time
 from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.states.node_action_enum import NodeAction
 import rclpy
@@ -69,7 +70,7 @@ class AtIntersectionToDepositState(State):
         future = self.client.call_async(request)
 
         while not future.done():
-            rclpy.spin_once(self.node, timeout_sec=0.1)
+            time.sleep(0.1)
 
         result = future.result()
         if result is not None:

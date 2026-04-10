@@ -104,6 +104,6 @@ class TurningLeftState(State):
         ]
 
         while self.outcome is None:
-            rclpy.spin_once(self.node, timeout_sec=0.1)
+            time.sleep(0.1)
 
         return self.outcome

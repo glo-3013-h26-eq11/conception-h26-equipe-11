@@ -1,4 +1,5 @@
 from yasmin import State
+import time
 import rclpy
 from std_msgs.msg import String, Float32, Bool
 import json
@@ -102,7 +103,7 @@ class WallFollowingState(State):
         ]
 
         while self.outcome is None:
-            rclpy.spin_once(self.node, timeout_sec=0.1)
+            time.sleep(0.1)
 
         blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = self.seen_tag
 
