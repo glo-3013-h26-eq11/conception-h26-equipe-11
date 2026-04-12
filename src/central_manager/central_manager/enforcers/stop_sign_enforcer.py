@@ -157,8 +157,6 @@ class StopSignEnforcer(Enforcer):
             self.stop_over_publisher.publish(data)
             cmd = self.stop_robot()
 
-        self._log(f"STOP CMD : {cmd}")
-
         return cmd
 
     def switch_state(self, new_state: _State):
