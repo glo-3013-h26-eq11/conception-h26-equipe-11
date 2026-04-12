@@ -8,7 +8,6 @@ def enforcer():
     return LeftTurnEnforcer()
 
 
-
 def test_given_arc_not_done_when_enforce_cmd_then_turn(enforcer):
     initial_command = Twist()
 
@@ -16,4 +15,3 @@ def test_given_arc_not_done_when_enforce_cmd_then_turn(enforcer):
 
     assert resulting_command.linear.x != 0
     assert resulting_command.angular.z != 0
-
