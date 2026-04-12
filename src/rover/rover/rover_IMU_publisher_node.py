@@ -5,7 +5,6 @@ from std_msgs.msg import Float32MultiArray
 import serial
 import threading
 import time
-from math import sqrt, atan2
 
 
 class ImuPublisherNode(Node):
@@ -42,12 +41,12 @@ class ImuPublisherNode(Node):
         self.start_serial_thread()
 
     def start_serial_thread(self):
-        """Start background thread for reading QMI8658 serial data"""
+        """Start background thread for reading QMI8658 serial data."""
         self.serial_thread = threading.Thread(target=self.serial_read_loop, daemon=True)
         self.serial_thread.start()
 
     def serial_read_loop(self):
-        """Read QMI8658 IMU data from serial port"""
+        """Read QMI8658 IMU data from serial port."""
         try:
             self.serial_port = serial.Serial("/dev/ttyACM", 115200, timeout=1)
             self.get_logger().info("Serial port opened successfully")
@@ -109,7 +108,7 @@ class ImuPublisherNode(Node):
                 self.get_logger().info("Serial port closed")
 
     def publish_imu_data(self):
-        """Publish QMI8658 IMU data to ROS2 topics"""
+        """Publish QMI8658 IMU data to ROS2 topics."""
         self.sample_count += 1
 
         # Convert yaw from degrees to radians for heading angle
@@ -146,7 +145,7 @@ class ImuPublisherNode(Node):
             )
 
     def on_shutdown(self):
-        """Cleanup on shutdown"""
+        """Cleanup on shutdown."""
         self.serial_running = False
         if self.serial_thread:
             self.serial_thread.join(timeout=2)
