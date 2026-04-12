@@ -7,7 +7,7 @@ from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
 LOOKAHEAD = 0.35  # m
-DESIRED_DISTANCE_FROM_WALL = 0.12  # m
+DESIRED_DISTANCE_FROM_WALL = 0.14  # m
 INTEGRAL_WINDOW_SIZE = 20
 KP = 5.0
 KD = 0.5
@@ -16,8 +16,8 @@ MAX_STEERING = 1.1  # radians
 SPEED = 0.20  # m/s
 WHEELBASE = 0.1  # m
 
-OBTUSE_ANGLE_THRESHOLD = 1115  # degrees
-AFTER_CORNER_THRESHOLD = 0.26  # m
+OBTUSE_ANGLE_THRESHOLD = 115  # degrees
+AFTER_CORNER_THRESHOLD = 0.45  # m
 
 INTERSECTION_HALF_CONE_ANGLE = 45  # degrees
 RIGHT_CORNER_SPEED = 0.1
@@ -88,9 +88,8 @@ class WallFollowNode(HealthPingingNode):
             theta_front, lidar_range_array, angle_min, angle_increment
         )
 
-        if A_c > A_a:
-            theta_for_wall_follow = theta_c
-            a_for_wall_follow = c
+        theta_for_wall_follow = theta_c
+        a_for_wall_follow = c
 
         if front < 0.25:
             theta_for_wall_follow = theta_front

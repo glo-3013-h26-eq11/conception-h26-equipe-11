@@ -1,15 +1,14 @@
 import json
 
 from yasmin import State
-from std_msgs.msg import Bool, String
+from std_msgs.msg import Bool, String, Int16
 import rclpy
 from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.blackboard_config import (
     BLACKBOARD_ENFORCERS,
     BLACKBOARD_PREVIOUS_STOP_TAG,
-    BLACKBOARD_HOME_DEPOSIT_ZONE
+    BLACKBOARD_HOME_DEPOSIT_ZONE,
 )
-
 
 
 class InitialState(State):
@@ -24,11 +23,11 @@ class InitialState(State):
 
         node.create_subscription(Bool, "rover/start", self.rover_start_callback, 10)
 
-        node.create_subscription(
-            String, "current_node", self.at_deposit_callback, 10
-        )
+        node.create_subscription(String, "current_node", self.at_deposit_callback, 10)
 
-        self.home_deposit_zone_pub = self.create_publisher(String, "home_deposit_node", 10)
+        self.home_deposit_zone_pub = self.node.create_publisher(
+            Int16, "home_deposit_zone", 10
+        )
 
         self.home_deposit_zone = None
 
@@ -42,10 +41,14 @@ class InitialState(State):
         data = json.loads(msg.data)
 
         seen_tag = data.get("tag")
-        
-        if not seen_tag == None and self.home_deposit_zone == None:
+
+        if seen_tag is not None:
+            
+
+            if self.home_deposit_zone != seen_tag:
+                self.node.get_logger().info(f"Potential home deposit : {seen_tag}")
+
             self.home_deposit_zone = seen_tag
-            self.home_deposit_zone_pub.publish(seen_tag)
 
 
     def execute(self, blackboard):
@@ -56,9 +59,14 @@ class InitialState(State):
         blackboard[BLACKBOARD_ENFORCERS] = [ImmobileEnforcer()]
 
         blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
-        blackboard[BLACKBOARD_HOME_DEPOSIT_ZONE] = self.home_deposit_zone
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)
+
+        home_deposit_data = Int16()
+        home_deposit_data.data = self.home_deposit_zone
+        self.home_deposit_zone_pub.publish(home_deposit_data)
+        self.node.get_logger().info(f"Home deposit : {self.home_deposit_zone}")
+
 
         return self.outcome
