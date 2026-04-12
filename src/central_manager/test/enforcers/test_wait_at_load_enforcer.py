@@ -35,7 +35,7 @@ def test_given_merchandise_loaded_when_update_then_stop_timer_counts(enforcer):
 
     for _ in range(5):
         enforcer.update_with_real_speed(cmd_input)
-        rclpy.spin_once(self.node, timeout_sec=0.1)
+        time.sleep(0.1)
 
     assert enforcer.timer != 0
 
@@ -51,7 +51,7 @@ def test_given_merchandise_loaded_when_wait_to_full_stop_then_publishes_deposit_
     increments = int(STOP_AFTER_LOAD_DURATION / 0.1 + 1)
     for _ in range(increments):
         enforcer.update_with_real_speed(cmd_input)
-        rclpy.spin_once(self.node, timeout_sec=0.1)
+        time.sleep(0.1)
     enforcer.enforce_cmd(cmd_input)
 
     enforcer.load_over_publisher.publish.assert_called()
@@ -64,7 +64,7 @@ def test_given_merchandise_still_unloaded_when_enforce_then_publisher_never_call
 
     for _ in range(5):
         enforcer.enforce_cmd(cmd_input)
-        rclpy.spin_once(self.node, timeout_sec=0.1)
+        time.sleep(0.1)
 
     enforcer.load_over_publisher.publish.assert_not_called()
 
@@ -74,6 +74,6 @@ def test_given_merchandise_still_unloaded_when_update_then_stop_timer_is_zero(en
 
     for _ in range(5):
         enforcer.update_with_real_speed(cmd_input)
-        rclpy.spin_once(self.node, timeout_sec=0.1)
+        time.sleep(0.1)
 
     assert enforcer.timer == 0

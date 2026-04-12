@@ -46,7 +46,7 @@ class TurningLeftState(State):
 
         gyro_z = data.get("gz")
         if gyro_z is None:
-            self.node.get_logger().info(f"no gyro_z")
+            self.node.get_logger().info("no gyro_z")
             return
 
         now = time.monotonic()

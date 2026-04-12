@@ -1,11 +1,5 @@
-import json
-import math
-import time
-
 from central_manager.enforcers.base_enforcer import Enforcer
 from geometry_msgs.msg import Twist
-from rclpy.node import Publisher
-from std_msgs.msg import String
 
 ARC_RADIUS = 0.24  # m
 LEFT_TURN_SPEED = 0.4  # m/s
