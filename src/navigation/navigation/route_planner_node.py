@@ -50,7 +50,7 @@ class RoutePlannerNode(HealthPingingNode):
         )
 
         self.current_node: str | None = None
-        self.available_goals: list[str] = []
+        self.available_goals: list[str] = ["ZC1", "ZD1"]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
     def handle_get_node_action_load(self, _request, response):
@@ -90,6 +90,7 @@ class RoutePlannerNode(HealthPingingNode):
             self.get_logger().info(
                 f"Invalid zone to set as home deposit zone : {id_of_zone}"
             )
+            return
 
         self.home_deposit_zone = id_of_zone
         self._vehicle_id = int(self.home_deposit_zone[2:])
