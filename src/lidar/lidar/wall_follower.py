@@ -16,7 +16,7 @@ MAX_STEERING = 1.1  # radians
 SPEED = 0.20  # m/s
 WHEELBASE = 0.1  # m
 
-OBTUSE_ANGLE_THRESHOLD = 105  # degrees
+OBTUSE_ANGLE_THRESHOLD = 110  # degrees
 AFTER_CORNER_THRESHOLD = 0.5  # m
 
 INTERSECTION_HALF_CONE_ANGLE = 45  # degrees
@@ -165,7 +165,7 @@ class WallFollowNode(HealthPingingNode):
     ):
 
         b, b_angle_deg = self.get_closest_point_in_half_cone(
-            scan, 0, INTERSECTION_HALF_CONE_ANGLE
+            scan, 10, INTERSECTION_HALF_CONE_ANGLE
         )
 
         A = self.get_A_angle_deg(a, b, theta - math.radians(b_angle_deg))
