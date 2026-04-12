@@ -25,8 +25,8 @@ import struct
 import time
 import serial
 
-PORT      = "/dev/ttyACM0"
-BAUDRATE  = 115200
+PORT = "/dev/ttyACM0"
+BAUDRATE = 115200
 DELIMITER = b"\r\n"
 FRAME_SIZE = 118
 
@@ -41,18 +41,18 @@ def parse_frame(frame: bytes):
         return None
 
     return {
-        "roll":    round(floats[5],  4),
-        "pitch":   round(floats[6],  4),
-        "yaw":     round(floats[7],  4),
-        "accel_x": round(floats[8],  4),
-        "accel_y": round(floats[9],  4),
+        "roll": round(floats[5], 4),
+        "pitch": round(floats[6], 4),
+        "yaw": round(floats[7], 4),
+        "accel_x": round(floats[8], 4),
+        "accel_y": round(floats[9], 4),
         "accel_z": round(floats[10], 4),
-        "gyro_x":  round(floats[11], 4),
-        "gyro_y":  round(floats[12], 4),
-        "gyro_z":  round(floats[13], 4),
-        "mag_x":   round(floats[14], 4),
-        "mag_y":   round(floats[15], 4),
-        "mag_z":   round(floats[16], 4),
+        "gyro_x": round(floats[11], 4),
+        "gyro_y": round(floats[12], 4),
+        "gyro_z": round(floats[13], 4),
+        "mag_x": round(floats[14], 4),
+        "mag_y": round(floats[15], 4),
+        "mag_z": round(floats[16], 4),
     }
 
 

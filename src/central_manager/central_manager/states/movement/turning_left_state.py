@@ -22,7 +22,9 @@ class TurningLeftState(State):
         node.create_subscription(String, "turn_over", self.turn_over_callback, 10)
         self.turn_over_publisher = node.create_publisher(String, "turn_over", 10)
 
-        node.create_subscription(Float32, "distance_to_car", self.distance_to_car_callback, 10)
+        node.create_subscription(
+            Float32, "distance_to_car", self.distance_to_car_callback, 10
+        )
         node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
         node.create_subscription(String, "/rover/imu/json", self._imu_callback, 10)
 

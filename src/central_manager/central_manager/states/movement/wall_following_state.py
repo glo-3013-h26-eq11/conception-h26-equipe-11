@@ -26,8 +26,10 @@ class WallFollowingState(State):
         )
 
         node.create_subscription(Bool, "stop_over", self.stop_over, 10)
-        
-        node.create_subscription(Float32, "/wall_follower/alpha", self.alpha_callback, 10)
+
+        node.create_subscription(
+            Float32, "/wall_follower/alpha", self.alpha_callback, 10
+        )
 
         self.stop_over_publisher = node.create_publisher(Bool, "stop_over", 10)
 
@@ -83,7 +85,7 @@ class WallFollowingState(State):
             self.outcome = "back_to_init"
 
     def execute(self, blackboard):
-        self.blackboard = blackboard 
+        self.blackboard = blackboard
 
         self.outcome = None
 

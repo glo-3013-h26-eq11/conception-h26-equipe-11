@@ -130,7 +130,6 @@ class StopSignEnforcer(Enforcer):
                 )
                 factor = max(0.0, min(1.0, factor))
 
-                
                 cmd.linear.x = max(cmd.linear.x * factor, MAX_BREAKING_SPEED)
                 cmd.angular.z = 0.0
                 cmd = self._apply_braking_angle_correction(cmd)
@@ -141,7 +140,9 @@ class StopSignEnforcer(Enforcer):
                 angle_fresh = (now - self._angle_last_update) <= DISTANCE_STALE_SEC
                 if angle_fresh and not self.is_rover_at_valid_angle_from_aruco():
                     self.switch_state(_State.ADJUST_ANGLE)
-                    self._log(f"FIN STOP — ADJUST_ANGLE (angle={self._relative_angle:.1f}deg)")
+                    self._log(
+                        f"FIN STOP — ADJUST_ANGLE (angle={self._relative_angle:.1f}deg)"
+                    )
                 else:
                     self.switch_state(_State.OVER)
                     self._log("FIN STOP — OVER")

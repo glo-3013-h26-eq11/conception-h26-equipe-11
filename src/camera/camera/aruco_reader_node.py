@@ -13,6 +13,7 @@ import numpy as np
 
 CAMERA_OFFSET: float = 0.03
 
+
 class ArucoReaderNode(HealthPingingNode):
     def __init__(self):
         super().__init__("aruco_reader", "camera")

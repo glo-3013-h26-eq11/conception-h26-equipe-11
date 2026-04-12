@@ -12,7 +12,7 @@ JETSON_ROVER_PORT = "/dev/ttyACM0"
 BAUDRATE = 115200
 
 NUM_FLOATS = 29
-FRAME_TOTAL_SIZE = 120 
+FRAME_TOTAL_SIZE = 120
 
 
 class RoverUsbPortNode(HealthPingingNode):
@@ -80,7 +80,7 @@ class RoverUsbPortNode(HealthPingingNode):
 
             payload = data[:-4]
 
-            floats = struct.unpack('f' * NUM_FLOATS, payload)
+            floats = struct.unpack("f" * NUM_FLOATS, payload)
 
             self.parse_and_publish(floats)
 
