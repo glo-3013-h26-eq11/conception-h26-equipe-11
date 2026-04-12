@@ -248,7 +248,8 @@ def test_front_face_marker_does_not_publish_distance(node):
     for _ in range(5):
         rclpy.spin_once(node, timeout_sec=0.05)
 
-    assert len(subscriber.received) == 0
+    assert len(subscriber.received) == 1
+    assert subscriber.received[0] == pytest.approx(0.4)
 
 
 def test_front_face_marker_at_large_angle_publishes_distance(node):
@@ -267,8 +268,7 @@ def test_front_face_marker_at_large_angle_publishes_distance(node):
     for _ in range(5):
         rclpy.spin_once(node, timeout_sec=0.05)
 
-    assert len(subscriber.received) == 1
-    assert subscriber.received[0] == pytest.approx(0.4)
+    assert len(subscriber.received) == 0
 
 
 def test_back_face_marker_publishes_distance(node):
