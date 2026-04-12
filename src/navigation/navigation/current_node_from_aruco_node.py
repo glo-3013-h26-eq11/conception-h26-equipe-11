@@ -96,7 +96,7 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
 
                     self._following_car_pub.publish(distance)
 
-                    if d <= SAFE_DISTANCE_TO_CAR:
+                    if d <= SAFE_DISTANCE_TO_CAR + 0.05:
                         self.is_car_at_dangerous_distance = True
 
     def _publish_distance(self):
