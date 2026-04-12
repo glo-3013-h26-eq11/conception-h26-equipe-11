@@ -9,6 +9,7 @@ from std_msgs.msg import Float32
 THETA_DEG = 60
 LOOKAHEAD = 0.35  # m
 DESIRED_DISTANCE_FROM_WALL = 0.12  # m
+FRONT_DISTANCE = 0.275 # m
 INTEGRAL_WINDOW_SIZE = 20
 KP = 5.3
 KD = 0.5
@@ -94,7 +95,7 @@ class WallFollowNode(HealthPingingNode):
             theta_for_wall_follow = theta_c
             a_for_wall_follow = c
 
-        if front < 0.25:
+        if front < FRONT_DISTANCE:
             theta_for_wall_follow = theta_front
             a_for_wall_follow = front
 
