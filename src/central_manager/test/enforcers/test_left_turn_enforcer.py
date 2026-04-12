@@ -8,6 +8,7 @@ from unittest.mock import Mock
 def enforcer():
     return LeftTurnEnforcer()
 
+
 def test_given_arc_not_done_when_enforce_cmd_then_turn(enforcer):
     initial_command = Twist()
 
