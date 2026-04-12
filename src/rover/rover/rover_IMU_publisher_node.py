@@ -99,7 +99,7 @@ class ImuPublisherNode(Node):
 
                 except Exception as e:
                     self.get_logger().warn(f"Error reading serial: {e}")
-                    time.sleep(0.1)
+                    rclpy.spin_once(self.node, timeout_sec=0.1)
 
         except serial.SerialException as e:
             self.get_logger().error(f"Serial port error: {e}")

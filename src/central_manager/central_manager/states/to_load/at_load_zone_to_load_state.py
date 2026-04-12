@@ -46,6 +46,6 @@ class AtLoadZoneToLoad(State):
         blackboard[BLACKBOARD_ENFORCERS] = [self.wait_at_load_enforcer]
 
         while self.outcome is None:
-            time.sleep(0.1)
+            rclpy.spin_once(self.node, timeout_sec=0.1)
 
         return self.outcome

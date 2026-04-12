@@ -69,7 +69,7 @@ class AtIntersectionToLoadState(State):
         future = self.client.call_async(request)
 
         while not future.done():
-            time.sleep(0.1)
+            rclpy.spin_once(self.node, timeout_sec=0.1)
 
         result = future.result()
         if result is not None:

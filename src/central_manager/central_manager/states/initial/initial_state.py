@@ -58,7 +58,7 @@ class InitialState(State):
         blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
 
         while self.outcome is None:
-            time.sleep(0.1)
+            rclpy.spin_once(self.node, timeout_sec=0.1)
 
         home_deposit_data = Int16()
         home_deposit_data.data = self.home_deposit_zone
