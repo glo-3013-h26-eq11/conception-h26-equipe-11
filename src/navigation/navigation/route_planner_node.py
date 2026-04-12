@@ -83,11 +83,13 @@ class RoutePlannerNode(HealthPingingNode):
     def set_home_deposit_callback(self, msg: Int16):
         if self._route_selector is None:
             return
-        
+
         id_of_zone = self._route_selector.tag_to_id(msg.data)
 
         if "ZD" not in id_of_zone:
-            self.get_logger().info(f"Invalid zone to set as home deposit zone : {id_of_zone}")
+            self.get_logger().info(
+                f"Invalid zone to set as home deposit zone : {id_of_zone}"
+            )
 
         self.home_deposit_zone = id_of_zone
         self._vehicle_id = int(self.home_deposit_zone[2:])

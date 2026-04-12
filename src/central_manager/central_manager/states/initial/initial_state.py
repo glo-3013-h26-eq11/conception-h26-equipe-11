@@ -7,7 +7,6 @@ from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.blackboard_config import (
     BLACKBOARD_ENFORCERS,
     BLACKBOARD_PREVIOUS_STOP_TAG,
-    BLACKBOARD_HOME_DEPOSIT_ZONE,
 )
 
 
@@ -34,7 +33,7 @@ class InitialState(State):
         self.outcome = None
 
     def rover_start_callback(self, msg):
-        if msg.data:
+        if msg.data and self.home_deposit_zone is not None:
             self.outcome = "system_ready"
 
     def at_deposit_callback(self, msg):
@@ -43,13 +42,11 @@ class InitialState(State):
         seen_tag = data.get("tag")
 
         if seen_tag is not None:
-            
 
             if self.home_deposit_zone != seen_tag:
                 self.node.get_logger().info(f"Potential home deposit : {seen_tag}")
 
             self.home_deposit_zone = seen_tag
-
 
     def execute(self, blackboard):
         self.outcome = None
@@ -67,6 +64,5 @@ class InitialState(State):
         home_deposit_data.data = self.home_deposit_zone
         self.home_deposit_zone_pub.publish(home_deposit_data)
         self.node.get_logger().info(f"Home deposit : {self.home_deposit_zone}")
-
 
         return self.outcome
