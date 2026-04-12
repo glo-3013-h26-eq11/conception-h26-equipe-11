@@ -1,7 +1,7 @@
 import json
 import rclpy
 from web_interface.system_health_node import HealthPingingNode
-from std_msgs.msg import String
+from std_msgs.msg import String, Int16
 from navigation.goal_selector import GoalMode, GoalSelector
 from navigation.city_interface import CityInterface
 from navigation.route_selector import RouteSelector
@@ -16,12 +16,16 @@ class RoutePlannerNode(HealthPingingNode):
         self._route_selector = route_selector
         self._goal_selector = GoalSelector(route_selector) if route_selector else None
         self._city_interface = CityInterface()
-        # a voir comment on se fait donner le vehicle_id
-        self.declare_parameter("vehicle_id", 99)
-        self._vehicle_id: int = int(self.get_parameter("vehicle_id").value)
+
+        self.home_deposit_zone = None
+        self._vehicle_id: int = None
 
         self.subscription_current = self.create_subscription(
             String, "current_node", self.current_node_id_distance_callback, 10
+        )
+
+        self.home_deposit_sub = self.create_subscription(
+            Int16, "home_deposit_zone", self.set_home_deposit_callback, 10
         )
 
         if route_selector is None:
@@ -46,8 +50,7 @@ class RoutePlannerNode(HealthPingingNode):
         )
 
         self.current_node: str | None = None
-        self.constant_deposit_zone = "ZD1"
-        self.available_goals: list[str] = [self.constant_deposit_zone]
+        self.available_goals: list[str] = ["ZC1", "ZD1"]
         self.goal_mode: str = GoalMode.GO_LOAD.value
 
     def handle_get_node_action_load(self, _request, response):
@@ -76,6 +79,23 @@ class RoutePlannerNode(HealthPingingNode):
 
         except (json.JSONDecodeError, ValueError, TypeError) as e:
             self.get_logger().error(f"Failed to parse map: {e}")
+
+    def set_home_deposit_callback(self, msg: Int16):
+        if self._route_selector is None:
+            return
+
+        id_of_zone = self._route_selector.tag_to_id(msg.data)
+
+        if "ZD" not in id_of_zone:
+            self.get_logger().info(
+                f"Invalid zone to set as home deposit zone : {id_of_zone}"
+            )
+            return
+
+        self.home_deposit_zone = id_of_zone
+        self._vehicle_id = int(self.home_deposit_zone[2:])
+        self.get_logger().info(f"Setting home deposit zone : {self.home_deposit_zone}")
+        self.available_goals.append(self.home_deposit_zone)
 
     def current_node_id_distance_callback(self, msg: String) -> None:
 
@@ -213,7 +233,13 @@ class RoutePlannerNode(HealthPingingNode):
                 load_goals.append(zc_goal)
 
         self.available_goals = sorted(set(load_goals))
-        self.available_goals.append(self.constant_deposit_zone)
+
+        if self.home_deposit_zone is not None:
+            self.available_goals.append(self.home_deposit_zone)
+
+        self.get_logger().info(
+            f"Load goals refreshed from API/map: {self.available_goals}"
+        )
 
     def _try_compute_route(self) -> None:
         if self._route_selector is None:

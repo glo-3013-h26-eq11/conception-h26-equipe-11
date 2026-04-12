@@ -13,7 +13,7 @@ from integration_tests.integration_helper import (
 )
 import pytest
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import String, Int16
 import json
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
@@ -55,11 +55,20 @@ class TopicPublisher(Node):
 
         self.publisher_current_node = self.create_publisher(String, "current_node", 10)
 
+        self.publisher_home_deposit = self.create_publisher(
+            Int16, "home_deposit_zone", 10
+        )
+
     def publish_current_node(self):
         msg = String()
         data = {"tag": CURRENT_NODE}
         msg.data = json.dumps(data)
         self.publisher_current_node.publish(msg)
+
+    def publish_home_deposit_zone(self):
+        msg = Int16()
+        msg.data = CURRENT_NODE
+        self.publisher_home_deposit.publish(msg)
 
 
 def test_route_planner_node_updates_web():
@@ -89,20 +98,28 @@ def test_route_planner_node_updates_web():
 
         page.wait_for_timeout(3000)
 
-        publisher_node.publish_current_node()
+        publisher_node.publish_home_deposit_zone()
 
         executor = SingleThreadedExecutor()
         executor.add_node(publisher_node)
 
         start = time.time()
-        while time.time() - start < 4:
+        while time.time() - start < 3:
             executor.spin_once(timeout_sec=0.1)
 
-        expect(page.locator(".mdi-arrow-up")).to_be_visible()
+        publisher_node.publish_current_node()
 
-        expect(page.locator(".mdi-arrow-left-top")).to_be_hidden()
+        start = time.time()
+        while time.time() - start < 3:
+            executor.spin_once(timeout_sec=0.1)
 
-        expect(page.locator(".mdi-arrow-right-top")).to_be_hidden()
+        page.wait_for_timeout(3000)
+
+        expect(page.locator(".mdi-arrow-up")).to_be_visible(timeout=3000)
+
+        expect(page.locator(".mdi-arrow-left-top")).to_be_hidden(timeout=3000)
+
+        expect(page.locator(".mdi-arrow-right-top")).to_be_hidden(timeout=3000)
 
         browser.close()
 
