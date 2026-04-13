@@ -64,7 +64,7 @@ class StateMachineRover:
             self.states["INITIAL"],
             transitions={
                 "system_ready": "WALL_FOLLOWING_POSITIONING",
-                "back_to_init": "INITIAL"
+                "back_to_init": "INITIAL",
             },
         )
 

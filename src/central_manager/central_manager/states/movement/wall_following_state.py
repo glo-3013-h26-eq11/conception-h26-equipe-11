@@ -11,7 +11,6 @@ from central_manager.blackboard_config import (
 from navigation_interfaces.srv import GetIsIntersectionValidToStop
 
 
-
 class WallFollowingState(State):
     def __init__(self, node):
         super().__init__(outcomes=["current_node", "back_to_init"])
@@ -43,8 +42,10 @@ class WallFollowingState(State):
         self.seen_tag = None
 
         self.previous_tag = None
-        
-        self.client = self.node.create_client(GetIsIntersectionValidToStop, "get_is_intersection_valid_to_stop")
+
+        self.client = self.node.create_client(
+            GetIsIntersectionValidToStop, "get_is_intersection_valid_to_stop"
+        )
 
     def distance_to_car_callback(self, msg: Float32):
         if self.car_follower_enforcer:
@@ -61,21 +62,21 @@ class WallFollowingState(State):
         if self.previous_tag is not None:
             if self.seen_tag == self.previous_tag:
                 return
-            
-        is_intersection_valid_to_stop = self.get_is_the_intersection_valid_to_stop(self.seen_tag)
-        
+
+        is_intersection_valid_to_stop = self.get_is_the_intersection_valid_to_stop(
+            self.seen_tag
+        )
+
         if not is_intersection_valid_to_stop:
             self.outcome = "current_node"
 
         if self.stop_sign_enforcer:
             self.stop_sign_enforcer.update_distance(distance)
             self.stop_sign_enforcer.update_relative_angle(angle)
-            
-    def get_is_the_intersection_valid_to_stop(self, aruco_tag:int) -> bool:
+
+    def get_is_the_intersection_valid_to_stop(self, aruco_tag: int) -> bool:
         if not self.client.wait_for_service(timeout_sec=5.0):
-            self.node.get_logger().error(
-                "get_is_intersection_valid_to_stop"
-            )
+            self.node.get_logger().error("get_is_intersection_valid_to_stop")
             raise RuntimeError("Service 'get_is_intersection_valid_to_stop")
 
         request = GetIsIntersectionValidToStop.Request()

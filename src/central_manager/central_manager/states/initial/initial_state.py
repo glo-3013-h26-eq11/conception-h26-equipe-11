@@ -61,7 +61,9 @@ class InitialState(State):
             rclpy.spin_once(self.node, timeout_sec=0.1)
 
         if self.home_deposit_zone is None:
-            self.node.get_logger().info(f"Home deposit not set, going back to initial state")
+            self.node.get_logger().info(
+                f"Home deposit not set, going back to initial state"
+            )
             return "back_to_init"
 
         home_deposit_data = Int16()
