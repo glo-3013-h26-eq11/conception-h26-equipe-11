@@ -6,7 +6,7 @@ from navigation.goal_selector import GoalMode, GoalSelector
 from navigation.city_interface import CityInterface
 from navigation.route_selector import RouteSelector
 from central_manager.states.node_action_enum import NodeAction
-from navigation_interfaces.srv import GetNodeAction
+from navigation_interfaces.srv import GetNodeAction, GetIsIntersectionValidToStop
 
 
 class RoutePlannerNode(HealthPingingNode):
@@ -48,10 +48,17 @@ class RoutePlannerNode(HealthPingingNode):
             "get_node_action_deposit",
             self.handle_get_node_action_deposit,
         )
+        
+        self.get_is_intersection_valid_to_stop = self.create_service(
+            GetIsIntersectionValidToStop,
+            "get_is_intersection_valid_to_stop",
+            self.handle_get_is_intersection_valid_to_stop
+        )
 
         self.current_node: str | None = None
         self.available_goals: list[str] = ["ZC1", "ZD1"]
         self.goal_mode: str = GoalMode.GO_LOAD.value
+        self._current_nodes_path = None
 
     def handle_get_node_action_load(self, _request, response):
         response.action = self._compute_node_action(
@@ -64,6 +71,34 @@ class RoutePlannerNode(HealthPingingNode):
             mode=GoalMode.GO_DEPOSIT, wait_action=NodeAction.WAIT_DEPOSIT_ZONE
         )
         return response
+    
+    def handle_get_is_intersection_valid_to_stop(self, request, response):
+        response.is_valid = self.is_intersection_valid_to_stop(request.aruco_tag)
+        return response
+
+    def is_intersection_valid_to_stop(self, aruco_tag:int):
+        self.get_logger().info(f"BEFORE TAG")
+
+        
+        if not self._route_selector:
+            return True
+        
+        if len(self.available_goals) <= 0:
+            return True
+        
+        id = self._route_selector.tag_to_id(aruco_tag)
+        
+        self.get_logger().info(f"id  : {id} ---- current nodes : {self._current_nodes_path}")
+
+        
+        if self._current_nodes_path:
+            if id.startswith("ZD") or id.startswith("ZC"):
+                if len(self._current_nodes_path) >= 1 and id == self._current_nodes_path[-1]:
+                    return True
+                else:
+                    return False
+
+        return True
 
     def _map_callback(self, msg: String) -> None:
         if self._route_selector is not None:
@@ -131,6 +166,8 @@ class RoutePlannerNode(HealthPingingNode):
             return wait_action.value
 
         nodes_path, directions_path = result
+        
+        self._current_nodes_path = nodes_path
 
         if len(directions_path) >= 1:
 

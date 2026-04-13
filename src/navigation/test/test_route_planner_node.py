@@ -25,6 +25,7 @@ def node():
         "A4": {"id": "A4", "tag": 4, "right": "A4", "left": "A2", "straight": "ZC1"},
         "ZD1": {"id": "ZD1", "tag": 5, "right": None, "left": None, "straight": "A3"},
         "ZC1": {"id": "ZC1", "tag": 6, "right": None, "left": None, "straight": "A1"},
+        "ZD2": {"id": "ZD2", "tag": 7, "right": None, "left": None, "straight": "A1"},
     }
     route_selector = RouteSelector(graph=temp_graph)
     route_planner_node = RoutePlannerNode(route_selector=route_selector)
@@ -383,3 +384,47 @@ def test_when_home_deposit_callback_then_home_deposit_updated(node):
     node.set_home_deposit_callback(data)
 
     assert node.home_deposit_zone == "ZD1"
+
+
+def test_given_going_ZD2_when_is_at_intersection_valid_to_stop_then_return_false(node):
+    ZD2_TAG = 7
+    node.available_goals = ["ZC1"]
+    node._current_nodes_path = ["A1", "ZC1"]
+
+
+    assert node.is_intersection_valid_to_stop(ZD2_TAG) == False
+    
+    
+def test_given_going_home_deposit_when_is_at_intersection_valid_to_stop_then_return_false(node):
+    ZD1_TAG = 5
+    node.available_goals = ["ZC1"]
+    node._current_nodes_path = ["A1", "ZC1"]
+
+
+    assert node.is_intersection_valid_to_stop(ZD1_TAG) == False
+
+
+def test_given_going_ZC1_when_is_at_intersection_valid_to_stop_then_return_true(node):
+    ZC1_TAG = 6
+    node.available_goals = ["ZC1"]
+    node._current_nodes_path = ["A1", "ZC1"]
+
+
+    assert node.is_intersection_valid_to_stop(ZC1_TAG) == True
+
+
+def test_given_going_mo_available_goals_when_is_at_intersection_valid_to_stop_then_return_true(node):
+    ZC1_TAG = 6
+    node.available_goals = []
+    node._current_nodes_path = ["A1", "ZC1"]
+
+
+    assert node.is_intersection_valid_to_stop(ZC1_TAG) == True
+
+def test_given_going_no_path_when_is_at_intersection_valid_to_stop_then_return_true(node):
+    ZC1_TAG = 6
+    node.available_goals = []
+    node._current_nodes_path = []
+
+
+    assert node.is_intersection_valid_to_stop(ZC1_TAG) == True
