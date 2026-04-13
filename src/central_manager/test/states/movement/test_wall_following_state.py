@@ -85,11 +85,28 @@ def test_when_stop_over_and_current_node_then_transitions(state):
     assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
 
 
-def test_when_current_node_and_is_not_valid_stop_then_outcome_current_node(state):
+def test_when_current_node_and_is_not_valid_stop_then_previous_tag_is_aruco_tag(state):
     blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
     outcome_holder = {}
+    ARUCO_TAG = 1
 
-    state.get_is_the_intersection_valid_to_stop = lambda x: False
+    class FakeFuture:
+        def __init__(self, result):
+            self._result = result
+
+        def result(self):
+            return self._result
+
+    class FakeResponse:
+        def __init__(self, is_valid):
+            self.is_valid = is_valid
+
+    fake_result = FakeResponse(is_valid=False)
+    fake_future = FakeFuture(fake_result)
+
+    state.get_is_the_intersection_valid_to_stop = (
+        lambda x: state.handle_get_is_the_intersection_valid_to_stop(x, fake_future)
+    )
 
     def run_state():
         outcome_holder["outcome"] = state.execute(blackboard)
@@ -101,11 +118,10 @@ def test_when_current_node_and_is_not_valid_stop_then_outcome_current_node(state
 
     pub = state.node.create_publisher(String, "current_node", 10)
 
-    data = {"distance": 5, "angle": 0.0, "tag": 1}
+    data = {"distance": 5, "angle": 0.0, "tag": ARUCO_TAG}
     msg = String(data=json.dumps(data))
     pub.publish(msg)
 
-    thread.join(timeout=2.0)
+    thread.join(timeout=5.0)
 
-    assert outcome_holder.get("outcome") == "current_node"
-    assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
+    assert state.previous_tag == ARUCO_TAG

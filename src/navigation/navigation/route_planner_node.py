@@ -121,7 +121,7 @@ class RoutePlannerNode(HealthPingingNode):
 
         if id_of_zone is None:
             self.get_logger().info(
-                f"Id of Zone is None : error with the home deposit map"
+                "Id of Zone is None : error with the home deposit map"
             )
 
         if "ZD" not in id_of_zone:
