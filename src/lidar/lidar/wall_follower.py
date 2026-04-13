@@ -7,7 +7,7 @@ from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
 LOOKAHEAD = 0.35  # m
-DESIRED_DISTANCE_FROM_WALL = 0.12  # m
+DESIRED_DISTANCE_FROM_WALL = 0.15  # m
 INTEGRAL_WINDOW_SIZE = 20
 KP = 5.0
 KD = 0.5
@@ -174,7 +174,7 @@ class WallFollowNode(HealthPingingNode):
 
             return RIGHT_CORNER_SPEED, -MAX_STEERING
 
-        elif A > OBTUSE_ANGLE_THRESHOLD and b < 0.18:
+        elif A > OBTUSE_ANGLE_THRESHOLD and b < 0.20:
 
             return RIGHT_CORNER_SPEED, 0
 

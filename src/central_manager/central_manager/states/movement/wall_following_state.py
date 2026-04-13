@@ -9,6 +9,7 @@ from central_manager.blackboard_config import (
     BLACKBOARD_PREVIOUS_STOP_TAG,
 )
 from navigation_interfaces.srv import GetIsIntersectionValidToStop
+from functools import partial
 
 
 class WallFollowingState(State):
@@ -58,17 +59,11 @@ class WallFollowingState(State):
         angle = float(data.get("angle"))
         self.seen_tag = data.get("tag")
 
+        self.get_is_the_intersection_valid_to_stop(self.seen_tag)
+
         if self.previous_tag is not None:
             if self.seen_tag == self.previous_tag:
                 return
-
-        is_intersection_valid_to_stop = self.get_is_the_intersection_valid_to_stop(
-            self.seen_tag
-        )
-
-        if not is_intersection_valid_to_stop:
-            self.node.get_logger().info(f"Skipping stopping at tag : {self.seen_tag}")
-            self.outcome = "current_node"
 
         if self.stop_sign_enforcer:
             self.stop_sign_enforcer.update_distance(distance)
@@ -82,16 +77,20 @@ class WallFollowingState(State):
         request = GetIsIntersectionValidToStop.Request()
         request.aruco_tag = aruco_tag
         future = self.client.call_async(request)
+        future.add_done_callback(
+            partial(self.handle_get_is_the_intersection_valid_to_stop, aruco_tag)
+        )
 
-        while not future.done():
-            rclpy.spin_once(self.node, timeout_sec=0.1)
-
+    def handle_get_is_the_intersection_valid_to_stop(self, aruco_tag, future):
         result = future.result()
-        if result is not None:
-            return result.is_valid
 
-        self.node.get_logger().error("get_is_intersection_valid_to_stop failed")
-        raise RuntimeError("get_is_intersection_valid_to_stop failed")
+        if result is not None:
+            if result.is_valid is False:
+                if self.previous_tag != aruco_tag:
+                    self.node.get_logger().info(
+                        f"Skipping stopping at tag : {aruco_tag}"
+                    )
+                    self.previous_tag = aruco_tag
 
     def stop_over(self, msg: Bool):
         self.node.get_logger().info("STOPPED : SAYS WALL FOLLOWER")

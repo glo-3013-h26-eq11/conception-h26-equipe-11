@@ -119,6 +119,11 @@ class RoutePlannerNode(HealthPingingNode):
 
         id_of_zone = self._route_selector.tag_to_id(msg.data)
 
+        if id_of_zone is None:
+            self.get_logger().info(
+                f"Id of Zone is None : error with the home deposit map"
+            )
+
         if "ZD" not in id_of_zone:
             self.get_logger().info(
                 f"Invalid zone to set as home deposit zone : {id_of_zone}"
@@ -197,6 +202,9 @@ class RoutePlannerNode(HealthPingingNode):
 
     def _post_nodes_path_to_city_interface(self, nodes_path: list[str]) -> None:
         if not nodes_path:
+            return
+
+        if not self._vehicle_id:
             return
 
         try:
