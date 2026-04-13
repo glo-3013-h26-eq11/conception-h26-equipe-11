@@ -9,8 +9,6 @@ from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from typing import List
 import rclpy
-import threading
-from yasmin import Blackboard
 
 
 class EnforcerManagerNode(HealthPingingNode):
@@ -27,25 +25,26 @@ class EnforcerManagerNode(HealthPingingNode):
 
         self.pub_cmd_vel_safe = self.create_publisher(Twist, "/cmd_vel_safe", 10)
 
-        self.blackboard = Blackboard()
-
+        self.blackboard = {}
         self.blackboard[BLACKBOARD_ENFORCERS] = []
         self.blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
 
         self.sm = state_machine or StateMachineRover(self)
-
-        self._sm_thread = threading.Thread(target=self._run_sm, daemon=True)
-        self._sm_thread.start()
+        self.sm.start(self.blackboard)
+        self.create_timer(0.1, self._state_machine_tick)
 
         self.previous_twist = Twist()
 
     def _get_enforcers(self) -> List[Enforcer]:
         return self.blackboard[BLACKBOARD_ENFORCERS]
 
-    def _run_sm(self):
-        self.get_logger().info("Starting the state machine...")
-
-        self.sm.run(self.blackboard)
+    def _state_machine_tick(self) -> None:
+        try:
+            outcome = self.sm.step(self.blackboard)
+            if outcome is not None:
+                self.get_logger().info(f"Transitioned to state: {outcome}")
+        except Exception as exc:
+            self.get_logger().error(f"State machine error: {exc}")
 
     def camera_callback(self, msg: String):
         self.cmd_callback(self.previous_twist)

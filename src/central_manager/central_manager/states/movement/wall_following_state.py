@@ -1,7 +1,6 @@
-from yasmin import State
-import rclpy
-from std_msgs.msg import String, Float32, Bool
+from typing import Optional
 import json
+from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 from central_manager.blackboard_config import (
@@ -10,55 +9,39 @@ from central_manager.blackboard_config import (
 )
 from navigation_interfaces.srv import GetIsIntersectionValidToStop
 from functools import partial
+from central_manager.state_base import RoverState
 
 
-class WallFollowingState(State):
+class WallFollowingState(RoverState):
     def __init__(self, node):
-        super().__init__(outcomes=["current_node", "back_to_init"])
-
         self.node = node
 
         node.create_subscription(
             String, "current_node", self.at_intersection_callback, 10
         )
-
         node.create_subscription(
             Float32, "distance_to_car", self.distance_to_car_callback, 10
         )
-
         node.create_subscription(Bool, "stop_over", self.stop_over, 10)
-
         node.create_subscription(
             Float32, "/wall_follower/alpha", self.alpha_callback, 10
         )
-
-        self.stop_over_publisher = node.create_publisher(Bool, "stop_over", 10)
-
-        self.car_follower_enforcer: CarFollowEnforcer = None
-
         node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
 
+        self.stop_over_publisher = node.create_publisher(Bool, "stop_over", 10)
+        self.car_follower_enforcer: CarFollowEnforcer = None
         self.stop_sign_enforcer: StopSignEnforcer = None
-
         self.latest_alpha = 0.0
-
         self.outcome = None
-
-        self.cooldown = None
-
         self.seen_tag = None
-
         self.previous_tag = None
-
         self.blackboard = None
-
         self.client = self.node.create_client(
             GetIsIntersectionValidToStop, "get_is_intersection_valid_to_stop"
         )
 
     def alpha_callback(self, msg: Float32):
         self.latest_alpha = msg.data
-
 
     def distance_to_car_callback(self, msg: Float32):
         if self.car_follower_enforcer:
@@ -73,9 +56,8 @@ class WallFollowingState(State):
 
         self.get_is_the_intersection_valid_to_stop(self.seen_tag)
 
-        if self.previous_tag is not None:
-            if self.seen_tag == self.previous_tag:
-                return
+        if self.previous_tag is not None and self.seen_tag == self.previous_tag:
+            return
 
         if self.stop_sign_enforcer:
             self.stop_sign_enforcer.update_distance(distance)
@@ -96,13 +78,12 @@ class WallFollowingState(State):
     def handle_get_is_the_intersection_valid_to_stop(self, aruco_tag, future):
         result = future.result()
 
-        if result is not None:
-            if result.is_valid is False:
-                if self.previous_tag != aruco_tag:
-                    self.node.get_logger().info(
-                        f"Skipping stopping at tag : {aruco_tag}"
-                    )
-                    self.previous_tag = aruco_tag
+        if result is not None and result.is_valid is False:
+            if self.previous_tag != aruco_tag:
+                self.node.get_logger().info(
+                    f"Skipping stopping at tag : {aruco_tag}"
+                )
+                self.previous_tag = aruco_tag
 
     def stop_over(self, msg: Bool):
         self.node.get_logger().info("STOPPED : SAYS WALL FOLLOWER")
@@ -114,29 +95,23 @@ class WallFollowingState(State):
         if not msg.data:
             self.outcome = "back_to_init"
 
-    def execute(self, blackboard):
+    def on_enter(self, blackboard):
         self.blackboard = blackboard
-
         self.outcome = None
-
         self.previous_tag = blackboard[BLACKBOARD_PREVIOUS_STOP_TAG]
-
         self.node.get_logger().info("WALL_FOLLOWING_STATE state")
-
         self.car_follower_enforcer = CarFollowEnforcer()
-
         self.stop_sign_enforcer = StopSignEnforcer(
             self.stop_over_publisher, logger=self.node.get_logger()
         )
-
         blackboard[BLACKBOARD_ENFORCERS] = [
             self.stop_sign_enforcer,
             self.car_follower_enforcer,
         ]
 
-        while self.outcome is None:
-            rclpy.spin_once(self.node, timeout_sec=0.1)
+    def step(self, blackboard) -> Optional[str]:
+        if self.outcome is None:
+            return None
 
         blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = self.seen_tag
-
         return self.outcome

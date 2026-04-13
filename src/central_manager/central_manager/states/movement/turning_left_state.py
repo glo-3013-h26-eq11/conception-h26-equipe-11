@@ -1,22 +1,19 @@
 import json
 import math
 import time
-
-from yasmin import State
-import rclpy
+from typing import Optional
 from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.left_turn_enforcer import LeftTurnEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
+from central_manager.state_base import RoverState
 
 BLACKBOARD_ARRIVAL_ALPHA = "arrival_alpha_rad"
 BASE_TARGET_DEGREES = 90.0
 
 
-class TurningLeftState(State):
+class TurningLeftState(RoverState):
     def __init__(self, node):
-        super().__init__(outcomes=["turn_over", "back_to_init"])
-
         self.node = node
 
         node.create_subscription(String, "turn_over", self.turn_over_callback, 10)
@@ -80,7 +77,7 @@ class TurningLeftState(State):
         if not msg.data:
             self.outcome = "back_to_init"
 
-    def execute(self, blackboard):
+    def on_enter(self, blackboard):
         self.outcome = None
         self.accumulated_degrees = 0.0
         self.last_imu_time = None
@@ -105,7 +102,5 @@ class TurningLeftState(State):
             self.car_follower_enforcer,
         ]
 
-        while self.outcome is None:
-            rclpy.spin_once(self.node, timeout_sec=0.1)
-
+    def step(self, blackboard) -> Optional[str]:
         return self.outcome
