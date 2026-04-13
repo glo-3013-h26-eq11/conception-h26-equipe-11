@@ -163,10 +163,13 @@ class RoutePlannerNode(HealthPingingNode):
             self._refresh_available_load_goals_from_city_interface()
 
         goal_node = self._select_goal_for_mode(mode)
+        if goal_node is None:
+            return NodeAction.WALL_FOLLOW.value
+
         result = self._route_selector.compute_path(self.current_node, goal_node)
 
         if result is None:
-            return wait_action.value
+            return NodeAction.WALL_FOLLOW.value
 
         nodes_path, directions_path = result
 
@@ -217,7 +220,7 @@ class RoutePlannerNode(HealthPingingNode):
                 f"Failed posting route_plan/nodes to city API for vehicle={self._vehicle_id}: {e}"
             )
 
-    def _select_goal_for_mode(self, mode: GoalMode) -> str:
+    def _select_goal_for_mode(self, mode: GoalMode) -> str | None:
         if self._route_selector is None:
             return self.current_node
 
@@ -229,8 +232,6 @@ class RoutePlannerNode(HealthPingingNode):
             available_goals=self.available_goals,
             mode=mode,
         )
-        if selected is None:
-            return self.current_node
         return selected
 
     def _refresh_available_load_goals_from_city_interface(self) -> None:
