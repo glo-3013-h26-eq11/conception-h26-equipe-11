@@ -1,3 +1,3 @@
 BLACKBOARD_ENFORCERS = "enforcers"
 BLACKBOARD_PREVIOUS_STOP_TAG = "previous_stop_tag"
-BLACKBOARD_HOME_DEPOSIT_ZONE = "home_deposit_zone"
+BLACKBOARD_ARRIVAL_ALPHA = "arrival_alpha_rad"

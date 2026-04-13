@@ -69,6 +69,7 @@ def test_given_enforcer_stopped_when_wait_time_done_then_adjust(enforcer):
     enforcer._state = _State.STOPPED
     enforcer._stop_start = time.time() - STOP_DURATION - 0.1
     enforcer._relative_angle = GOOD_ANGLE_ALIGNMENT_LEFT - 1.0
+    enforcer._angle_last_update = time.time()
     cmd = make_cmd(1.0)
 
     enforcer.update_distance(0.6)
@@ -80,6 +81,7 @@ def test_given_enforcer_stopped_when_wait_time_done_then_adjust(enforcer):
 def test_given_rover_too_left_when_adjust_then_adjust_right(enforcer):
     enforcer._state = _State.ADJUST_ANGLE
     enforcer._relative_angle = GOOD_ANGLE_ALIGNMENT_LEFT - 0.1
+    enforcer._angle_last_update = time.time()
 
     cmd = make_cmd(1.0)
 
@@ -91,6 +93,7 @@ def test_given_rover_too_left_when_adjust_then_adjust_right(enforcer):
 def test_given_rover_too_right_when_adjust_then_adjust_left(enforcer):
     enforcer._state = _State.ADJUST_ANGLE
     enforcer._relative_angle = GOOD_ANGLE_ALIGNEMENT_RIGHT + 0.1
+    enforcer._angle_last_update = time.time()
 
     cmd = make_cmd(1.0)
 

@@ -43,6 +43,9 @@ RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
 
 ENV SHELL /bin/bash
 
+ENV ROS_DOMAIN_ID="111"
+ENV ROS_LOCALHOST_ONLY=1
+
 ENV PATH="/home/devuser/.local/bin:${PATH}"
 
 
