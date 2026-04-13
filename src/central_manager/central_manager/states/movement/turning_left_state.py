@@ -24,9 +24,13 @@ class TurningLeftState(RoverState):
         )
         node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
         node.create_subscription(String, "/rover/imu/json", self._imu_callback, 10)
+        node.create_subscription(
+            Float32, "/wall_follower/alpha", self.alpha_callback, 10
+        )
 
         self.car_follower_enforcer = None
         self.outcome = None
+        self.latest_alpha = 0.0
 
         self.target_degrees = BASE_TARGET_DEGREES
         self.accumulated_degrees = 0.0
@@ -77,15 +81,15 @@ class TurningLeftState(RoverState):
         if not msg.data:
             self.outcome = "back_to_init"
 
+    def alpha_callback(self, msg: Float32):
+        self.latest_alpha = msg.data
+
     def on_enter(self, blackboard):
         self.outcome = None
         self.accumulated_degrees = 0.0
         self.last_imu_time = None
 
-        try:
-            arrival_alpha_rad = blackboard[BLACKBOARD_ARRIVAL_ALPHA]
-        except KeyError:
-            arrival_alpha_rad = 0.0
+        arrival_alpha_rad = self.latest_alpha
 
         correction_deg = math.degrees(arrival_alpha_rad)
         self.target_degrees = BASE_TARGET_DEGREES - correction_deg
@@ -94,6 +98,8 @@ class TurningLeftState(RoverState):
             f"TURNING_LEFT state — arrival alpha: {math.degrees(arrival_alpha_rad):.2f}° "
             f"— target turn: {self.target_degrees:.1f}°"
         )
+
+        blackboard[BLACKBOARD_ARRIVAL_ALPHA] = arrival_alpha_rad
 
         self.car_follower_enforcer = CarFollowEnforcer()
 

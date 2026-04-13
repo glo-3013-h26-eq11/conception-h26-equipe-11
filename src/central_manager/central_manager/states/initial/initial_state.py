@@ -45,6 +45,10 @@ class InitialState(RoverState):
         blackboard[BLACKBOARD_ENFORCERS] = [ImmobileEnforcer()]
         blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
 
+        home_deposit_data = Int16()
+        home_deposit_data.data = 0
+        self.home_deposit_zone_pub.publish(home_deposit_data)
+
     def step(self, blackboard) -> Optional[str]:
         if self.outcome is None:
             return None

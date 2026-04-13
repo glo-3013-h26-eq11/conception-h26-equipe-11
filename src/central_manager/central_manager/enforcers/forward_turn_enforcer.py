@@ -3,7 +3,7 @@ from geometry_msgs.msg import Twist
 from rclpy.node import Publisher
 from std_msgs.msg import String
 
-FORWARD_DISTANCE = 0.6 * 1.5  # m
+FORWARD_DISTANCE = 0.70 # m
 FORWARD_TURN_SPEED = 0.4  # m/s
 
 
