@@ -15,8 +15,6 @@ from central_manager.blackboard_config import (
     BLACKBOARD_PREVIOUS_STOP_TAG,
 )
 
-import pytest
-
 
 @pytest.fixture(scope="module", autouse=True)
 def rclpy_init():
