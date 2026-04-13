@@ -4,9 +4,19 @@ from typing import Optional
 import rclpy
 from std_msgs.msg import String, Float32, Bool
 from web_interface.system_health_node import HealthPingingNode
+from numpy import abs
 
-SAFE_DISTANCE_TO_CAR = 0.25  # m
+SAFE_DISTANCE_TO_CAR = 0.23  # m
 CAR_DETECTION_REFRESH = 0.5
+
+FRONT_ARUCO_ID = 1
+RIGHT_ARUCO_ID = 2
+BACK_ARUCO_ID = 3
+LEFT_ARUCO_ID = 4
+FRONT_CONE_RIGHT_MAX = 20.0
+FRONT_CONE_LEFT_MAX = -60.0
+
+ARUCO_TILT_THRESHOLD = 47.0
 
 
 class CurrentNodeFromArucoNode(HealthPingingNode):
@@ -44,58 +54,42 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
     def _detect_intersections(self, payload):
         markers_5x5 = payload.get("markers_5x5", [])
 
-        if not markers_5x5:
-            return
+        for marker in markers_5x5:
 
-        self.get_logger().info(f"Detected: {len(markers_5x5)} markers")
+            depth = float(marker.get("depth", 9999))
+            # angle_x_deg : décalage latéral (gauche-droite) du tag dans le champ de la caméra
+            angle = float(marker.get("angle_x_deg", 0))
+            z_forward = float(marker.get("z_forward", 0))
+            tag_angle = float(
+                marker.get("tag_angle", 0)
+            )  # inclinaison physique (tilt) du tag
+            marker_id = marker.get("tag")
 
-        valid_markers = [m for m in markers_5x5 if m.get("z_forward", 0) >= 0.15]
+            if depth > 1.0:
+                continue
+            
+            if z_forward < 0.15:
+                continue
+            
+            if angle > FRONT_CONE_RIGHT_MAX:
+                continue
+            
+            if angle < FRONT_CONE_LEFT_MAX:
+                continue   
 
-        if not valid_markers:
-            self.get_logger().warn("No valid markers according to the z_forward.")
-            return
-
-        selected_marker = None
-
-        front_strict = [m for m in valid_markers if m.get("angle_x_deg", 999) < 10.0]
-        if front_strict:
-            selected_marker = min(front_strict, key=lambda m: m.get("depth", 9999))
-            self.get_logger().info(
-                f"Front strict: Tag {selected_marker['tag']}, "
-                f"angle {selected_marker['angle_x_deg']}°"
-            )
-
-        if not selected_marker:
-            front_wide = [m for m in valid_markers if m.get("angle_x_deg", 999) < 30.0]
-            if front_wide:
-                selected_marker = min(front_wide, key=lambda m: m.get("depth", 9999))
-                self.get_logger().info(
-                    f"Front wide: Tag {selected_marker['tag']}, "
-                    f"angle {selected_marker['angle_x_deg']}°"
-                )
-
-        if not selected_marker:
-            side = [m for m in valid_markers if m.get("angle_x_deg", 999) < 60.0]
-            if side:
-                selected_marker = min(side, key=lambda m: m.get("depth", 9999))
-                self.get_logger().info(
-                    f"Side: Tag {selected_marker['tag']}, angle {selected_marker['angle_x_deg']}°"
-                )
-
-        if selected_marker:
-            marker_id = selected_marker.get("tag")
-            distance = selected_marker.get("depth")
+            if abs(tag_angle) >= ARUCO_TILT_THRESHOLD:
+                continue
 
             out = String()
-            out.data = json.dumps({"tag": marker_id, "distance": distance})
+            out.data = json.dumps(
+                {
+                    "tag": marker_id,
+                    "distance": depth,
+                    "angle": tag_angle,
+                }
+            )
+
             self._current_node_pub.publish(out)
-            self.get_logger().info(
-                f"Published: Tag {marker_id}, distance {distance:.2f}m"
-            )
-        else:
-            self.get_logger().warn(
-                "No marker selected according to the range < 60 degrees fixed."
-            )
 
     def _detect_cars(self, payload):
         markers_4x4 = payload.get("markers_4x4", [])
@@ -106,19 +100,27 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
 
             d = float(marker.get("depth", 9999))
             angle = float(marker.get("angle_x_deg", 0))
+            tag_id = int(marker.get("tag", 0))
 
-            if angle <= 45.0:
-                if closest_vehicle_dist is None or d < closest_vehicle_dist:
+            # Ignorer les véhicules sur le côté (>45°)
+            if tag_id == BACK_ARUCO_ID and abs(angle) > 45.0:
+                continue
 
-                    closest_vehicle_dist = d
+            # FRONT sur le côté : pas dans notre voie, ignorer
+            if tag_id == FRONT_ARUCO_ID and abs(angle) > 45.0:
+                continue
 
-                    distance = Float32()
-                    distance.data = closest_vehicle_dist
+            if closest_vehicle_dist is None or d < closest_vehicle_dist:
 
-                    self._following_car_pub.publish(distance)
+                closest_vehicle_dist = d
 
-                    if d <= SAFE_DISTANCE_TO_CAR:
-                        self.is_car_at_dangerous_distance = True
+                distance = Float32()
+                distance.data = closest_vehicle_dist
+
+                self._following_car_pub.publish(distance)
+
+                if d <= SAFE_DISTANCE_TO_CAR:
+                    self.is_car_at_dangerous_distance = True
 
     def _publish_distance(self):
         out = Bool()

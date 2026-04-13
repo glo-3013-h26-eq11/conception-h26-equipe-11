@@ -9,7 +9,9 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import String
 
 
-def _install_fake_modules(monkeypatch, *, ids_4x4, ids_5x5, depth_value=0.42):
+def _install_fake_modules(
+    monkeypatch, *, ids_4x4, ids_5x5, depth_value=0.42, tag_angle=0
+):
     import numpy as np
 
     cv_bridge_mod = types.ModuleType("cv_bridge")
@@ -61,7 +63,11 @@ def _install_fake_modules(monkeypatch, *, ids_4x4, ids_5x5, depth_value=0.42):
                 [[[0.0, 0.0, float(depth_value)]]],
                 dtype=np.float32,
             )
-            return None, tvecs, None
+            rvecs = np.array(
+                [[[0.0, 0.0, float(tag_angle)]]],
+                dtype=np.float32,
+            )
+            return rvecs, tvecs, None
 
     cv2_mod.aruco = _FakeAruco
 
@@ -115,10 +121,7 @@ def _make_compressed_image(frame_id="oak", sec=1, nanosec=2):
 
 def test_publishes_ids_when_detected(monkeypatch):
     ar = _install_fake_modules(
-        monkeypatch,
-        ids_4x4=[1, 2],
-        ids_5x5=[10],
-        depth_value=0.5,
+        monkeypatch, ids_4x4=[1, 2], ids_5x5=[10], depth_value=0.5, tag_angle=0
     )
 
     node = ar.ArucoReaderNode()
@@ -143,8 +146,20 @@ def test_publishes_ids_when_detected(monkeypatch):
     assert payload["stamp"]["sec"] == 123
     assert payload["stamp"]["nanosec"] == 456
     assert payload["markers_4x4"] == [
-        {"tag": 1, "depth": 0.5, "angle_x_deg": pytest.approx(0), "z_forward": 0.5},
-        {"tag": 2, "depth": 0.5, "angle_x_deg": pytest.approx(0), "z_forward": 0.5},
+        {
+            "tag": 1,
+            "depth": 0.5,
+            "angle_x_deg": pytest.approx(0),
+            "z_forward": 0.5,
+            "tag_angle": pytest.approx(0),
+        },
+        {
+            "tag": 2,
+            "depth": 0.5,
+            "angle_x_deg": pytest.approx(0),
+            "z_forward": 0.5,
+            "tag_angle": pytest.approx(0),
+        },
     ]
     assert payload["markers_5x5"] == [
         {
@@ -152,6 +167,7 @@ def test_publishes_ids_when_detected(monkeypatch):
             "depth": 0.5,
             "angle_x_deg": pytest.approx(0.0),
             "z_forward": pytest.approx(0.5),
+            "tag_angle": pytest.approx(0),
         }
     ]
 

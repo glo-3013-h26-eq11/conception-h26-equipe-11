@@ -1,7 +1,7 @@
 import json
 import pytest
 import rclpy
-from std_msgs.msg import String
+from std_msgs.msg import String, Int16
 
 from navigation.route_planner_node import RoutePlannerNode
 from navigation.route_selector import RouteSelector
@@ -28,6 +28,14 @@ def node():
     }
     route_selector = RouteSelector(graph=temp_graph)
     route_planner_node = RoutePlannerNode(route_selector=route_selector)
+    route_planner_node.home_deposit_zone = "ZD1"
+    route_planner_node.available_goals = ["ZD1"]
+    route_planner_node._city_interface.get_cranes = lambda: {
+        "cranes": [
+            {"id": 1, "nb_tokens": 1},
+            {"id": 2, "nb_tokens": 0},
+        ]
+    }
 
     yield route_planner_node
 
@@ -334,3 +342,44 @@ def test_when_handle_get_node_action_deposit_then_current_then_nodes_published_(
 
     assert len(received) == 2
     assert received[-1][-1] == "ZD1"
+
+
+def test_when_refresh_available_load_goals_then_keeps_only_zc_in_map_with_tokens(node):
+    node._city_interface.get_cranes = lambda: {
+        "cranes": [
+            {"id": 1, "nb_tokens": 2},
+            {"id": 2, "nb_tokens": 5},
+            {"id": 3, "nb_tokens": 0},
+        ]
+    }
+
+    node._refresh_available_load_goals_from_city_interface()
+
+    assert node.available_goals == ["ZC1", node.home_deposit_zone]
+
+
+def test_when_home_deposit_callback_then_vehicle_id_is_set(node):
+    data = Int16()
+    data.data = 5
+
+    node.set_home_deposit_callback(data)
+
+    assert node._vehicle_id == 1
+
+
+def test_when_home_deposit_callback_then_avaible_goals_updated(node):
+    data = Int16()
+    data.data = 5
+
+    node.set_home_deposit_callback(data)
+
+    assert "ZD1" in node.available_goals
+
+
+def test_when_home_deposit_callback_then_home_deposit_updated(node):
+    data = Int16()
+    data.data = 5
+
+    node.set_home_deposit_callback(data)
+
+    assert node.home_deposit_zone == "ZD1"

@@ -33,7 +33,18 @@ jobs:
             colcon build &&
             source install/setup.bash &&
             
-            colcon test --packages-skip ldlidar_ros2 --event-handlers console_direct+ &&
+            colcon test --packages-skip ldlidar_ros2 integration_tests --event-handlers console_direct+ &&
+
+            colcon test-result --verbose
+          "
+      - name: TEST_INTEGRATION->Run integration tests
+        run: |
+          docker run --rm -e PYTHONPATH=/home/ws/src --network host -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp ros2-test-image bash -lc "
+            cd /home/ws &&
+            colcon build &&
+            source install/setup.bash &&
+            
+            colcon test --packages-select integration_tests --event-handlers console_direct+ &&
 
             colcon test-result --verbose
           "

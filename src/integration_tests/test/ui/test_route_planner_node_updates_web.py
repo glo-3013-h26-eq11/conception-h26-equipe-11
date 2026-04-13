@@ -13,7 +13,7 @@ from integration_tests.integration_helper import (
 )
 import pytest
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import String, Int16
 import json
 
 WEBAPP_URL = f"http://127.0.0.1:{PORT}"
@@ -56,11 +56,20 @@ class TopicPublisher(Node):
 
         self.publisher_current_node = self.create_publisher(String, "current_node", 10)
 
+        self.publisher_home_deposit = self.create_publisher(
+            Int16, "home_deposit_zone", 10
+        )
+
     def publish_current_node(self):
         msg = String()
         data = {"tag": CURRENT_NODE}
         msg.data = json.dumps(data)
         self.publisher_current_node.publish(msg)
+
+    def publish_home_deposit_zone(self):
+        msg = Int16()
+        msg.data = CURRENT_NODE
+        self.publisher_home_deposit.publish(msg)
 
 
 def test_route_planner_node_updates_web():

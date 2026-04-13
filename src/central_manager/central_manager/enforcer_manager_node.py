@@ -5,6 +5,7 @@ from central_manager.blackboard_config import (
     BLACKBOARD_PREVIOUS_STOP_TAG,
 )
 from web_interface.system_health_node import HealthPingingNode
+from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from typing import List
 import rclpy
@@ -13,8 +14,12 @@ from yasmin import Blackboard
 
 
 class EnforcerManagerNode(HealthPingingNode):
-    def __init__(self):
+    def __init__(self, state_machine=None):
         super().__init__("enforcer_manager_node", "central_manager")
+
+        self.sub_cmd_vel_from_aruco_callback = self.create_subscription(
+            String, "current_node", self.camera_callback, 10
+        )
 
         self.sub_cmd_vel = self.create_subscription(
             Twist, "/cmd_vel", self.cmd_callback, 10
@@ -27,10 +32,12 @@ class EnforcerManagerNode(HealthPingingNode):
         self.blackboard[BLACKBOARD_ENFORCERS] = []
         self.blackboard[BLACKBOARD_PREVIOUS_STOP_TAG] = None
 
-        self.sm = StateMachineRover(self)
+        self.sm = state_machine or StateMachineRover(self)
 
         self._sm_thread = threading.Thread(target=self._run_sm, daemon=True)
         self._sm_thread.start()
+
+        self.previous_twist = Twist()
 
     def _get_enforcers(self) -> List[Enforcer]:
         return self.blackboard[BLACKBOARD_ENFORCERS]
@@ -40,7 +47,12 @@ class EnforcerManagerNode(HealthPingingNode):
 
         self.sm.run(self.blackboard)
 
+    def camera_callback(self, msg: String):
+        self.cmd_callback(self.previous_twist)
+
     def cmd_callback(self, cmd: Twist) -> None:
+        self.previous_twist = cmd
+
         for enforcer in self._get_enforcers():
             cmd = enforcer.enforce_cmd(cmd)
 
@@ -55,9 +67,10 @@ def main(args=None):
 
     enforcer_manager_node = EnforcerManagerNode()
 
-    rclpy.spin(enforcer_manager_node)
-
-    enforcer_manager_node.destroy_node()
+    try:
+        rclpy.spin(enforcer_manager_node)
+    finally:
+        enforcer_manager_node.destroy_node()
 
     rclpy.shutdown()
 

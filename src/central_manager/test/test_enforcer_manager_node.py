@@ -19,7 +19,8 @@ def rclpy_context():
 
 @pytest.fixture()
 def node_no_publisher():
-    node = EnforcerManagerNode()
+    state_machine = MagicMock()
+    node = EnforcerManagerNode(state_machine)
     node.pub_cmd_vel_safe = MagicMock()
     yield node
     node.destroy_node()
@@ -27,7 +28,8 @@ def node_no_publisher():
 
 @pytest.fixture()
 def node():
-    node = EnforcerManagerNode()
+    state_machine = MagicMock()
+    node = EnforcerManagerNode(state_machine)
     yield node
     node.destroy_node()
 
