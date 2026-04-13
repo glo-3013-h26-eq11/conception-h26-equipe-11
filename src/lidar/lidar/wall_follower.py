@@ -17,7 +17,7 @@ SPEED = 0.20  # m/s
 WHEELBASE = 0.1  # m
 
 OBTUSE_ANGLE_THRESHOLD = 115  # degrees
-AFTER_CORNER_THRESHOLD = 0.26  # m
+AFTER_CORNER_THRESHOLD = 0.40  # m
 
 INTERSECTION_HALF_CONE_ANGLE = 45  # degrees
 RIGHT_CORNER_SPEED = 0.1
@@ -174,7 +174,7 @@ class WallFollowNode(HealthPingingNode):
 
             return RIGHT_CORNER_SPEED, -MAX_STEERING
 
-        elif A > OBTUSE_ANGLE_THRESHOLD:
+        elif A > OBTUSE_ANGLE_THRESHOLD and b < 0.18:
 
             return RIGHT_CORNER_SPEED, 0
 

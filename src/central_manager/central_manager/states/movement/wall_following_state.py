@@ -67,6 +67,7 @@ class WallFollowingState(State):
         )
 
         if not is_intersection_valid_to_stop:
+            self.node.get_logger().info(f"Skipping stopping at tag : {self.seen_tag}")
             self.outcome = "current_node"
 
         if self.stop_sign_enforcer:
