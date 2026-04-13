@@ -80,9 +80,7 @@ class WallFollowingState(RoverState):
 
         if result is not None and result.is_valid is False:
             if self.previous_tag != aruco_tag:
-                self.node.get_logger().info(
-                    f"Skipping stopping at tag : {aruco_tag}"
-                )
+                self.node.get_logger().info(f"Skipping stopping at tag : {aruco_tag}")
                 self.previous_tag = aruco_tag
 
     def stop_over(self, msg: Bool):

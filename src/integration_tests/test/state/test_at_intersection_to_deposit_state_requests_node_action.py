@@ -38,7 +38,7 @@ def test_route_planner_service_integration():
     state.on_enter(blackboard)
 
     time.sleep(0.5)
-    
+
     outcome = state.step(blackboard)
 
     assert outcome is not None
