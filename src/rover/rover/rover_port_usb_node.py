@@ -52,7 +52,7 @@ class RoverUsbPortNode(HealthPingingNode):
 
         self.frame_count = 0
 
-        self.read_timer = self.create_timer(0.02, self.read_serial_callback)
+        self.read_timer = self.create_timer(0.1, self.read_serial_callback)
 
     def send_json_command(self, command: str):
         try:
@@ -65,7 +65,7 @@ class RoverUsbPortNode(HealthPingingNode):
 
     def request_feedback(self):
         try:
-            self.serial_port.write(b'{"T":130}\n')
+            self.serial_port.write(b'{"T":13}\n')
         except Exception as e:
             self.get_logger().error(f"Request failed: {e}")
 
