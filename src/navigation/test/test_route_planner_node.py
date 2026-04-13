@@ -419,7 +419,7 @@ def test_given_going_ZD2_when_is_at_intersection_valid_to_stop_then_return_false
     node.available_goals = ["ZC1"]
     node._current_nodes_path = ["A1", "ZC1"]
 
-    assert node.is_intersection_valid_to_stop(ZD2_TAG) == False
+    assert node.is_intersection_valid_to_stop(ZD2_TAG) is False
 
 
 def test_given_going_home_deposit_when_is_at_intersection_valid_to_stop_then_return_false(
@@ -429,7 +429,7 @@ def test_given_going_home_deposit_when_is_at_intersection_valid_to_stop_then_ret
     node.available_goals = ["ZC1"]
     node._current_nodes_path = ["A1", "ZC1"]
 
-    assert node.is_intersection_valid_to_stop(ZD1_TAG) == False
+    assert node.is_intersection_valid_to_stop(ZD1_TAG) is False
 
 
 def test_given_going_ZC1_when_is_at_intersection_valid_to_stop_then_return_true(node):
@@ -437,7 +437,7 @@ def test_given_going_ZC1_when_is_at_intersection_valid_to_stop_then_return_true(
     node.available_goals = ["ZC1"]
     node._current_nodes_path = ["A1", "ZC1"]
 
-    assert node.is_intersection_valid_to_stop(ZC1_TAG) == True
+    assert node.is_intersection_valid_to_stop(ZC1_TAG) is True
 
 
 def test_given_going_mo_available_goals_when_is_at_intersection_valid_to_stop_then_return_true(
@@ -447,7 +447,7 @@ def test_given_going_mo_available_goals_when_is_at_intersection_valid_to_stop_th
     node.available_goals = []
     node._current_nodes_path = ["A1", "ZC1"]
 
-    assert node.is_intersection_valid_to_stop(ZC1_TAG) == True
+    assert node.is_intersection_valid_to_stop(ZC1_TAG) is True
 
 
 def test_given_going_no_path_when_is_at_intersection_valid_to_stop_then_return_true(
@@ -457,7 +457,7 @@ def test_given_going_no_path_when_is_at_intersection_valid_to_stop_then_return_t
     node.available_goals = []
     node._current_nodes_path = []
 
-    assert node.is_intersection_valid_to_stop(ZC1_TAG) == True
+    assert node.is_intersection_valid_to_stop(ZC1_TAG) is True
 
 
 def test_given_going_ZD1_when_is_at_intersection_ZC2_valid_to_stop_then_return_false(
@@ -467,7 +467,7 @@ def test_given_going_ZD1_when_is_at_intersection_ZC2_valid_to_stop_then_return_f
     node_zc2.available_goals = ["ZD1"]
     node_zc2._current_nodes_path = ["A3", "ZD1"]
 
-    assert node_zc2.is_intersection_valid_to_stop(ZC2_TAG) == False
+    assert node_zc2.is_intersection_valid_to_stop(ZC2_TAG) is False
 
 
 def test_given_going_ZD1_when_is_at_intersection_A1_valid_to_stop_then_return_true(
@@ -477,7 +477,7 @@ def test_given_going_ZD1_when_is_at_intersection_A1_valid_to_stop_then_return_tr
     node.available_goals = ["ZD1"]
     node._current_nodes_path = ["A3", "ZD1"]
 
-    assert node.is_intersection_valid_to_stop(A1_TAG) == True
+    assert node.is_intersection_valid_to_stop(A1_TAG) is True
 
 
 def test_when_handle_is_at_intersection_valid_to_stop_then_response_is_sent(node):
