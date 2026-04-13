@@ -116,14 +116,13 @@ class RoutePlannerNode(HealthPingingNode):
     def set_home_deposit_callback(self, msg: Int16):
         if self._route_selector is None:
             return
-        
+
         if msg.data == 0:
             self.home_deposit_zone = None
             if self.home_deposit_zone in self.available_goals:
                 self.available_goals.remove(self.home_deposit_zone)
             self.get_logger().info("Reset home deposit zone")
             return
-
 
         id_of_zone = self._route_selector.tag_to_id(msg.data)
 
