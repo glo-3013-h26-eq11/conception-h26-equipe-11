@@ -10,8 +10,8 @@ from lidar.wall_follower import (
     WHEELBASE,
     AFTER_CORNER_THRESHOLD,
     THETA_DEG,
-    MAX_STEERING,
     RIGHT_CORNER_SPEED,
+    RIGHT_CORNER_STEERING,
 )
 
 
@@ -158,6 +158,7 @@ def test_when_invalid_wall_measurements_then_repeats_last_command(
     )
 
     wall_follow_node.last_steering = 0.3
+    wall_follow_node.last_speed = 0.1
 
     scan = create_scan(default_distance=float("inf"))
 
@@ -166,7 +167,7 @@ def test_when_invalid_wall_measurements_then_repeats_last_command(
 
     # Assert
     assert len(commands) == 1
-    assert commands[0][0] == pytest.approx(SPEED)
+    assert commands[0][0] == pytest.approx(0.1)
     assert commands[0][1] == pytest.approx(0.3)
 
 
@@ -185,4 +186,4 @@ def test_when_big_b_then_steering_right_max(wall_follow_node):
     )
 
     assert result_speed == initial_speed
-    assert result_steering == -MAX_STEERING
+    assert result_steering == -RIGHT_CORNER_STEERING

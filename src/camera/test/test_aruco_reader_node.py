@@ -7,6 +7,7 @@ import pytest
 import rclpy
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
+from camera.aruco_reader_node import CAMERA_OFFSET
 
 
 def _install_fake_modules(
@@ -148,14 +149,14 @@ def test_publishes_ids_when_detected(monkeypatch):
     assert payload["markers_4x4"] == [
         {
             "tag": 1,
-            "depth": 0.5,
-            "angle_x_deg": pytest.approx(0),
+            "depth": 0.50 + CAMERA_OFFSET,
+            "angle_x_deg": pytest.approx(0.0),
             "z_forward": 0.5,
             "tag_angle": pytest.approx(0),
         },
         {
             "tag": 2,
-            "depth": 0.5,
+            "depth": 0.50 + CAMERA_OFFSET,
             "angle_x_deg": pytest.approx(0),
             "z_forward": 0.5,
             "tag_angle": pytest.approx(0),
@@ -164,7 +165,7 @@ def test_publishes_ids_when_detected(monkeypatch):
     assert payload["markers_5x5"] == [
         {
             "tag": 10,
-            "depth": 0.5,
+            "depth": 0.50 + CAMERA_OFFSET,
             "angle_x_deg": pytest.approx(0.0),
             "z_forward": pytest.approx(0.5),
             "tag_angle": pytest.approx(0),

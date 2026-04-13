@@ -12,7 +12,7 @@ DISTANCE_STALE_SEC: float = 0.3
 
 MAX_BREAKING_SPEED = 0.1
 
-GOOD_ANGLE_ALIGNMENT_LEFT = -12.0
+GOOD_ANGLE_ALIGNMENT_LEFT = -10.0
 GOOD_ANGLE_ALIGNEMENT_RIGHT = -2.0
 
 ANGLE_CORRECTION_SPEED = 0.5  # rad/s
@@ -41,6 +41,7 @@ class StopSignEnforcer(Enforcer):
         self._distance: Optional[float] = None
         self._relative_angle = None
         self._last_update: float = 0.0
+        self._angle_last_update: float = 0.0
 
         self._logger = logger
 
@@ -57,6 +58,7 @@ class StopSignEnforcer(Enforcer):
     def update_relative_angle(self, relative_angle):
         self._relative_angle = relative_angle
         self._last_update = time.time()
+        self._angle_last_update = time.time()
 
     def update_with_real_speed(self, real_speed_cmd: Twist):
         dt = self._compute_delta_time()
@@ -77,9 +79,23 @@ class StopSignEnforcer(Enforcer):
 
     def is_rover_at_valid_angle_from_aruco(self):
         return (
-            self._relative_angle > GOOD_ANGLE_ALIGNMENT_LEFT
+            self._relative_angle is not None
+            and self._relative_angle > GOOD_ANGLE_ALIGNMENT_LEFT
             and self._relative_angle < GOOD_ANGLE_ALIGNEMENT_RIGHT
         )
+
+    def _apply_braking_angle_correction(self, cmd: Twist) -> Twist:
+        if self._relative_angle is None:
+            return cmd
+
+        if self._relative_angle < GOOD_ANGLE_ALIGNMENT_LEFT:
+            cmd.angular.z = -ANGLE_CORRECTION_SPEED
+        elif self._relative_angle > GOOD_ANGLE_ALIGNEMENT_RIGHT:
+            cmd.angular.z = ANGLE_CORRECTION_SPEED
+        else:
+            cmd.angular.z = 0.0
+
+        return cmd
 
     def stop_robot(self) -> Twist:
         return Twist()
@@ -90,8 +106,9 @@ class StopSignEnforcer(Enforcer):
         stale = (now - self._last_update) > DISTANCE_STALE_SEC
 
         if stale:
-            self._state = _State.IDLE
             self._distance = None
+            if self._state in (_State.IDLE, _State.BRAKING):
+                self._state = _State.IDLE
 
         if self._state == _State.IDLE:
             if self._distance is not None and self._distance <= BRAKE_START_DIST:
@@ -107,48 +124,48 @@ class StopSignEnforcer(Enforcer):
 
                 self.switch_state(_State.STOPPED)
                 cmd = self.stop_robot()
-
-            if self._distance is not None:
+            elif self._distance is not None:
                 factor = (self._distance - STOP_TARGET_DIST) / (
                     BRAKE_START_DIST - STOP_TARGET_DIST
                 )
                 factor = max(0.0, min(1.0, factor))
 
                 cmd.linear.x = max(cmd.linear.x * factor, MAX_BREAKING_SPEED)
-                cmd.angular.z = 0.0  # Important pour ne pas perdre le Aruco
+                cmd.angular.z = 0.0
+                cmd = self._apply_braking_angle_correction(cmd)
 
         if self._state == _State.STOPPED:
             elapsed = now - self._stop_start
             if elapsed >= self.stop_duration:
-                self.switch_state(_State.ADJUST_ANGLE)
-                self._log("FIN STOP — mode ADJUST_ANGLE")
+                angle_fresh = (now - self._angle_last_update) <= DISTANCE_STALE_SEC
+                if angle_fresh and not self.is_rover_at_valid_angle_from_aruco():
+                    self.switch_state(_State.ADJUST_ANGLE)
+                    self._log(
+                        f"FIN STOP — ADJUST_ANGLE (angle={self._relative_angle:.1f}deg)"
+                    )
+                else:
+                    self.switch_state(_State.OVER)
+                    self._log("FIN STOP — OVER")
 
             cmd = self.stop_robot()
 
         if self._state == _State.ADJUST_ANGLE:
-            self._log(f"ADJUST : {self._relative_angle} deg")
+            angle_fresh = (now - self._angle_last_update) <= DISTANCE_STALE_SEC
 
-            if self._relative_angle is not None:
-
-                if self._relative_angle < GOOD_ANGLE_ALIGNMENT_LEFT:
-                    self._log("CORRECT RIGHT")
-
-                    cmd = self.correct_rover_right()
-
-                elif self._relative_angle > GOOD_ANGLE_ALIGNEMENT_RIGHT:
-                    self._log("CORRECT LEFT")
-
-                    cmd = self.correct_rover_left()
-
-                else:
-                    self._log("NO CORRECTION")
-
-                    cmd = self.stop_robot()
-
-                if self.is_rover_at_valid_angle_from_aruco():
-                    cmd = self.switch_state(_State.OVER)
-            else:
+            if not angle_fresh:
+                self._log("ADJUST — angle perdu, OVER")
+                self.switch_state(_State.OVER)
                 cmd = self.stop_robot()
+            elif self.is_rover_at_valid_angle_from_aruco():
+                self._log("ADJUST — angle OK, OVER")
+                self.switch_state(_State.OVER)
+                cmd = self.stop_robot()
+            elif self._relative_angle < GOOD_ANGLE_ALIGNMENT_LEFT:
+                self._log(f"ADJUST : {self._relative_angle:.1f}deg — CORRECT RIGHT")
+                cmd = self.correct_rover_right()
+            else:
+                self._log(f"ADJUST : {self._relative_angle:.1f}deg — CORRECT LEFT")
+                cmd = self.correct_rover_left()
 
         if self._state == _State.OVER:
             self._log("STOP OVER")
