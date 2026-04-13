@@ -149,6 +149,18 @@ def test_given_load_service_when_at_goal_then_returns_wait_load_action(node):
     assert response.action == NodeAction.WAIT_LOAD_ZONE.value
 
 
+def test_given_load_service_when_no_zc_available_then_returns_wall_follow(node):
+    node.current_node = "A1"
+    node._city_interface.get_cranes = lambda: {
+        "cranes": [{"id": 1, "nb_tokens": 0}],
+    }
+    node.available_goals = ["ZD1"]
+
+    response = node.handle_get_node_action_load(None, type("Resp", (), {})())
+
+    assert response.action == NodeAction.WALL_FOLLOW.value
+
+
 def test_given_deposit_service_when_at_goal_then_returns_wait_deposit_action(node):
     node.current_node = "ZD1"
     node.available_goals = ["ZC1", "ZD1"]
