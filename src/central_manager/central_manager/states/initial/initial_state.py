@@ -62,7 +62,7 @@ class InitialState(State):
 
         if self.home_deposit_zone is None:
             self.node.get_logger().info(
-                f"Home deposit not set, going back to initial state"
+                "Home deposit not set, going back to initial state"
             )
             return "back_to_init"
 

@@ -83,3 +83,29 @@ def test_when_stop_over_and_current_node_then_transitions(state):
 
     assert outcome_holder.get("outcome") == "current_node"
     assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
+
+
+def test_when_current_node_and_is_not_valid_stop_then_outcome_current_node(state):
+    blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
+    outcome_holder = {}
+
+    state.get_is_the_intersection_valid_to_stop = lambda x: False
+
+    def run_state():
+        outcome_holder["outcome"] = state.execute(blackboard)
+
+    thread = threading.Thread(target=run_state)
+    thread.start()
+
+    time.sleep(0.2)
+
+    pub = state.node.create_publisher(String, "current_node", 10)
+
+    data = {"distance": 5, "angle": 0.0, "tag": 1}
+    msg = String(data=json.dumps(data))
+    pub.publish(msg)
+
+    thread.join(timeout=2.0)
+
+    assert outcome_holder.get("outcome") == "current_node"
+    assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
