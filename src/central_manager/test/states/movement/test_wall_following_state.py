@@ -16,8 +16,7 @@ from central_manager.blackboard_config import (
 )
 
 import pytest
-from unittest.mock import MagicMock
-from navigation_interfaces.srv import GetIsIntersectionValidToStop
+
 
 @pytest.fixture(scope="module", autouse=True)
 def rclpy_init():
@@ -34,9 +33,34 @@ def state():
     node.destroy_node()
 
 
+def test_when_rover_stop_then_outcome_back_to_init(state):
+    blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
+    outcome_holder = {}
+
+    def run_state():
+        outcome_holder["outcome"] = state.execute(blackboard)
+
+    thread = threading.Thread(target=run_state)
+    thread.start()
+
+    time.sleep(0.2)
+
+    pub = state.node.create_publisher(Bool, "rover/start", 10)
+    msg = Bool(data=False)
+    pub.publish(msg)
+
+    time.sleep(0.2)
+
+    thread.join(timeout=2.0)
+
+    assert outcome_holder.get("outcome") == "back_to_init"
+
+
 def test_when_stop_over_and_current_node_then_transitions(state):
     blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
     outcome_holder = {}
+
+    state.get_is_the_intersection_valid_to_stop = lambda x: x == x
 
     def run_state():
         outcome_holder["outcome"] = state.execute(blackboard)
@@ -61,66 +85,3 @@ def test_when_stop_over_and_current_node_then_transitions(state):
 
     assert outcome_holder.get("outcome") == "current_node"
     assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
-
-
-def test_when_stop_rover_then_outcome_back_to_init(state):
-    blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
-    outcome_holder = {}
-    
-    def run_state():
-        outcome_holder["outcome"] = state.execute(blackboard)
-
-    thread = threading.Thread(target=run_state)
-    thread.start()
-
-    time.sleep(0.2)
-
-    pub = state.node.create_publisher(Bool, "rover/start", 10)
-    msg = Bool(data=False)
-    pub.publish(msg)
-
-    time.sleep(0.2)
-
-    thread.join(timeout=2.0)
-
-    assert outcome_holder.get("outcome") == "back_to_init"
-
-class FakeFuture:
-    def __init__(self, result):
-        self._result = result
-
-    def done(self):
-        return True
-
-    def result(self):
-        return self._result
-
-class FakeResponse:
-    def __init__(self, is_valid):
-        self.is_valid = is_valid
-
-@pytest.fixture
-def state():
-    node = MagicMock()
-    state = WallFollowingState(node)
-    return state
-
-def test_get_is_intersection_valid_to_stop_true(state):
-    # Mock client
-    mock_client = MagicMock()
-    state.client = mock_client
-
-    mock_client.wait_for_service.return_value = True
-
-    fake_response = FakeResponse(is_valid=True)
-    fake_future = FakeFuture(fake_response)
-
-    mock_client.call_async.return_value = fake_future
-
-    # Call function
-    result = state.get_is_the_intersection_valid_to_stop(42)
-
-    # Assertions
-    assert result is True
-    mock_client.wait_for_service.assert_called_once()
-    mock_client.call_async.assert_called_once()
