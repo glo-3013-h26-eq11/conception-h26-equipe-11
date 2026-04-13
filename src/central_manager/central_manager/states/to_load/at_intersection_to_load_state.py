@@ -35,7 +35,13 @@ class AtIntersectionToLoadState(RoverState):
             self.outcome = "back_to_init"
             return
 
-        node_action = NodeAction(result.action)
+        try:
+            node_action = NodeAction(result.action)
+        except ValueError:
+            self.node.get_logger().error(f"INVALID node action : {result.action}")
+            self.outcome = "back_to_init"
+            return
+
         if node_action == NodeAction.LEFT_TURN:
             self.outcome = "left_turn"
         elif node_action == NodeAction.FORWARD_TURN:

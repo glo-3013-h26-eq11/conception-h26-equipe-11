@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 from central_manager.states.to_load.at_intersection_to_load_state import (
     AtIntersectionToLoadState,
@@ -8,11 +8,30 @@ from central_manager.states.node_action_enum import NodeAction
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 
 
+class FakeResponse:
+    def __init__(self, action: str):
+        self.action = action
+
+
+class FakeFuture:
+    def __init__(self, action: str):
+        self._action = action
+
+    def add_done_callback(self, callback):
+        callback(self)
+
+    def result(self):
+        return FakeResponse(self._action)
+
+
 @pytest.fixture
 def blackboard_mock():
     logger_mock = MagicMock()
     node_mock = MagicMock()
     node_mock.get_logger.return_value = logger_mock
+    client_mock = MagicMock()
+    client_mock.wait_for_service.return_value = True
+    node_mock.create_client.return_value = client_mock
 
     return {"node": node_mock, BLACKBOARD_ENFORCERS: []}
 
@@ -31,44 +50,24 @@ def test_at_intersection_to_load_state_outcomes(
     blackboard_mock, node_action, expected_outcome
 ):
     state = AtIntersectionToLoadState(blackboard_mock["node"])
+    state.client.call_async.return_value = FakeFuture(node_action.value)
 
-    with patch.object(state, "get_current_node_action", return_value=node_action):
-        outcome = state.execute(blackboard_mock)
-
-    assert outcome == expected_outcome
+    state.on_enter(blackboard_mock)
+    assert state.step(blackboard_mock) == expected_outcome
     assert len(blackboard_mock[BLACKBOARD_ENFORCERS]) == 1
 
 
 def test_invalid_node_action_logs_error(blackboard_mock):
     state = AtIntersectionToLoadState(blackboard_mock["node"])
+    state.client.call_async.return_value = FakeFuture("invalid")
 
-    with patch.object(state, "get_current_node_action", return_value=None):
-        outcome = state.execute(blackboard_mock)
-
-    assert outcome is None
-
-
-class FakeFuture:
-    def __init__(self, action: str):
-        self._action = action
-
-    def result(self):
-        class Response:
-            pass
-
-        r = Response()
-        r.action = self._action
-        return r
+    state.on_enter(blackboard_mock)
+    assert state.step(blackboard_mock) == "back_to_init"
 
 
 def test_left_turn_transition(blackboard_mock):
     state = AtIntersectionToLoadState(blackboard_mock["node"])
+    state.client.call_async.return_value = FakeFuture(NodeAction.LEFT_TURN.value)
 
-    with patch.object(
-        state,
-        "get_current_node_action",
-        return_value=NodeAction.LEFT_TURN,
-    ):
-        outcome = state.execute(blackboard_mock)
-
-    assert outcome == "left_turn"
+    state.on_enter(blackboard_mock)
+    assert state.step(blackboard_mock) == "left_turn"

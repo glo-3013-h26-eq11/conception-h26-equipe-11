@@ -1,7 +1,6 @@
 import json
 
 from typing import Optional
-import json
 from std_msgs.msg import Bool, String, Int16
 from central_manager.enforcers.immobile_enforcer import ImmobileEnforcer
 from central_manager.blackboard_config import (
