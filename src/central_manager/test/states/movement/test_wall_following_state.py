@@ -31,36 +31,7 @@ def state():
     node.destroy_node()
 
 
-def test_when_stop_over_and_current_node_then_transitions(state):
-    blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
-    outcome_holder = {}
-
-    def run_state():
-        outcome_holder["outcome"] = state.execute(blackboard)
-
-    thread = threading.Thread(target=run_state)
-    thread.start()
-
-    time.sleep(0.2)
-
-    pub = state.node.create_publisher(String, "current_node", 10)
-    pub_stop_over = state.node.create_publisher(Bool, "stop_over", 10)
-
-    data = {"distance": 5, "angle": 0.0}
-    msg = String(data=json.dumps(data))
-    pub.publish(msg)
-
-    data_stop_over = Bool()
-    data_stop_over.data = False
-    pub_stop_over.publish(data_stop_over)
-
-    thread.join(timeout=2.0)
-
-    assert outcome_holder.get("outcome") == "current_node"
-    assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
-
-
-def test_when_stop_rover_then_outcome_back_to_init(state):
+def test_when_rover_stop_then_outcome_back_to_init(state):
     blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
     outcome_holder = {}
 
@@ -81,3 +52,76 @@ def test_when_stop_rover_then_outcome_back_to_init(state):
     thread.join(timeout=2.0)
 
     assert outcome_holder.get("outcome") == "back_to_init"
+
+
+def test_when_stop_over_and_current_node_then_transitions(state):
+    blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
+    outcome_holder = {}
+
+    state.get_is_the_intersection_valid_to_stop = lambda x: x == x
+
+    def run_state():
+        outcome_holder["outcome"] = state.execute(blackboard)
+
+    thread = threading.Thread(target=run_state)
+    thread.start()
+
+    time.sleep(0.2)
+
+    pub = state.node.create_publisher(String, "current_node", 10)
+    pub_stop_over = state.node.create_publisher(Bool, "stop_over", 10)
+
+    data = {"distance": 5, "angle": 0.0, "tag": 1}
+    msg = String(data=json.dumps(data))
+    pub.publish(msg)
+
+    data_stop_over = Bool()
+    data_stop_over.data = False
+    pub_stop_over.publish(data_stop_over)
+
+    thread.join(timeout=2.0)
+
+    assert outcome_holder.get("outcome") == "current_node"
+    assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
+
+
+def test_when_current_node_and_is_not_valid_stop_then_previous_tag_is_aruco_tag(state):
+    blackboard = {BLACKBOARD_ENFORCERS: [], BLACKBOARD_PREVIOUS_STOP_TAG: None}
+    outcome_holder = {}
+    ARUCO_TAG = 1
+
+    class FakeFuture:
+        def __init__(self, result):
+            self._result = result
+
+        def result(self):
+            return self._result
+
+    class FakeResponse:
+        def __init__(self, is_valid):
+            self.is_valid = is_valid
+
+    fake_result = FakeResponse(is_valid=False)
+    fake_future = FakeFuture(fake_result)
+
+    state.get_is_the_intersection_valid_to_stop = (
+        lambda x: state.handle_get_is_the_intersection_valid_to_stop(x, fake_future)
+    )
+
+    def run_state():
+        outcome_holder["outcome"] = state.execute(blackboard)
+
+    thread = threading.Thread(target=run_state)
+    thread.start()
+
+    time.sleep(0.2)
+
+    pub = state.node.create_publisher(String, "current_node", 10)
+
+    data = {"distance": 5, "angle": 0.0, "tag": ARUCO_TAG}
+    msg = String(data=json.dumps(data))
+    pub.publish(msg)
+
+    thread.join(timeout=5.0)
+
+    assert state.previous_tag == ARUCO_TAG

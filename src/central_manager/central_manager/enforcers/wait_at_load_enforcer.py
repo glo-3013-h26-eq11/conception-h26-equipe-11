@@ -4,7 +4,7 @@ from rclpy.node import Publisher
 from std_msgs.msg import String, Bool
 from proximity_sensor.merchandise_flag import MerchandiseFlag
 
-STOP_AFTER_LOAD_DURATION = 1.5  # s
+STOP_AFTER_LOAD_DURATION = 0.8  # s
 
 
 class WaitAtLoadEnforcer(Enforcer):

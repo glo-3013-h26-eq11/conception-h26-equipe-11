@@ -8,6 +8,8 @@ from central_manager.blackboard_config import (
     BLACKBOARD_ENFORCERS,
     BLACKBOARD_PREVIOUS_STOP_TAG,
 )
+from navigation_interfaces.srv import GetIsIntersectionValidToStop
+from functools import partial
 
 
 class WallFollowingState(State):
@@ -50,8 +52,13 @@ class WallFollowingState(State):
 
         self.blackboard = None
 
+        self.client = self.node.create_client(
+            GetIsIntersectionValidToStop, "get_is_intersection_valid_to_stop"
+        )
+
     def alpha_callback(self, msg: Float32):
         self.latest_alpha = msg.data
+
 
     def distance_to_car_callback(self, msg: Float32):
         if self.car_follower_enforcer:
@@ -62,8 +69,9 @@ class WallFollowingState(State):
 
         distance = float(data.get("distance"))
         angle = float(data.get("angle"))
-
         self.seen_tag = data.get("tag")
+
+        self.get_is_the_intersection_valid_to_stop(self.seen_tag)
 
         if self.previous_tag is not None:
             if self.seen_tag == self.previous_tag:
@@ -72,6 +80,29 @@ class WallFollowingState(State):
         if self.stop_sign_enforcer:
             self.stop_sign_enforcer.update_distance(distance)
             self.stop_sign_enforcer.update_relative_angle(angle)
+
+    def get_is_the_intersection_valid_to_stop(self, aruco_tag: int) -> bool:
+        if not self.client.wait_for_service(timeout_sec=5.0):
+            self.node.get_logger().error("get_is_intersection_valid_to_stop")
+            raise RuntimeError("Service 'get_is_intersection_valid_to_stop")
+
+        request = GetIsIntersectionValidToStop.Request()
+        request.aruco_tag = aruco_tag
+        future = self.client.call_async(request)
+        future.add_done_callback(
+            partial(self.handle_get_is_the_intersection_valid_to_stop, aruco_tag)
+        )
+
+    def handle_get_is_the_intersection_valid_to_stop(self, aruco_tag, future):
+        result = future.result()
+
+        if result is not None:
+            if result.is_valid is False:
+                if self.previous_tag != aruco_tag:
+                    self.node.get_logger().info(
+                        f"Skipping stopping at tag : {aruco_tag}"
+                    )
+                    self.previous_tag = aruco_tag
 
     def stop_over(self, msg: Bool):
         self.node.get_logger().info("STOPPED : SAYS WALL FOLLOWER")

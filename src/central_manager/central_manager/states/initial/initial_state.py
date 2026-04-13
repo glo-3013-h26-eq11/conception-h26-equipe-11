@@ -12,11 +12,7 @@ from central_manager.blackboard_config import (
 
 class InitialState(State):
     def __init__(self, node):
-        super().__init__(
-            outcomes=[
-                "system_ready",
-            ]
-        )
+        super().__init__(outcomes=["system_ready", "back_to_init"])
 
         self.node = node
 
@@ -33,7 +29,7 @@ class InitialState(State):
         self.outcome = None
 
     def rover_start_callback(self, msg):
-        if msg.data and self.home_deposit_zone is not None:
+        if msg.data:
             self.outcome = "system_ready"
 
     def at_deposit_callback(self, msg):
@@ -41,7 +37,7 @@ class InitialState(State):
 
         seen_tag = data.get("tag")
 
-        if seen_tag is not None:
+        if seen_tag is not None and self.home_deposit_zone is None:
 
             if self.home_deposit_zone != seen_tag:
                 self.node.get_logger().info(f"Potential home deposit : {seen_tag}")
@@ -59,6 +55,12 @@ class InitialState(State):
 
         while self.outcome is None:
             rclpy.spin_once(self.node, timeout_sec=0.1)
+
+        if self.home_deposit_zone is None:
+            self.node.get_logger().info(
+                "Home deposit not set, going back to initial state"
+            )
+            return "back_to_init"
 
         home_deposit_data = Int16()
         home_deposit_data.data = self.home_deposit_zone
