@@ -13,7 +13,8 @@ FRONT_ARUCO_ID = 1
 RIGHT_ARUCO_ID = 2
 BACK_ARUCO_ID = 3
 LEFT_ARUCO_ID = 4
-FRONT_CONE_DETECTION = 25.0
+FRONT_CONE_RIGHT_MAX = 20.0
+FRONT_CONE_LEFT_MAX = -60.0
 
 ARUCO_TILT_THRESHOLD = 47.0
 
@@ -64,24 +65,31 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             )  # inclinaison physique (tilt) du tag
             marker_id = marker.get("tag")
 
-            if (
-                depth <= 1.0
-                and abs(angle) <= FRONT_CONE_DETECTION
-                and z_forward >= 0.15
-            ):
+            if depth > 1.0:
+                continue
 
-                if abs(tag_angle) < ARUCO_TILT_THRESHOLD:
+            if z_forward < 0.15:
+                continue
 
-                    out = String()
-                    out.data = json.dumps(
-                        {
-                            "tag": marker_id,
-                            "distance": depth,
-                            "angle": tag_angle,
-                        }
-                    )
+            if angle > FRONT_CONE_RIGHT_MAX:
+                continue
 
-                    self._current_node_pub.publish(out)
+            if angle < FRONT_CONE_LEFT_MAX:
+                continue
+
+            if abs(tag_angle) >= ARUCO_TILT_THRESHOLD:
+                continue
+
+            out = String()
+            out.data = json.dumps(
+                {
+                    "tag": marker_id,
+                    "distance": depth,
+                    "angle": tag_angle,
+                }
+            )
+
+            self._current_node_pub.publish(out)
 
     def _detect_cars(self, payload):
         markers_4x4 = payload.get("markers_4x4", [])

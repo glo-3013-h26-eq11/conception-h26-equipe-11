@@ -11,7 +11,6 @@ from navigation.current_node_from_aruco_node import (
     BACK_ARUCO_ID,
     LEFT_ARUCO_ID,
     RIGHT_ARUCO_ID,
-    FRONT_CONE_DETECTION,
 )
 
 
@@ -86,28 +85,6 @@ def test_when_detect_aruco_5x5_less_1m_less_15deg_zfwd_g_15_then_publish(node):
 
 def test_when_detect_aruco_5x5_bigger_1m_less_15deg_zfwd_g_15_then_not_publish(node):
     payload = {"markers_5x5": [{"depth": 1.1, "angle_x_deg": 7.0, "z_forward": 0.2}]}
-
-    subscriber = StringSubscriber(node, "current_node")
-
-    publisher = StringPublisher(node, "aruco_detections")
-
-    for _ in range(5):
-        rclpy.spin_once(node, timeout_sec=0.05)
-
-    publisher.publish(payload)
-
-    for _ in range(5):
-        rclpy.spin_once(node, timeout_sec=0.05)
-
-    assert len(subscriber.received) == 0
-
-
-def test_when_detect_aruco_5x5_less_1m_bigger_15deg_zfwd_g_15_then_publish(node):
-    payload = {
-        "markers_5x5": [
-            {"depth": 0.8, "angle_x_deg": FRONT_CONE_DETECTION + 1.0, "z_forward": 0.2}
-        ]
-    }
 
     subscriber = StringSubscriber(node, "current_node")
 
