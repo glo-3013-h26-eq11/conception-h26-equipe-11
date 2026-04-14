@@ -11,7 +11,6 @@ from navigation.current_node_from_aruco_node import (
     BACK_ARUCO_ID,
     LEFT_ARUCO_ID,
     RIGHT_ARUCO_ID,
-    FRONT_CONE_LEFT_MAX,
 )
 
 
