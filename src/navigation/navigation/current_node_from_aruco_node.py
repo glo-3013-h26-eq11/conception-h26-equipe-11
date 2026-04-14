@@ -67,15 +67,15 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
 
             if depth > 1.0:
                 continue
-            
+
             if z_forward < 0.15:
                 continue
-            
+
             if angle > FRONT_CONE_RIGHT_MAX:
                 continue
-            
+
             if angle < FRONT_CONE_LEFT_MAX:
-                continue   
+                continue
 
             if abs(tag_angle) >= ARUCO_TILT_THRESHOLD:
                 continue
