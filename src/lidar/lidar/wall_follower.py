@@ -44,7 +44,6 @@ class WallFollowNode(HealthPingingNode):
 
         scan_topic = self.get_parameter("scan_topic").value
         output_topic = self.get_parameter("output_topic").value
-        self.alpha_pub = self.create_publisher(Float32, "/wall_follower/alpha", 10)
 
         self.create_subscription(LaserScan, scan_topic, self.lidar_callback, 10)
         self.drive_pub = self.create_publisher(Twist, output_topic, 10)
@@ -105,9 +104,6 @@ class WallFollowNode(HealthPingingNode):
             (a_for_wall_follow * math.cos(theta_for_wall_follow) - b)
             / (a_for_wall_follow * math.sin(theta_for_wall_follow))
         )
-        msg = Float32()
-        msg.data = float(alpha)
-        self.alpha_pub.publish(msg)
 
         D_t = b * math.cos(alpha)
         D_tp1 = D_t + LOOKAHEAD * math.sin(alpha)

@@ -8,8 +8,7 @@ from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 from central_manager.state_base import RoverState
 
-BLACKBOARD_ARRIVAL_ALPHA = "arrival_alpha_rad"
-BASE_TARGET_DEGREES = 90.0
+BASE_TARGET_DEGREES = 75.0
 
 
 class TurningLeftState(RoverState):
@@ -24,15 +23,9 @@ class TurningLeftState(RoverState):
         )
         node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
         node.create_subscription(String, "/rover/imu/json", self._imu_callback, 10)
-        node.create_subscription(
-            Float32, "/wall_follower/alpha", self.alpha_callback, 10
-        )
 
         self.car_follower_enforcer = None
         self.outcome = None
-        self.latest_alpha = 0.0
-
-        self.target_degrees = BASE_TARGET_DEGREES
         self.accumulated_degrees = 0.0
         self.last_imu_time = None
 
@@ -63,12 +56,11 @@ class TurningLeftState(RoverState):
         if self._is_turn_done():
             self.node.get_logger().info(
                 f"Turn done: accumulated={self.accumulated_degrees:.2f}° "
-                f"target={self.target_degrees:.2f}°"
             )
             self.outcome = "turn_over"
 
     def _is_turn_done(self) -> bool:
-        return abs(self.accumulated_degrees) >= abs(self.target_degrees)
+        return abs(self.accumulated_degrees) >= BASE_TARGET_DEGREES
 
     def turn_over_callback(self, msg: String):
         self.outcome = "turn_over"
@@ -81,25 +73,10 @@ class TurningLeftState(RoverState):
         if not msg.data:
             self.outcome = "back_to_init"
 
-    def alpha_callback(self, msg: Float32):
-        self.latest_alpha = msg.data
-
     def on_enter(self, blackboard):
         self.outcome = None
         self.accumulated_degrees = 0.0
         self.last_imu_time = None
-
-        arrival_alpha_rad = self.latest_alpha
-
-        correction_deg = math.degrees(arrival_alpha_rad)
-        self.target_degrees = BASE_TARGET_DEGREES - correction_deg
-
-        self.node.get_logger().info(
-            f"TURNING_LEFT state — arrival alpha: {math.degrees(arrival_alpha_rad):.2f}° "
-            f"— target turn: {self.target_degrees:.1f}°"
-        )
-
-        blackboard[BLACKBOARD_ARRIVAL_ALPHA] = arrival_alpha_rad
 
         self.car_follower_enforcer = CarFollowEnforcer()
 
