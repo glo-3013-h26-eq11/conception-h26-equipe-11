@@ -11,7 +11,8 @@ from navigation.current_node_from_aruco_node import (
     BACK_ARUCO_ID,
     LEFT_ARUCO_ID,
     RIGHT_ARUCO_ID,
-    FRONT_CONE_DETECTION,
+    FRONT_CONE_RIGHT_MAX,
+    FRONT_CONE_LEFT_MAX
 )
 
 
@@ -105,7 +106,7 @@ def test_when_detect_aruco_5x5_bigger_1m_less_15deg_zfwd_g_15_then_not_publish(n
 def test_when_detect_aruco_5x5_less_1m_bigger_15deg_zfwd_g_15_then_publish(node):
     payload = {
         "markers_5x5": [
-            {"depth": 0.8, "angle_x_deg": FRONT_CONE_DETECTION + 1.0, "z_forward": 0.2}
+            {"depth": 0.8, "angle_x_deg": FRONT_CONE_LEFT_MAX + 1.0, "z_forward": 0.2}
         ]
     }
 
