@@ -4,7 +4,6 @@ import rclpy
 from web_interface.system_health_node import HealthPingingNode
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float32
 
 THETA_DEG = 60
 LOOKAHEAD = 0.35  # m
