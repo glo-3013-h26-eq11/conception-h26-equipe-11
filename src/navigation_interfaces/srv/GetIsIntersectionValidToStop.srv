@@ -1,0 +1,3 @@
+int16 aruco_tag
+---
+bool is_valid

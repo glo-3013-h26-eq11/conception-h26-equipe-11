@@ -25,6 +25,35 @@ def node():
         "A4": {"id": "A4", "tag": 4, "right": "A4", "left": "A2", "straight": "ZC1"},
         "ZD1": {"id": "ZD1", "tag": 5, "right": None, "left": None, "straight": "A3"},
         "ZC1": {"id": "ZC1", "tag": 6, "right": None, "left": None, "straight": "A1"},
+        "ZD2": {"id": "ZD2", "tag": 7, "right": None, "left": None, "straight": "A1"},
+    }
+    route_selector = RouteSelector(graph=temp_graph)
+    route_planner_node = RoutePlannerNode(route_selector=route_selector)
+    route_planner_node.home_deposit_zone = "ZD1"
+    route_planner_node.available_goals = ["ZD1"]
+    route_planner_node._city_interface.get_cranes = lambda: {
+        "cranes": [
+            {"id": 1, "nb_tokens": 1},
+            {"id": 2, "nb_tokens": 0},
+        ]
+    }
+
+    yield route_planner_node
+
+    route_planner_node.destroy_node()
+
+
+@pytest.fixture
+def node_zc2():
+    temp_graph = {
+        "A1": {"id": "A1", "tag": 1, "right": "ZD1", "left": "ZC1", "straight": "A4"},
+        "A2": {"id": "A2", "tag": 2, "right": "A2", "left": "A4", "straight": "ZD1"},
+        "A3": {"id": "A3", "tag": 3, "right": "ZC1", "left": "ZD1", "straight": "A2"},
+        "A4": {"id": "A4", "tag": 4, "right": "A4", "left": "A2", "straight": "ZC1"},
+        "ZD1": {"id": "ZD1", "tag": 5, "right": None, "left": None, "straight": "A3"},
+        "ZC1": {"id": "ZC1", "tag": 6, "right": None, "left": None, "straight": "A1"},
+        "ZD2": {"id": "ZD2", "tag": 7, "right": None, "left": None, "straight": "A1"},
+        "ZC2": {"id": "ZC2", "tag": 8, "right": None, "left": None, "straight": "A1"},
     }
     route_selector = RouteSelector(graph=temp_graph)
     route_planner_node = RoutePlannerNode(route_selector=route_selector)
@@ -147,6 +176,18 @@ def test_given_load_service_when_at_goal_then_returns_wait_load_action(node):
     response = node.handle_get_node_action_load(None, type("Resp", (), {})())
 
     assert response.action == NodeAction.WAIT_LOAD_ZONE.value
+
+
+def test_given_load_service_when_no_zc_available_then_returns_wall_follow(node):
+    node.current_node = "A1"
+    node._city_interface.get_cranes = lambda: {
+        "cranes": [{"id": 1, "nb_tokens": 0}],
+    }
+    node.available_goals = ["ZD1"]
+
+    response = node.handle_get_node_action_load(None, type("Resp", (), {})())
+
+    assert response.action == NodeAction.WALL_FOLLOW.value
 
 
 def test_given_deposit_service_when_at_goal_then_returns_wait_deposit_action(node):
@@ -383,3 +424,86 @@ def test_when_home_deposit_callback_then_home_deposit_updated(node):
     node.set_home_deposit_callback(data)
 
     assert node.home_deposit_zone == "ZD1"
+
+
+def test_given_going_ZD2_when_is_at_intersection_valid_to_stop_then_return_false(node):
+    ZD2_TAG = 7
+    node.available_goals = ["ZC1"]
+    node._current_nodes_path = ["A1", "ZC1"]
+
+    assert node.is_intersection_valid_to_stop(ZD2_TAG) is False
+
+
+def test_given_going_home_deposit_when_is_at_intersection_valid_to_stop_then_return_false(
+    node,
+):
+    ZD1_TAG = 5
+    node.available_goals = ["ZC1"]
+    node._current_nodes_path = ["A1", "ZC1"]
+
+    assert node.is_intersection_valid_to_stop(ZD1_TAG) is False
+
+
+def test_given_going_ZC1_when_is_at_intersection_valid_to_stop_then_return_true(node):
+    ZC1_TAG = 6
+    node.available_goals = ["ZC1"]
+    node._current_nodes_path = ["A1", "ZC1"]
+
+    assert node.is_intersection_valid_to_stop(ZC1_TAG) is True
+
+
+def test_given_going_mo_available_goals_when_is_at_intersection_valid_to_stop_then_return_true(
+    node,
+):
+    ZC1_TAG = 6
+    node.available_goals = []
+    node._current_nodes_path = ["A1", "ZC1"]
+
+    assert node.is_intersection_valid_to_stop(ZC1_TAG) is True
+
+
+def test_given_going_no_path_when_is_at_intersection_valid_to_stop_then_return_true(
+    node,
+):
+    ZC1_TAG = 6
+    node.available_goals = []
+    node._current_nodes_path = []
+
+    assert node.is_intersection_valid_to_stop(ZC1_TAG) is True
+
+
+def test_given_going_ZD1_when_is_at_intersection_ZC2_valid_to_stop_then_return_false(
+    node_zc2,
+):
+    ZC2_TAG = 8
+    node_zc2.available_goals = ["ZD1"]
+    node_zc2._current_nodes_path = ["A3", "ZD1"]
+
+    assert node_zc2.is_intersection_valid_to_stop(ZC2_TAG) is False
+
+
+def test_given_going_ZD1_when_is_at_intersection_A1_valid_to_stop_then_return_true(
+    node,
+):
+    A1_TAG = 1
+    node.available_goals = ["ZD1"]
+    node._current_nodes_path = ["A3", "ZD1"]
+
+    assert node.is_intersection_valid_to_stop(A1_TAG) is True
+
+
+def test_when_handle_is_at_intersection_valid_to_stop_then_response_is_sent(node):
+    class Req:
+        aruco_tag = 42
+
+    class Resp:
+        is_valid = None
+
+    node.is_intersection_valid_to_stop = lambda tag: tag == 42
+
+    response = Resp()
+
+    result = node.handle_get_is_intersection_valid_to_stop(Req(), response)
+
+    assert result is response
+    assert response.is_valid is True

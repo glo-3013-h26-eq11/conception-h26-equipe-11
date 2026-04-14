@@ -7,20 +7,22 @@ from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
 LOOKAHEAD = 0.35  # m
+FRONT_DISTANCE = 0.275  # m
 DESIRED_DISTANCE_FROM_WALL = 0.12  # m
 INTEGRAL_WINDOW_SIZE = 20
-KP = 5.0
+KP = 5.3
 KD = 0.5
 KI = 0.05
-MAX_STEERING = 1.1  # radians
-SPEED = 0.20  # m/s
-WHEELBASE = 0.1  # m
+MAX_STEERING = 1.0  # radians
+SPEED = 0.30  # m/s
+WHEELBASE = 0.10  # m
 
 OBTUSE_ANGLE_THRESHOLD = 115  # degrees
-AFTER_CORNER_THRESHOLD = 0.26  # m
+AFTER_CORNER_THRESHOLD = 0.40  # m
 
-INTERSECTION_HALF_CONE_ANGLE = 45  # degrees
+INTERSECTION_HALF_CONE_ANGLE = 40  # degrees
 RIGHT_CORNER_SPEED = 0.1
+RIGHT_CORNER_STEERING = 0.8
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -46,6 +48,7 @@ class WallFollowNode(HealthPingingNode):
         self.drive_pub = self.create_publisher(Twist, output_topic, 10)
         self.last_time = None
         self.last_steering = 0.0
+        self.last_speed = 0.0
         self.last_errors_window = np.array([])
         self._corner_detected = False
         self._corner_time = None
@@ -75,7 +78,7 @@ class WallFollowNode(HealthPingingNode):
             or not is_valid_lidar_scan(c)
         ):
             self.get_logger().warn("Invalid lidar scan, repeating last command")
-            self.send_control_command(SPEED, self.last_steering)
+            self.send_control_command(self.last_speed, self.last_steering)
             return
 
         A_a = self.get_A_angle_deg(a, b, theta)
@@ -92,7 +95,7 @@ class WallFollowNode(HealthPingingNode):
             theta_for_wall_follow = theta_c
             a_for_wall_follow = c
 
-        if front < 0.25:
+        if front < FRONT_DISTANCE:
             theta_for_wall_follow = theta_front
             a_for_wall_follow = front
 
@@ -100,6 +103,7 @@ class WallFollowNode(HealthPingingNode):
             (a_for_wall_follow * math.cos(theta_for_wall_follow) - b)
             / (a_for_wall_follow * math.sin(theta_for_wall_follow))
         )
+
         D_t = b * math.cos(alpha)
         D_tp1 = D_t + LOOKAHEAD * math.sin(alpha)
 
@@ -146,6 +150,9 @@ class WallFollowNode(HealthPingingNode):
 
         angular_z = speed * math.tan(steering) / WHEELBASE
 
+        self.last_speed = speed
+        self.last_steering = steering
+
         twist = Twist()
         twist.linear.x = speed
         twist.angular.z = angular_z
@@ -172,9 +179,9 @@ class WallFollowNode(HealthPingingNode):
 
         if b > AFTER_CORNER_THRESHOLD:
 
-            return RIGHT_CORNER_SPEED, -MAX_STEERING
+            return RIGHT_CORNER_SPEED, -RIGHT_CORNER_STEERING
 
-        elif A > OBTUSE_ANGLE_THRESHOLD:
+        elif A > OBTUSE_ANGLE_THRESHOLD and b < 0.20:
 
             return RIGHT_CORNER_SPEED, 0
 

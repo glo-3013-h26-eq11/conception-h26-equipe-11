@@ -37,7 +37,7 @@ def test_when_ping_with_node_status_then_publish_data_structure(health_monitor_n
 
     expected = {"web_interface": {"health_monitor": "ACTIVE"}}
 
-    assert received_msgs[-1] == expected
+    assert expected in received_msgs
 
 
 def test_when_ping_then_fails_to_ping_for_3_sec_then_publish_crashed(

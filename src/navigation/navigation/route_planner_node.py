@@ -6,7 +6,7 @@ from navigation.goal_selector import GoalMode, GoalSelector
 from navigation.city_interface import CityInterface
 from navigation.route_selector import RouteSelector
 from central_manager.states.node_action_enum import NodeAction
-from navigation_interfaces.srv import GetNodeAction
+from navigation_interfaces.srv import GetNodeAction, GetIsIntersectionValidToStop
 
 
 class RoutePlannerNode(HealthPingingNode):
@@ -49,9 +49,16 @@ class RoutePlannerNode(HealthPingingNode):
             self.handle_get_node_action_deposit,
         )
 
+        self.get_is_intersection_valid_to_stop = self.create_service(
+            GetIsIntersectionValidToStop,
+            "get_is_intersection_valid_to_stop",
+            self.handle_get_is_intersection_valid_to_stop,
+        )
+
         self.current_node: str | None = None
         self.available_goals: list[str] = ["ZC1", "ZD1"]
         self.goal_mode: str = GoalMode.GO_LOAD.value
+        self._current_nodes_path = None
 
     def handle_get_node_action_load(self, _request, response):
         response.action = self._compute_node_action(
@@ -64,6 +71,32 @@ class RoutePlannerNode(HealthPingingNode):
             mode=GoalMode.GO_DEPOSIT, wait_action=NodeAction.WAIT_DEPOSIT_ZONE
         )
         return response
+
+    def handle_get_is_intersection_valid_to_stop(self, request, response):
+        response.is_valid = self.is_intersection_valid_to_stop(request.aruco_tag)
+        return response
+
+    def is_intersection_valid_to_stop(self, aruco_tag: int):
+
+        if not self._route_selector:
+            return True
+
+        if len(self.available_goals) <= 0:
+            return True
+
+        id = self._route_selector.tag_to_id(aruco_tag)
+
+        if self._current_nodes_path:
+            if id.startswith("ZD") or id.startswith("ZC"):
+                if (
+                    len(self._current_nodes_path) >= 1
+                    and id == self._current_nodes_path[-1]
+                ):
+                    return True
+                else:
+                    return False
+
+        return True
 
     def _map_callback(self, msg: String) -> None:
         if self._route_selector is not None:
@@ -84,7 +117,19 @@ class RoutePlannerNode(HealthPingingNode):
         if self._route_selector is None:
             return
 
+        if msg.data == 0:
+            self.home_deposit_zone = None
+            if self.home_deposit_zone in self.available_goals:
+                self.available_goals.remove(self.home_deposit_zone)
+            self.get_logger().info("Reset home deposit zone")
+            return
+
         id_of_zone = self._route_selector.tag_to_id(msg.data)
+
+        if id_of_zone is None:
+            self.get_logger().info(
+                "Id of Zone is None : error with the home deposit map"
+            )
 
         if "ZD" not in id_of_zone:
             self.get_logger().info(
@@ -125,12 +170,17 @@ class RoutePlannerNode(HealthPingingNode):
             self._refresh_available_load_goals_from_city_interface()
 
         goal_node = self._select_goal_for_mode(mode)
+        if goal_node is None:
+            return NodeAction.WALL_FOLLOW.value
+
         result = self._route_selector.compute_path(self.current_node, goal_node)
 
         if result is None:
-            return wait_action.value
+            return NodeAction.WALL_FOLLOW.value
 
         nodes_path, directions_path = result
+
+        self._current_nodes_path = nodes_path
 
         if len(directions_path) >= 1:
 
@@ -164,6 +214,9 @@ class RoutePlannerNode(HealthPingingNode):
         if not nodes_path:
             return
 
+        if not self._vehicle_id:
+            return
+
         try:
             self._city_interface.post_vehicle_with_id(self._vehicle_id, nodes_path)
             self.get_logger().info(
@@ -174,7 +227,7 @@ class RoutePlannerNode(HealthPingingNode):
                 f"Failed posting route_plan/nodes to city API for vehicle={self._vehicle_id}: {e}"
             )
 
-    def _select_goal_for_mode(self, mode: GoalMode) -> str:
+    def _select_goal_for_mode(self, mode: GoalMode) -> str | None:
         if self._route_selector is None:
             return self.current_node
 
@@ -186,8 +239,6 @@ class RoutePlannerNode(HealthPingingNode):
             available_goals=self.available_goals,
             mode=mode,
         )
-        if selected is None:
-            return self.current_node
         return selected
 
     def _refresh_available_load_goals_from_city_interface(self) -> None:

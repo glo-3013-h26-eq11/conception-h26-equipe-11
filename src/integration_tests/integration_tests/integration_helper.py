@@ -24,8 +24,8 @@ def start_process(cmd, cwd="../.."):
         cwd=cwd,
         shell=True,
         executable="/bin/bash",
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=None,
+        stderr=None,
         preexec_fn=os.setsid,
     )
 
