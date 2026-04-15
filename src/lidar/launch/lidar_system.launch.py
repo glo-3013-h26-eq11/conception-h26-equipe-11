@@ -27,6 +27,8 @@ def generate_launch_description():
                 executable="wall_follower",
                 name="wall_follower_node",
                 output="screen",
+                respawn_delay=2.0,
+                respawn=True,
                 parameters=[{"output_topic": LaunchConfiguration("output_topic")}],
             ),
         ]

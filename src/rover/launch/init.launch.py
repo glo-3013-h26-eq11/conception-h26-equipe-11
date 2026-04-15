@@ -46,11 +46,15 @@ def generate_launch_description():
                 package="proximity_sensor",
                 executable="proximity_sensor_node",
                 name="proximity_sensor",
+                respawn_delay=2.0,
+                respawn=True
             ),
             Node(
                 package="central_manager",
                 executable="enforcer_manager_node",
                 name="enforcer_manager",
+                respawn_delay=2.0,
+                respawn=True
             ),
         ]
     )

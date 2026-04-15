@@ -58,6 +58,8 @@ def generate_launch_description() -> LaunchDescription:
                 executable="aruco_reader_node",
                 name="aruco_reader_node",
                 output="screen",
+                respawn_delay=2.0,
+                respawn=True,
                 parameters=[
                     {
                         "image_topic": LaunchConfiguration("image_topic"),
