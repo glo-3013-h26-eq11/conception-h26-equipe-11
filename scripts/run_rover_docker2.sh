@@ -9,7 +9,7 @@ docker run --rm \
     -v /dev:/dev \
     -v /home/norlab/repos/louis2/conception-h26-equipe-11:/home/ws \
     -e ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-11} \
-    test_louis:latest \
+    test_max:latest \
     bash -c "
         set -e
         source /opt/ros/humble/setup.bash

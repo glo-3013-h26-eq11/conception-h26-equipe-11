@@ -1,7 +1,7 @@
 from central_manager.enforcers.base_enforcer import Enforcer
 from geometry_msgs.msg import Twist
 
-ARC_RADIUS = 0.235  # m
+ARC_RADIUS = 0.230  # m
 LEFT_TURN_SPEED = 0.4  # m/s
 
 
