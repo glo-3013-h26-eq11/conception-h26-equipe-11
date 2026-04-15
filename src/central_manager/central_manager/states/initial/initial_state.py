@@ -8,6 +8,7 @@ from central_manager.blackboard_config import (
     BLACKBOARD_PREVIOUS_STOP_TAG,
 )
 from central_manager.state_base import RoverState
+from central_manager.transitions_enum import Transition
 
 
 class InitialState(RoverState):
@@ -26,7 +27,7 @@ class InitialState(RoverState):
 
     def rover_start_callback(self, msg):
         if msg.data:
-            self.outcome = "system_ready"
+            self.outcome = Transition.SYSTEM_READY.value
 
     def at_deposit_callback(self, msg):
         data = json.loads(msg.data)
@@ -57,7 +58,7 @@ class InitialState(RoverState):
             self.node.get_logger().info(
                 "Home deposit not set, going back to initial state"
             )
-            return "back_to_init"
+            return Transition.BACK_TO_INIT.value
 
         home_deposit_data = Int16()
         home_deposit_data.data = self.home_deposit_zone

@@ -3,24 +3,29 @@ from std_msgs.msg import String, Bool
 from central_manager.enforcers.wait_at_deposit_enforcer import WaitAtDepositEnforcer
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 from central_manager.state_base import RoverState
+from central_manager.transitions_enum import Transition
 
 
 class AtDepositZoneToDeposit(RoverState):
     def __init__(self, node):
         self.node = node
 
-        node.create_subscription(String, "deposit_over", self.deposit_over_callback, 10)
+        node.create_subscription(
+            String, Transition.DEPOSIT_OVER.value, self.deposit_over_callback, 10
+        )
         node.create_subscription(
             Bool, "/proximity_sensor/merchandise", self.merchandise_callback, 10
         )
         node.create_subscription(Bool, "rover/start", self.rover_stop_callback, 10)
 
-        self.deposit_over_publisher = node.create_publisher(String, "deposit_over", 10)
+        self.deposit_over_publisher = node.create_publisher(
+            String, Transition.DEPOSIT_OVER.value, 10
+        )
         self.outcome = None
         self.wait_at_deposit_enforcer = None
 
     def deposit_over_callback(self, msg: String):
-        self.outcome = "deposit_over"
+        self.outcome = Transition.DEPOSIT_OVER.value
 
     def merchandise_callback(self, msg: Bool):
         if self.wait_at_deposit_enforcer:
@@ -28,7 +33,7 @@ class AtDepositZoneToDeposit(RoverState):
 
     def rover_stop_callback(self, msg: Bool):
         if not msg.data:
-            self.outcome = "back_to_init"
+            self.outcome = Transition.BACK_TO_INIT.value
 
     def on_enter(self, blackboard):
         self.outcome = None

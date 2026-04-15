@@ -10,6 +10,7 @@ from central_manager.blackboard_config import (
     BLACKBOARD_ENFORCERS,
     BLACKBOARD_PREVIOUS_STOP_TAG,
 )
+from central_manager.transitions_enum import Transition
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -32,7 +33,7 @@ def test_when_rover_stop_then_outcome_back_to_init(state):
     state.on_enter(blackboard)
 
     state.rover_stop_callback(Bool(data=False))
-    assert state.step(blackboard) == "back_to_init"
+    assert state.step(blackboard) == Transition.BACK_TO_INIT.value
 
 
 def test_when_stop_over_and_current_node_then_transitions(state):
@@ -44,7 +45,7 @@ def test_when_stop_over_and_current_node_then_transitions(state):
     state.at_intersection_callback(String(data=json.dumps(data)))
     state.stop_over(Bool(data=False))
 
-    assert state.step(blackboard) == "current_node"
+    assert state.step(blackboard) == Transition.CURRENT_NODE.value
     assert len(blackboard[BLACKBOARD_ENFORCERS]) == 2
 
 
