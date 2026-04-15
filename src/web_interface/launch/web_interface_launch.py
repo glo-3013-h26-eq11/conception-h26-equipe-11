@@ -24,19 +24,21 @@ def generate_launch_description():
                 executable="static_web_server",
                 name="static_web_server",
                 respawn_delay=2.0,
-                respawn=True
+                respawn=True,
             ),
             launch_ros.actions.Node(
-                package="web_interface", executable="console_node", name="console_node",
+                package="web_interface",
+                executable="console_node",
+                name="console_node",
                 respawn_delay=2.0,
-                respawn=True
+                respawn=True,
             ),
             launch_ros.actions.Node(
                 package="web_interface",
                 executable="system_health_node",
                 name="system_health_node",
                 respawn_delay=2.0,
-                respawn=True
+                respawn=True,
             ),
         ]
     )
