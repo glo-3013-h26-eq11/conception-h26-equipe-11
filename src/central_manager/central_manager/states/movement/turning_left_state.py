@@ -8,7 +8,7 @@ from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 from central_manager.state_base import RoverState
 
-BASE_TARGET_DEGREES = 60
+BASE_TARGET_DEGREES = 57
 
 
 class TurningLeftState(RoverState):
