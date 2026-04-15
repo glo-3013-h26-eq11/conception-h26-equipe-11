@@ -175,7 +175,7 @@ class ArucoReaderNode(HealthPingingNode):
         dist_xz = float(np.linalg.norm([tvec[0], tvec[2]])) + CAMERA_OFFSET
         # Horizontal angle: 0° = straight ahead, ±90° = fully to the side.
         # Used to ignore markers seen during a turn (large lateral offset).
-        angle_x_deg = float(np.degrees(np.arctan2(abs(tvec[0]), abs(tvec[2]))))
+        angle_x_deg = float(np.degrees(np.arctan2(tvec[0], tvec[2])))
         # Z: forward distance to marker. If Z is very small the rover is
         # already passing under the marker — must not trigger stop.
         z_forward = float(tvec[2])

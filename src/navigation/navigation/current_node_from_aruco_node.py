@@ -14,9 +14,9 @@ RIGHT_ARUCO_ID = 2
 BACK_ARUCO_ID = 3
 LEFT_ARUCO_ID = 4
 FRONT_CONE_RIGHT_MAX = 20.0
-FRONT_CONE_LEFT_MAX = -60.0
+FRONT_CONE_LEFT_MAX = -40.0
 
-ARUCO_TILT_THRESHOLD = 47.0
+ARUCO_TILT_THRESHOLD = 35
 
 
 class CurrentNodeFromArucoNode(HealthPingingNode):
@@ -70,6 +70,8 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
 
             if z_forward < 0.15:
                 continue
+
+            self.get_logger().info(f"angle x : {angle}  -- tilt : {tag_angle} -- id : {marker_id}")
 
             if angle > FRONT_CONE_RIGHT_MAX:
                 continue
