@@ -5,6 +5,7 @@ from central_manager.enforcers.forward_turn_enforcer import ForwardTurnEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 from central_manager.state_base import RoverState
+from central_manager.transitions_enum import Transition
 
 
 class TurningForwardState(RoverState):
@@ -22,7 +23,7 @@ class TurningForwardState(RoverState):
         self.outcome = None
 
     def turn_over_callback(self, msg: String):
-        self.outcome = "turn_over"
+        self.outcome = Transition.TURN_OVER.value
 
     def distance_to_car_callback(self, msg: Float32):
         if self.car_follower_enforcer:
@@ -30,7 +31,7 @@ class TurningForwardState(RoverState):
 
     def rover_stop_callback(self, msg: Bool):
         if not msg.data:
-            self.outcome = "back_to_init"
+            self.outcome = Transition.BACK_TO_INIT.value
 
     def on_enter(self, blackboard):
         self.outcome = None

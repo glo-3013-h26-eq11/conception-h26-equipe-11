@@ -6,6 +6,7 @@ from central_manager.states.to_deposit.at_intersection_to_deposit_state import (
 )
 from central_manager.states.node_action_enum import NodeAction
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
+from central_manager.transitions_enum import Transition
 
 
 class FakeResponse:
@@ -39,11 +40,11 @@ def blackboard_mock():
 @pytest.mark.parametrize(
     "node_action, expected_outcome",
     [
-        (NodeAction.LEFT_TURN, "left_turn"),
-        (NodeAction.FORWARD_TURN, "forward_turn"),
-        (NodeAction.RIGHT_TURN, "right_turn"),
-        (NodeAction.WAIT_DEPOSIT_ZONE, "wait_deposit_zone"),
-        (NodeAction.WALL_FOLLOW, "right_turn"),
+        (NodeAction.LEFT_TURN, Transition.LEFT_TURN.value),
+        (NodeAction.FORWARD_TURN, Transition.FORWARD_TURN.value),
+        (NodeAction.RIGHT_TURN, Transition.RIGHT_TURN.value),
+        (NodeAction.WAIT_DEPOSIT_ZONE, Transition.WAIT_DEPOSIT_ZONE.value),
+        (NodeAction.WALL_FOLLOW, Transition.RIGHT_TURN.value),
     ],
 )
 def test_at_intersection_to_deposit_state_outcomes(
@@ -62,7 +63,7 @@ def test_invalid_node_action_logs_error(blackboard_mock):
     state.client.call_async.return_value = FakeFuture("invalid")
 
     state.on_enter(blackboard_mock)
-    assert state.step(blackboard_mock) == "back_to_init"
+    assert state.step(blackboard_mock) == Transition.BACK_TO_INIT.value
 
 
 def test_left_turn_transition(blackboard_mock):
@@ -70,4 +71,4 @@ def test_left_turn_transition(blackboard_mock):
     state.client.call_async.return_value = FakeFuture(NodeAction.LEFT_TURN.value)
 
     state.on_enter(blackboard_mock)
-    assert state.step(blackboard_mock) == "left_turn"
+    assert state.step(blackboard_mock) == Transition.LEFT_TURN.value

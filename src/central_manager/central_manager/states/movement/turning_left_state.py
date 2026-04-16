@@ -8,6 +8,7 @@ from central_manager.enforcers.left_turn_enforcer import LeftTurnEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 from central_manager.state_base import RoverState
+from central_manager.transitions_enum import Transition
 
 BASE_TARGET_DEGREES = 56
 
@@ -16,8 +17,12 @@ class TurningLeftState(RoverState):
     def __init__(self, node):
         self.node = node
 
-        node.create_subscription(String, "turn_over", self.turn_over_callback, 10)
-        self.turn_over_publisher = node.create_publisher(String, "turn_over", 10)
+        node.create_subscription(
+            String, Transition.TURN_OVER.value, self.turn_over_callback, 10
+        )
+        self.turn_over_publisher = node.create_publisher(
+            String, Transition.TURN_OVER.value, 10
+        )
 
         node.create_subscription(
             Float32, "distance_to_car", self.distance_to_car_callback, 10
@@ -58,13 +63,13 @@ class TurningLeftState(RoverState):
             self.node.get_logger().info(
                 f"Turn done: accumulated={self.accumulated_degrees:.2f}° "
             )
-            self.outcome = "turn_over"
+            self.outcome = Transition.TURN_OVER.value
 
     def _is_turn_done(self) -> bool:
         return abs(self.accumulated_degrees) >= BASE_TARGET_DEGREES
 
     def turn_over_callback(self, msg: String):
-        self.outcome = "turn_over"
+        self.outcome = Transition.TURN_OVER.value
 
     def distance_to_car_callback(self, msg: Float32):
         if self.car_follower_enforcer:
@@ -72,7 +77,7 @@ class TurningLeftState(RoverState):
 
     def rover_stop_callback(self, msg: Bool):
         if not msg.data:
-            self.outcome = "back_to_init"
+            self.outcome = Transition.BACK_TO_INIT.value
 
     def on_enter(self, blackboard):
         self.outcome = None

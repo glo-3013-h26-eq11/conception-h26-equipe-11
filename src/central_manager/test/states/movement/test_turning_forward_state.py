@@ -5,6 +5,7 @@ from rclpy.node import Node
 
 from central_manager.states.movement.turning_forward_state import TurningForwardState
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
+from central_manager.transitions_enum import Transition
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -27,7 +28,7 @@ def test_when_turn_over_then_outcome_turn_over(state):
     state.on_enter(blackboard)
 
     state.turn_over_callback(String(data="done"))
-    assert state.step(blackboard) == "turn_over"
+    assert state.step(blackboard) == Transition.TURN_OVER.value
 
 
 def test_when_stop_rover_then_outcome_back_to_init(state):
@@ -35,4 +36,4 @@ def test_when_stop_rover_then_outcome_back_to_init(state):
     state.on_enter(blackboard)
 
     state.rover_stop_callback(Bool(data=False))
-    assert state.step(blackboard) == "back_to_init"
+    assert state.step(blackboard) == Transition.BACK_TO_INIT.value
