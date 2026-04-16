@@ -17,12 +17,7 @@ class TurningLeftState(RoverState):
     def __init__(self, node):
         self.node = node
 
-        node.create_subscription(
-            String, Transition.TURN_OVER.value, self.turn_over_callback, 10
-        )
-        self.turn_over_publisher = node.create_publisher(
-            String, Transition.TURN_OVER.value, 10
-        )
+        node.create_subscription(String, Transition.TURN_OVER.value, self.turn_over_callback, 10)
 
         node.create_subscription(
             Float32, "distance_to_car", self.distance_to_car_callback, 10

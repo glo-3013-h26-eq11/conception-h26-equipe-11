@@ -10,9 +10,7 @@ class AtLoadZoneToLoad(RoverState):
     def __init__(self, node):
         self.node = node
 
-        node.create_subscription(
-            String, Transition.LOAD_OVER.value, self.load_over_callback, 10
-        )
+        node.create_subscription(String, Transition.LOAD_OVER.value, self.load_over_callback, 10)
         node.create_subscription(
             Bool, "/proximity_sensor/merchandise", self.merchandise_callback, 10
         )
