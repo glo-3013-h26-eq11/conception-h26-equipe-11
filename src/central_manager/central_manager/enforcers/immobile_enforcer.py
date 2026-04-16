@@ -4,7 +4,7 @@ from geometry_msgs.msg import Twist
 
 class ImmobileEnforcer(Enforcer):
     def __init__(self):
-        pass
+        super().__init__(priority=1)
 
     def enforce_cmd(self, cmd: Twist) -> Twist:
         return Twist()

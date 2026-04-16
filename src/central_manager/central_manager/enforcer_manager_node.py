@@ -36,6 +36,9 @@ class EnforcerManagerNode(HealthPingingNode):
         self.previous_twist = Twist()
 
     def _get_enforcers(self) -> List[Enforcer]:
+        self.blackboard[BLACKBOARD_ENFORCERS].sort(
+            key=lambda enforcer: enforcer.priority
+        )
         return self.blackboard[BLACKBOARD_ENFORCERS]
 
     def _state_machine_tick(self) -> None:

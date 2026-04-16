@@ -30,7 +30,7 @@ class StopSignEnforcer(Enforcer):
     def __init__(
         self, stop_over_publisher, stop_duration: float = STOP_DURATION, logger=None
     ) -> None:
-        super().__init__()
+        super().__init__(priority=2)
         self._state: _State = _State.IDLE
         self._stop_start: Optional[float] = None
 

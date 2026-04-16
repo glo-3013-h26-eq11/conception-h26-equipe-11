@@ -9,8 +9,7 @@ STOP_AFTER_DEPOSIT_DURATION = 0.8  # s
 
 class WaitAtDepositEnforcer(Enforcer):
     def __init__(self, deposit_over_publisher: Publisher):
-        super().__init__()
-
+        super().__init__(priority=1)
         self.timer = 0
 
         self.merchandise_unloaded = False

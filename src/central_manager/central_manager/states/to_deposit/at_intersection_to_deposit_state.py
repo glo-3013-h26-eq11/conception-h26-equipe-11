@@ -16,7 +16,9 @@ class AtIntersectionToDepositState(RoverState):
     def on_enter(self, blackboard):
         self.outcome = None
         self.node.get_logger().info("AT_INTERSECTION_TO_DEPOSIT state")
-        blackboard[BLACKBOARD_ENFORCERS] = [ImmobileEnforcer()]
+        self.immobile_enforcer = ImmobileEnforcer()
+        blackboard[BLACKBOARD_ENFORCERS] = [self.immobile_enforcer]
+
         self._request_future = None
 
         if not self.client.wait_for_service(timeout_sec=5.0):

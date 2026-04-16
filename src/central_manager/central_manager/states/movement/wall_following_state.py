@@ -1,4 +1,5 @@
 from typing import Optional
+
 import json
 from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
@@ -103,8 +104,8 @@ class WallFollowingState(RoverState):
             self.stop_over_publisher, logger=self.node.get_logger()
         )
         blackboard[BLACKBOARD_ENFORCERS] = [
-            self.stop_sign_enforcer,
             self.car_follower_enforcer,
+            self.stop_sign_enforcer,
         ]
 
     def step(self, blackboard) -> Optional[str]:

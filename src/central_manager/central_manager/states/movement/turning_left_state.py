@@ -1,6 +1,7 @@
 import json
 import math
 import time
+
 from typing import Optional
 from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.left_turn_enforcer import LeftTurnEnforcer
@@ -79,10 +80,11 @@ class TurningLeftState(RoverState):
         self.last_imu_time = None
 
         self.car_follower_enforcer = CarFollowEnforcer()
+        self.left_turn_enforcer = LeftTurnEnforcer()
 
         blackboard[BLACKBOARD_ENFORCERS] = [
-            LeftTurnEnforcer(),
             self.car_follower_enforcer,
+            self.left_turn_enforcer,
         ]
 
     def step(self, blackboard) -> Optional[str]:

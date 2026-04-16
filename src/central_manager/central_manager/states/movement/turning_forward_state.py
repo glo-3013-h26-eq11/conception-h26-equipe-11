@@ -1,4 +1,5 @@
 from typing import Optional
+
 from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.forward_turn_enforcer import ForwardTurnEnforcer
 from central_manager.enforcers.car_follow_enforcer import CarFollowEnforcer
@@ -36,9 +37,10 @@ class TurningForwardState(RoverState):
         self.node.get_logger().info("TURNING_FORWARD state")
 
         self.car_follower_enforcer = CarFollowEnforcer()
+        self.forward_turn_enforcer = ForwardTurnEnforcer(self.turn_over_publisher)
         blackboard[BLACKBOARD_ENFORCERS] = [
-            ForwardTurnEnforcer(self.turn_over_publisher),
             self.car_follower_enforcer,
+            self.forward_turn_enforcer,
         ]
 
     def step(self, blackboard) -> Optional[str]:
