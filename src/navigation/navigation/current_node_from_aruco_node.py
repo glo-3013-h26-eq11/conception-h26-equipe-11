@@ -71,7 +71,9 @@ class CurrentNodeFromArucoNode(HealthPingingNode):
             if z_forward < 0.15:
                 continue
 
-            self.get_logger().info(f"angle x : {angle}  -- tilt : {tag_angle} -- id : {marker_id}")
+            self.get_logger().info(
+                f"angle x : {angle}  -- tilt : {tag_angle} -- id : {marker_id}"
+            )
 
             if angle > FRONT_CONE_RIGHT_MAX:
                 continue

@@ -4,6 +4,7 @@ from central_manager.states.node_action_enum import NodeAction
 from navigation_interfaces.srv import GetNodeAction
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
 from central_manager.state_base import RoverState
+from central_manager.transitions_enum import Transition
 
 
 class AtIntersectionToDepositState(RoverState):
@@ -33,31 +34,31 @@ class AtIntersectionToDepositState(RoverState):
         result = future.result()
         if result is None:
             self.node.get_logger().error("Failed to get node action from service")
-            self.outcome = "back_to_init"
+            self.outcome = Transition.BACK_TO_INIT.value
             return
 
         try:
             node_action = NodeAction(result.action)
         except ValueError:
             self.node.get_logger().error(f"INVALID node action : {result.action}")
-            self.outcome = "back_to_init"
+            self.outcome = Transition.BACK_TO_INIT.value
             return
 
         if node_action == NodeAction.LEFT_TURN:
-            self.outcome = "left_turn"
+            self.outcome = Transition.LEFT_TURN.value
         elif node_action == NodeAction.FORWARD_TURN:
-            self.outcome = "forward_turn"
+            self.outcome = Transition.FORWARD_TURN.value
         elif node_action == NodeAction.WALL_FOLLOW:
-            self.outcome = "right_turn"
+            self.outcome = Transition.RIGHT_TURN.value
         elif node_action == NodeAction.RIGHT_TURN:
-            self.outcome = "right_turn"
+            self.outcome = Transition.RIGHT_TURN.value
         elif node_action == NodeAction.WAIT_DEPOSIT_ZONE:
-            self.outcome = "wait_deposit_zone"
+            self.outcome = Transition.WAIT_DEPOSIT_ZONE.value
         elif node_action == NodeAction.BACK_TO_INIT:
-            self.outcome = "back_to_init"
+            self.outcome = Transition.BACK_TO_INIT.value
         else:
             self.node.get_logger().error(f"INVALID node action : {node_action}")
-            self.outcome = "back_to_init"
+            self.outcome = Transition.BACK_TO_INIT.value
 
         self.node.get_logger().info(f"Node action : {self.outcome}")
 

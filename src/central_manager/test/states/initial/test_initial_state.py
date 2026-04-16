@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 from central_manager.states.initial.initial_state import InitialState
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
+from central_manager.transitions_enum import Transition
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -27,7 +28,7 @@ def test_initial_state_transitions_to_system_ready():
     state.rover_start_callback(Bool(data=True))
     outcome = state.step(blackboard)
 
-    assert outcome == "system_ready"
+    assert outcome == Transition.SYSTEM_READY.value
     assert len(blackboard[BLACKBOARD_ENFORCERS]) == 1
 
     node.destroy_node()

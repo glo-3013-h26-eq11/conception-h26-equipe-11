@@ -7,6 +7,7 @@ from central_manager.states.to_deposit.at_deposit_zone_to_deposit_state import (
     AtDepositZoneToDeposit,
 )
 from central_manager.blackboard_config import BLACKBOARD_ENFORCERS
+from central_manager.transitions_enum import Transition
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -29,7 +30,7 @@ def test_at_deposit_zone_to_deposit_state_transitions_to_deposit_over(state):
     state.on_enter(blackboard)
 
     state.deposit_over_callback(String(data="done"))
-    assert state.step(blackboard) == "deposit_over"
+    assert state.step(blackboard) == Transition.DEPOSIT_OVER.value
 
 
 def test_when_stop_rover_then_outcome_back_to_init(state):
@@ -37,4 +38,4 @@ def test_when_stop_rover_then_outcome_back_to_init(state):
     state.on_enter(blackboard)
 
     state.rover_stop_callback(Bool(data=False))
-    assert state.step(blackboard) == "back_to_init"
+    assert state.step(blackboard) == Transition.BACK_TO_INIT.value

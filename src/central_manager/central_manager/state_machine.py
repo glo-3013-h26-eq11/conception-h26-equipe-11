@@ -15,6 +15,8 @@ from central_manager.states.to_deposit.at_intersection_to_deposit_state import (
 from central_manager.states.to_deposit.at_deposit_zone_to_deposit_state import (
     AtDepositZoneToDeposit,
 )
+from central_manager.states_enum import State
+from central_manager.transitions_enum import Transition
 
 
 class StateMachineRover:
@@ -26,7 +28,7 @@ class StateMachineRover:
         self.current_state = None
 
     def start(self, blackboard: dict) -> None:
-        self._transition_to("INITIAL", blackboard)
+        self._transition_to(State.INITIAL.value, blackboard)
 
     def step(self, blackboard: dict) -> Optional[str]:
         if self.current_state is None:
@@ -57,74 +59,74 @@ class StateMachineRover:
 
     def create_states(self, node):
         return {
-            "INITIAL": InitialState(node),
-            "WALL_FOLLOWING_POSITIONING": WallFollowingState(node),
-            "AT_INTERSECTION_TO_LOAD": AtIntersectionToLoadState(node),
-            "TURNING_LEFT_TO_LOAD": TurningLeftState(node),
-            "TURNING_FORWARD_TO_LOAD": TurningForwardState(node),
-            "WALL_FOLLOWING_TO_LOAD": WallFollowingState(node),
-            "AT_LOAD_ZONE_TO_LOAD": AtLoadZoneToLoad(node),
-            "AT_INTERSECTION_TO_DEPOSIT": AtIntersectionToDepositState(node),
-            "TURNING_LEFT_TO_DEPOSIT": TurningLeftState(node),
-            "TURNING_FORWARD_TO_DEPOSIT": TurningForwardState(node),
-            "WALL_FOLLOWING_TO_DEPOSIT": WallFollowingState(node),
-            "AT_DEPOSIT_ZONE_TO_DEPOSIT": AtDepositZoneToDeposit(node),
+            State.INITIAL.value: InitialState(node),
+            State.WALL_FOLLOWING_POSITIONNING.value: WallFollowingState(node),
+            State.AT_INTERSECTION_TO_LOAD.value: AtIntersectionToLoadState(node),
+            State.TURNING_LEFT_TO_LOAD.value: TurningLeftState(node),
+            State.TURNING_FORWARD_TO_LOAD.value: TurningForwardState(node),
+            State.WALL_FOLLOWING_TO_LOAD.value: WallFollowingState(node),
+            State.AT_LOAD_ZONE_TO_LOAD.value: AtLoadZoneToLoad(node),
+            State.AT_INTERSECTION_TO_DEPOSIT.value: AtIntersectionToDepositState(node),
+            State.TURNING_LEFT_TO_DEPOSIT.value: TurningLeftState(node),
+            State.TURNING_FORWARD_TO_DEPOSIT.value: TurningForwardState(node),
+            State.WALL_FOLLOWING_TO_DEPOSIT.value: WallFollowingState(node),
+            State.AT_DEPOSIT_ZONE_TO_DEPOSIT.value: AtDepositZoneToDeposit(node),
         }
 
     def create_transitions(self):
         return {
-            "INITIAL": {
-                "system_ready": "WALL_FOLLOWING_POSITIONING",
-                "back_to_init": "INITIAL",
+            State.INITIAL.value: {
+                Transition.SYSTEM_READY.value: State.WALL_FOLLOWING_POSITIONNING.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "WALL_FOLLOWING_POSITIONING": {
-                "current_node": "AT_INTERSECTION_TO_LOAD",
-                "back_to_init": "INITIAL",
+            State.WALL_FOLLOWING_POSITIONNING.value: {
+                Transition.CURRENT_NODE.value: State.AT_INTERSECTION_TO_LOAD.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "AT_INTERSECTION_TO_LOAD": {
-                "left_turn": "TURNING_LEFT_TO_LOAD",
-                "forward_turn": "TURNING_FORWARD_TO_LOAD",
-                "right_turn": "WALL_FOLLOWING_TO_LOAD",
-                "wait_load_zone": "AT_LOAD_ZONE_TO_LOAD",
-                "back_to_init": "INITIAL",
+            State.AT_INTERSECTION_TO_LOAD.value: {
+                Transition.LEFT_TURN.value: State.TURNING_LEFT_TO_LOAD.value,
+                Transition.FORWARD_TURN.value: State.TURNING_FORWARD_TO_LOAD.value,
+                Transition.RIGHT_TURN.value: State.WALL_FOLLOWING_TO_LOAD.value,
+                Transition.WAIT_LOAD_ZONE.value: State.AT_LOAD_ZONE_TO_LOAD.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "TURNING_LEFT_TO_LOAD": {
-                "turn_over": "WALL_FOLLOWING_TO_LOAD",
-                "back_to_init": "INITIAL",
+            State.TURNING_LEFT_TO_LOAD.value: {
+                Transition.TURN_OVER.value: State.WALL_FOLLOWING_TO_LOAD.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "TURNING_FORWARD_TO_LOAD": {
-                "turn_over": "WALL_FOLLOWING_TO_LOAD",
-                "back_to_init": "INITIAL",
+            State.TURNING_FORWARD_TO_LOAD.value: {
+                Transition.TURN_OVER.value: State.WALL_FOLLOWING_TO_LOAD.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "WALL_FOLLOWING_TO_LOAD": {
-                "current_node": "AT_INTERSECTION_TO_LOAD",
-                "back_to_init": "INITIAL",
+            State.WALL_FOLLOWING_TO_LOAD.value: {
+                Transition.CURRENT_NODE.value: State.AT_INTERSECTION_TO_LOAD.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "AT_LOAD_ZONE_TO_LOAD": {
-                "load_over": "AT_INTERSECTION_TO_DEPOSIT",
-                "back_to_init": "INITIAL",
+            State.AT_LOAD_ZONE_TO_LOAD.value: {
+                Transition.LOAD_OVER.value: State.AT_INTERSECTION_TO_DEPOSIT.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "AT_INTERSECTION_TO_DEPOSIT": {
-                "left_turn": "TURNING_LEFT_TO_DEPOSIT",
-                "forward_turn": "TURNING_FORWARD_TO_DEPOSIT",
-                "right_turn": "WALL_FOLLOWING_TO_DEPOSIT",
-                "wait_deposit_zone": "AT_DEPOSIT_ZONE_TO_DEPOSIT",
-                "back_to_init": "INITIAL",
+            State.AT_INTERSECTION_TO_DEPOSIT.value: {
+                Transition.LEFT_TURN.value: State.TURNING_LEFT_TO_DEPOSIT.value,
+                Transition.FORWARD_TURN.value: State.TURNING_FORWARD_TO_DEPOSIT.value,
+                Transition.RIGHT_TURN.value: State.WALL_FOLLOWING_TO_DEPOSIT.value,
+                Transition.WAIT_DEPOSIT_ZONE.value: State.AT_DEPOSIT_ZONE_TO_DEPOSIT.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "TURNING_LEFT_TO_DEPOSIT": {
-                "turn_over": "WALL_FOLLOWING_TO_DEPOSIT",
-                "back_to_init": "INITIAL",
+            State.TURNING_LEFT_TO_DEPOSIT.value: {
+                Transition.TURN_OVER.value: State.WALL_FOLLOWING_TO_DEPOSIT.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "TURNING_FORWARD_TO_DEPOSIT": {
-                "turn_over": "WALL_FOLLOWING_TO_DEPOSIT",
-                "back_to_init": "INITIAL",
+            State.TURNING_FORWARD_TO_DEPOSIT.value: {
+                Transition.TURN_OVER.value: State.WALL_FOLLOWING_TO_DEPOSIT.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "WALL_FOLLOWING_TO_DEPOSIT": {
-                "current_node": "AT_INTERSECTION_TO_DEPOSIT",
-                "back_to_init": "INITIAL",
+            State.WALL_FOLLOWING_TO_DEPOSIT.value: {
+                Transition.CURRENT_NODE.value: State.AT_INTERSECTION_TO_DEPOSIT.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
-            "AT_DEPOSIT_ZONE_TO_DEPOSIT": {
-                "deposit_over": "AT_INTERSECTION_TO_LOAD",
-                "back_to_init": "INITIAL",
+            State.AT_DEPOSIT_ZONE_TO_DEPOSIT.value: {
+                Transition.DEPOSIT_OVER.value: State.AT_INTERSECTION_TO_LOAD.value,
+                Transition.BACK_TO_INIT.value: State.INITIAL.value,
             },
         }
