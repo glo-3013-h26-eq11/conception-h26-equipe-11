@@ -4,7 +4,7 @@ from std_msgs.msg import String, Bool
 from rclpy.node import Publisher
 from proximity_sensor.merchandise_flag import MerchandiseFlag
 
-STOP_AFTER_DEPOSIT_DURATION = 0.8  # s
+STOP_AFTER_DEPOSIT_DURATION = 0.3  # s
 
 
 class WaitAtDepositEnforcer(Enforcer):
