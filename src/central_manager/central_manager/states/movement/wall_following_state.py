@@ -1,4 +1,5 @@
 from typing import Optional
+
 import json
 from std_msgs.msg import String, Float32, Bool
 from central_manager.enforcers.stop_sign_enforcer import StopSignEnforcer
@@ -10,6 +11,7 @@ from central_manager.blackboard_config import (
 from navigation_interfaces.srv import GetIsIntersectionValidToStop
 from functools import partial
 from central_manager.state_base import RoverState
+from central_manager.transitions_enum import Transition
 
 
 class WallFollowingState(RoverState):
@@ -87,11 +89,11 @@ class WallFollowingState(RoverState):
         self.node.get_logger().info("STOPPED : SAYS WALL FOLLOWER")
         if self.blackboard is not None:
             self.blackboard["arrival_alpha_rad"] = self.latest_alpha
-        self.outcome = "current_node"
+        self.outcome = Transition.CURRENT_NODE.value
 
     def rover_stop_callback(self, msg: Bool):
         if not msg.data:
-            self.outcome = "back_to_init"
+            self.outcome = Transition.BACK_TO_INIT.value
 
     def on_enter(self, blackboard):
         self.blackboard = blackboard
@@ -103,8 +105,8 @@ class WallFollowingState(RoverState):
             self.stop_over_publisher, logger=self.node.get_logger()
         )
         blackboard[BLACKBOARD_ENFORCERS] = [
-            self.stop_sign_enforcer,
             self.car_follower_enforcer,
+            self.stop_sign_enforcer,
         ]
 
     def step(self, blackboard) -> Optional[str]:

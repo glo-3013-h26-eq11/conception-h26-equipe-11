@@ -9,6 +9,7 @@ VEHICLE_STALE_SEC: float = 0.5
 
 class CarFollowEnforcer(Enforcer):
     def __init__(self):
+        super().__init__(priority=3)
         self.min_follow_distance: float = SAFE_DISTANCE_TO_CAR
         self._follow_distance: Optional[float] = None
         self._last_update: float = 0.0

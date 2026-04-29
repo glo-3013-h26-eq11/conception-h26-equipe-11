@@ -9,7 +9,7 @@ FORWARD_TURN_SPEED = 0.4  # m/s
 
 class ForwardTurnEnforcer(Enforcer):
     def __init__(self, turn_over_publisher: Publisher):
-        super().__init__()
+        super().__init__(priority=1)
 
         self.travel_distance_already_done = 0
         self.total_distance_to_travel = FORWARD_DISTANCE

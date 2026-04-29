@@ -9,8 +9,7 @@ STOP_AFTER_LOAD_DURATION = 0.8  # s
 
 class WaitAtLoadEnforcer(Enforcer):
     def __init__(self, load_over_publisher: Publisher):
-        super().__init__()
-
+        super().__init__(priority=1)
         self.timer = 0
 
         self.merchandise_loaded = False

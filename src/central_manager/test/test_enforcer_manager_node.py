@@ -41,6 +41,8 @@ def test_when_cmd_callback_then_enforce_command_and_update_real_speed_and_publis
     # Arrange
     e1 = MagicMock()
     e2 = MagicMock()
+    e1.priority = 1
+    e2.priority = 10
 
     cmd_in = Twist()
     cmd_in.linear.x = 1.0

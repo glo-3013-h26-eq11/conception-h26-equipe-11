@@ -6,6 +6,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
 THETA_DEG = 60
+THETA_C_DEG = 37
 LOOKAHEAD = 0.35  # m
 FRONT_DISTANCE = 0.275  # m
 DESIRED_DISTANCE_FROM_WALL = 0.14  # m
@@ -23,6 +24,8 @@ AFTER_CORNER_THRESHOLD = 0.40  # m
 INTERSECTION_HALF_CONE_ANGLE = 40  # degrees
 RIGHT_CORNER_SPEED = 0.1
 RIGHT_CORNER_STEERING = 0.8
+
+FREEZE_RIGHT_DISTANCE_THRESHOLD = 0.20  # m
 
 
 def angle_to_distance(theta_rad, lidar_array, angle_min, angle_increment):
@@ -64,9 +67,7 @@ class WallFollowNode(HealthPingingNode):
         theta_a = theta_b + theta
         theta_front = np.radians(90)
 
-        THETA_C = np.radians(37)
-
-        theta_c = THETA_C
+        theta_c = THETA_C_DEG
 
         a = angle_to_distance(theta_a, lidar_range_array, angle_min, angle_increment)
         b = angle_to_distance(theta_b, lidar_range_array, angle_min, angle_increment)
@@ -181,9 +182,9 @@ class WallFollowNode(HealthPingingNode):
 
             return RIGHT_CORNER_SPEED, -RIGHT_CORNER_STEERING
 
-        elif A > OBTUSE_ANGLE_THRESHOLD and b < 0.20:
+        elif A > OBTUSE_ANGLE_THRESHOLD and b < FREEZE_RIGHT_DISTANCE_THRESHOLD:
 
-            return RIGHT_CORNER_SPEED, 0
+            return RIGHT_CORNER_SPEED, 0.0
 
         return initial_speed, initial_steering
 

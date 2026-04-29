@@ -4,7 +4,8 @@ import time
 
 
 class Enforcer(ABC):
-    def __init__(self):
+    def __init__(self, priority=1):
+        self.priority = priority
         self.last_real_speed_timer = None
 
     @abstractmethod
